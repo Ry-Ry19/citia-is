@@ -11,18 +11,22 @@ import { Label } from "@/components/ui/label";
 
 export function AdminLoginForm() {
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>CENRO Staff Login</CardTitle>
+    <Card className="w-full border-0 shadow-none">
+      <CardHeader className="px-0">
+        <div className="flex justify-center">
+          <p className="text-sm font-medium text-primary">CENRO STAFF PORTAL</p>
+        </div>
+        <CardTitle>Sign in to CITIA-IS</CardTitle>
         <CardDescription>
           Enter your email and password to sign in to your account.
         </CardDescription>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="px-0">
         <form className="space-y-5">
+          {/* Email */}
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email Address</Label>
 
             <Input
               id="email"
@@ -33,6 +37,7 @@ export function AdminLoginForm() {
             />
           </div>
 
+          {/* Password */}
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
 
@@ -45,7 +50,8 @@ export function AdminLoginForm() {
             />
           </div>
 
-          <Button type="submit" className="w-full">
+          {/* Submit */}
+          <Button type="submit" className="w-full" size="lg">
             Sign in
           </Button>
         </form>
