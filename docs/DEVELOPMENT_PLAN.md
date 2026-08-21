@@ -108,8 +108,7 @@ Backlog → Ready → In Progress → Review/Test → Done
 
 ## 5. Core Community User Workflow
 
-Login
-→ Dashboard
+→ Dashboard/Landing page
 → Capture/Upload Image
 → Image Preview
 → Processing
