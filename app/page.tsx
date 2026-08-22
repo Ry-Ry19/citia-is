@@ -6,12 +6,14 @@
 
 import { Navbar } from "@/components/landing/navbar";
 import { HeroSection } from "@/components/landing/hero-section";
+import { MarqueeStrip } from "@/components/landing/marquee-strip";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
       <HeroSection />
+      <MarqueeStrip />
     </div>
   );
 }
