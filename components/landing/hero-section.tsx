@@ -27,7 +27,7 @@ export function HeroSection() {
       {/* Dark overlay — makes text readable. Fixed black regardless of
           theme, since the video is always dark, unlike theme-following
           surfaces like cards or the navbar. */}
-      <div className="absolute inset-0 bg-black/55" />
+      <div className="absolute inset-0 bg-black/70" />
 
       {/* Content — above overlay */}
       <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
@@ -35,12 +35,13 @@ export function HeroSection() {
           CENRO Iligan City &middot; Community Tool
         </p>
 
+        {/* text-4xl(mobile screen approach),sm:text-5xl(target tablets), lg:text-6xl(target desktops) */}
         <h1 className="text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
           Identify and Report{" "}
           <span className="text-green-400">Invasive Trees</span> in Iligan City
         </h1>
 
-        <p className="mt-5 text-base leading-relaxed text-white/80 sm:text-lg">
+        <p className="mt-5 text-base font-medium leading-snug tracking-tight text-white/90 sm:text-lg">
           CITIA-IS helps communities detect Mahogany Invasive Tree species,
           understand their ecological impact, and report sightings directly to
           CENRO.

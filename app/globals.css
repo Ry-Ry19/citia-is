@@ -115,7 +115,7 @@
   --color-chart-5: var(--chart-5);
 
   /* ── Typography ────────────────────────────────────────── */
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
 

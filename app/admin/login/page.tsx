@@ -4,7 +4,7 @@ import { AdminLoginForm } from "@/components/auth/admin-login-form";
 
 export default function AdminLoginPage() {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center bg-stone-100 px-4 pt-20 pb-12 md:pt-12">
+    <main className="relative flex min-h-screen flex-col items-center justify-center bg-muted px-4 pt-20 pb-12 md:pt-12">
       {/* Back to home */}
       <Link
         href="/"
