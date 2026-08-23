@@ -4,6 +4,8 @@
 // USES: Lucide React icons — consistent with the rest of the app
 // CONCEPT: Content duplicated for seamless CSS animation loop
 
+"use client";
+
 import {
   Leaf,
   MapPin,
@@ -39,7 +41,7 @@ const badges = [
 export function MarqueeStrip() {
   return (
     // overflow-hidden clips content that animates outside bounds
-    <div className="overflow-hidden bg-stone-800 py-3.5">
+    <div className="overflow-hidden w-full bg-stone-800 py-4">
       {/*
         animate-marquee — defined in globals.css @layer utilities
         whitespace-nowrap — prevents wrapping to next line
@@ -58,12 +60,14 @@ export function MarqueeStrip() {
             className="mx-8 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-stone-300"
           >
             {/* Lucide icon — h-3.5 w-3.5 matches text-xs size */}
-            <badge.icon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+            <badge.icon className="h-3.5 w-3.5 text-primary shrink-0" />
 
             {badge.label}
 
-            {/* Separator dot */}
-            <span className="ml-6 text-stone-600">·</span>
+            {/* Separator dot - only show between badges, not after the last one */}
+            {index < [...badges, ...badges].length - 1 && (
+              <span className="ml-6 text-stone-600">·</span>
+            )}
           </span>
         ))}
       </div>

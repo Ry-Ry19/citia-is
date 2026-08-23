@@ -703,6 +703,7 @@
      WHY: Accessibility is not optional. Every user deserves
      a comfortable experience.
      ──────────────────────────────────────────────────────── */
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -822,9 +823,26 @@
   .container-wide {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
+
+  .animate-marquee {
+    animation: marquee 10s linear infinite;
+  }
+
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-/* Marquee animation */
+/* Keyframe outside @layer — correct */
 @keyframes marquee {
   from {
     transform: translateX(0);
@@ -832,25 +850,6 @@
   to {
     transform: translateX(-50%);
   }
-}
-
-@layer utilities {
-  .animate-marquee {
-    animation: marquee 35s linear infinite;
-  }
-  .animate-marquee:hover {
-    animation-play-state: paused;
-  }
-}
-
-/* Hide scrollbar but keep scroll */
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
 }
 
 /* =========================================================
