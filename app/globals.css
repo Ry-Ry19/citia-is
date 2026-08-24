@@ -827,6 +827,11 @@
   .animate-marquee {
     animation: marquee 10s linear infinite;
   }
+  
+  /* Add this INSIDE your existing @layer utilities block */
+.animate-marquee-track {
+  animation: marquee-track 30s linear infinite;
+}
 
   .animate-marquee:hover {
     animation-play-state: paused;
@@ -848,8 +853,13 @@
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(-100%);
   }
+}
+
+@keyframes marquee-track {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
 }
 
 /* =========================================================

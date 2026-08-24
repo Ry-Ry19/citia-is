@@ -81,18 +81,23 @@ export function Navbar() {
           </Button>
         </div>
 
-        {/* Mobile menu toggle */}
-        <button
-          className="flex md:hidden items-center text-muted-foreground"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </button>
+        {/* Mobile — ThemeToggle always visible + hamburger */}
+        <div className="flex md:hidden items-center gap-2">
+          {/* ThemeToggle visible on mobile and tablet */}
+          <ThemeToggle />
+
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle menu"
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile dropdown */}
@@ -117,13 +122,12 @@ export function Navbar() {
               </Link>
             ))}
 
-            {/* Divider */}
             <div className="my-2 border-t border-border" />
 
             <Link
               href="/admin/login"
               onClick={() => setIsMenuOpen(false)}
-              className="rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent"
+              className="rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
             >
               Admin Login
             </Link>

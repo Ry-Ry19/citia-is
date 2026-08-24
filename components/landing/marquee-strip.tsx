@@ -1,9 +1,3 @@
-// components/landing/marquee-strip.tsx
-//
-// WHAT: Auto-scrolling horizontal strip of system features
-// USES: Lucide React icons — consistent with the rest of the app
-// CONCEPT: Content duplicated for seamless CSS animation loop
-
 "use client";
 
 import {
@@ -21,8 +15,6 @@ import {
   Bell,
 } from "lucide-react";
 
-// Each badge has an icon component and a label
-// Icon is stored as a component reference — rendered as <item.icon />
 const badges = [
   { icon: Leaf, label: "AI Tree Identification" },
   { icon: MapPin, label: "Report a Sighting" },
@@ -38,38 +30,79 @@ const badges = [
   { icon: Smartphone, label: "Mobile Friendly" },
 ];
 
+// Single row of badges — reused in both tracks
+function BadgeRow({ prefix }: { prefix: string }) {
+  return (
+    <>
+      {badges.map((badge, index) => (
+        <span
+          key={`${prefix}-${index}`}
+          className="mx-8 inline-flex shrink-0 items-center gap-2 text-xs font-medium tracking-wide text-stone-300"
+        >
+          <badge.icon className="h-3.5 w-3.5 shrink-0 text-primary" />
+          {badge.label}
+          <span className="ml-6 text-stone-600">·</span>
+        </span>
+      ))}
+    </>
+  );
+}
+
 export function MarqueeStrip() {
   return (
-    // overflow-hidden clips content that animates outside bounds
-    <div className="overflow-hidden w-full bg-stone-800 py-4">
+    <div
+      style={{
+        overflow: "hidden",
+        width: "100%",
+        backgroundColor: "#1c1917",
+        paddingTop: "14px",
+        paddingBottom: "14px",
+      }}
+    >
       {/*
-        animate-marquee — defined in globals.css @layer utilities
-        whitespace-nowrap — prevents wrapping to next line
-        flex — lays all badges in a horizontal row
+        HOW SEAMLESS LOOP WORKS WITH TWO DIVS:
+
+        Both Track1 and Track2 are identical.
+        They sit side by side inside a flex container.
+        Track1 animates from 0 to -100% of its own width.
+        As Track1 exits left, Track2 is already filling
+        the exact same space from the right.
+        When Track1 resets to 0, it snaps back behind Track2
+        which has taken its place — user never sees the jump.
+
+        This is more reliable than -50% on one long div
+        because each track is self-contained and the
+        browser measures each independently.
       */}
-      <div className="flex animate-marquee whitespace-nowrap">
-        {/*
-          Spread badges twice: [...badges, ...badges]
-          First copy scrolls left → second copy fills the gap
-          When animation resets, user never sees the jump
-        */}
-        {[...badges, ...badges].map((badge, index) => (
-          <span
-            key={index}
-            // inline-flex keeps icon and text on same line
-            className="mx-8 inline-flex items-center gap-2 text-xs font-medium tracking-wide text-stone-300"
-          >
-            {/* Lucide icon — h-3.5 w-3.5 matches text-xs size */}
-            <badge.icon className="h-3.5 w-3.5 text-primary shrink-0" />
+      <div
+        style={{
+          display: "flex",
+          width: "max-content",
+        }}
+      >
+        {/* Track 1 — animates left */}
+        <div
+          style={{
+            display: "inline-flex",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            animation: "marquee-track 30s linear infinite",
+          }}
+        >
+          <BadgeRow prefix="track1" />
+        </div>
 
-            {badge.label}
-
-            {/* Separator dot - only show between badges, not after the last one */}
-            {index < [...badges, ...badges].length - 1 && (
-              <span className="ml-6 text-stone-600">·</span>
-            )}
-          </span>
-        ))}
+        {/* Track 2 — identical clone, creates seamless fill */}
+        <div
+          style={{
+            display: "inline-flex",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            animation: "marquee-track 30s linear infinite",
+          }}
+        >
+          <BadgeRow prefix="track2" />
+        </div>
       </div>
     </div>
   );

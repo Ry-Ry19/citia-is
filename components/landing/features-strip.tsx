@@ -1,12 +1,11 @@
 // components/landing/features-strip.tsx
 //
-// WHAT: Horizontally scrollable feature icons (like Image 1)
+// WHAT: Horizontally scrollable feature icons
 // CONCEPTS:
-//   overflow-x-auto  — enables horizontal scroll
-//   w-max            — inner div is as wide as content needs
-//   flex-shrink-0    — prevents items from compressing
-//   scrollbar-hide   — hides scrollbar (defined in globals.css)
-//   group / group-hover — hover effect on parent affects children
+//   overflow-x-auto — enables horizontal scroll on mobile
+//   scrollbar-hide  — hides scrollbar (defined in globals.css)
+//   group-hover     — hover effect on parent affects children
+//   dark: prefix    — dark mode variants via Tailwind
 
 import Link from "next/link";
 import {
@@ -33,7 +32,8 @@ const features = [
 
 export function FeaturesStrip() {
   return (
-    <section className="bg-stone-50 py-14 px-6">
+    
+    <section className="bg-muted py-14 px-6">
       {/* Heading */}
       <div className="mx-auto mb-10 max-w-5xl text-center">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">
@@ -54,14 +54,22 @@ export function FeaturesStrip() {
             <Link
               key={feature.label}
               href={feature.href}
-              className="group flex flex-col items-center gap-3 w-28 flex-shrink-0"
+              className="group flex flex-col items-center gap-3 w-28 shrink-0"
             >
-              {/* Icon box */}
+              {/*
+                Icon box
+                bg-card       — white in light, dark surface in dark mode
+                border-border — uses CSS variable, auto dark mode
+                group-hover   — parent hover triggers child color change
+              */}
               <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 group-hover:border-primary/40 group-hover:shadow-md">
                 <feature.icon className="h-8 w-8 text-muted-foreground transition-colors duration-200 group-hover:text-primary" />
               </div>
 
-              {/* Label */}
+              {/*
+                text-muted-foreground — readable in both light and dark
+                group-hover:text-primary — highlights on hover
+              */}
               <span className="text-center text-xs font-medium leading-tight text-muted-foreground transition-colors duration-200 group-hover:text-primary">
                 {feature.label}
               </span>
