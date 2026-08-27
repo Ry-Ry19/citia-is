@@ -385,7 +385,7 @@
      MUTED-FOREGROUND: oklch(0.50 0.025 145) - Medium gray.
      ──────────────────────────────────────────────────────── */
   --muted: oklch(0.95 0.01 145);
-  --muted-foreground: oklch(0.5 0.025 145);
+  --muted-foreground: oklch(31.714% 0.00004 271.152);
 
   /* ── Accent ──────────────────────────────────────────────────
      LEARN: Accent draws attention. Used for hover states,
@@ -827,11 +827,11 @@
   .animate-marquee {
     animation: marquee 10s linear infinite;
   }
-  
+
   /* Add this INSIDE your existing @layer utilities block */
-.animate-marquee-track {
-  animation: marquee-track 30s linear infinite;
-}
+  .animate-marquee-track {
+    animation: marquee-track 30s linear infinite;
+  }
 
   .animate-marquee:hover {
     animation-play-state: paused;
@@ -858,8 +858,21 @@
 }
 
 @keyframes marquee-track {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-100%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 /* =========================================================

@@ -17,15 +17,6 @@ export default function AdminLoginPage() {
       <div className="flex w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-card shadow-2xl md:flex-row">
         {/* Left Side: Dark media panel (Desktop: Left/order-1, Mobile: Bottom/order-2) */}
         <div className="order-2 flex flex-col bg-neutral-950 md:order-1 md:w-3/5">
-          {/* Media header strip */}
-          <div className="flex items-center gap-2 px-6 py-3">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-              C
-            </div>
-            <span className="text-xs font-medium tracking-wide text-white/80">
-              CENRO &middot; CITIA-IS
-            </span>
-          </div>
 
           {/* Media content */}
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-black md:aspect-auto md:h-full">
@@ -51,8 +42,6 @@ export default function AdminLoginPage() {
       {/* Copyright — outside the card */}
       <p className="mt-6 max-w-md text-center text-xs text-muted-foreground">
         Copyright © 2026 onwards, CENRO &amp; CITIA-IS Development Team.
-        Community-Driven Invasive Tree Identification and Action Information
-        System.
       </p>
     </main>
   );

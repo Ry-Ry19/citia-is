@@ -31,7 +31,7 @@ export function HeroSection() {
 
       {/* Content — above overlay */}
       <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
-        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white/70">
+        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-white">
           CENRO Iligan City &middot; Community Tool
         </p>
 
