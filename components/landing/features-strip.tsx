@@ -33,7 +33,7 @@ const features = [
 export function FeaturesStrip() {
   return (
     
-    <section className="bg-muted py-14 px-6">
+    <section id="features-strip" className="bg-muted py-14 px-6">
       {/* Heading */}
       <div className="mx-auto mb-10 max-w-5xl text-center">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">

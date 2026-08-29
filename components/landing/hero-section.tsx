@@ -4,7 +4,9 @@
 // CONCEPTS:
 //   relative/absolute — video fills parent, content sits above
 //   z-index layering  — video → overlay → content
-//   animate-bounce    — CSS animation from Tailwind
+//   animate-bounce    — CSS animation from Tailwind 
+
+"use client";
 
 import Link from "next/link";
 import { Leaf, MapPin } from "lucide-react";
@@ -12,7 +14,7 @@ import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden pt-16">
+    <section id="hero-section"className="relative flex min-h-screen items-center justify-center overflow-hidden pt-16">
       {/* Video background */}
       <video
         className="absolute inset-0 h-full w-full object-cover"

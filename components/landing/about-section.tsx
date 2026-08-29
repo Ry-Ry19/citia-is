@@ -69,7 +69,7 @@ export function AboutSection() {
   };
 
   return (
-    <section className="bg-background py-20 px-6">
+    <section id="about-section" className="bg-background py-20 px-6">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-col gap-12 md:flex-row md:items-center">
           {/* LEFT: Text */}

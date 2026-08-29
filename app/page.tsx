@@ -11,10 +11,11 @@ import { FeaturesStrip } from "@/components/landing/features-strip";
 import { AboutSection } from "@/components/landing/about-section";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { CTABanner} from "@/components/landing/cta-banner";
+import { Footer } from "@/components/landing/footer";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div id="top" className="min-h-screen bg-white">
       <Navbar />
       <HeroSection />
       <MarqueeStrip />
@@ -22,6 +23,7 @@ export default function LandingPage() {
       <AboutSection />
       <HowItWorks />
       <CTABanner />
+      <Footer />
     </div>
   );
 }
