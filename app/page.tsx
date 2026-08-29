@@ -9,6 +9,8 @@ import { HeroSection } from "@/components/landing/hero-section";
 import { MarqueeStrip } from "@/components/landing/marquee-strip";
 import { FeaturesStrip } from "@/components/landing/features-strip";
 import { AboutSection } from "@/components/landing/about-section";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { CTABanner} from "@/components/landing/cta-banner";
 
 export default function LandingPage() {
   return (
@@ -18,6 +20,8 @@ export default function LandingPage() {
       <MarqueeStrip />
       <FeaturesStrip />
       <AboutSection />
+      <HowItWorks />
+      <CTABanner />
     </div>
   );
 }
