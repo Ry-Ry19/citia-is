@@ -1,20 +1,92 @@
 // components/landing/footer.tsx
 //
-// WHAT: Site footer with link groups and copyright
-// CONCEPT: Responsive grid — 1 col mobile, 2 col tablet, 4 col desktop
-// DESIGN NOTE: Deliberately kept to the "multi-column grid +
-//   minimalist bottom bar" pattern rather than heavier trends
-//   (3D models, physics-based elements, giant typography) — those
-//   suit creative/portfolio sites, but conflict with this project's
-//   own accessibility-first, low-friction goals for community and
-//   elderly users. Micro-animations (link underline slide) are the
-//   one trend adopted, since they're cheap, unobtrusive, and add
-//   polish without any accessibility or performance cost.
+// WHAT: Site footer — theme-aware, two-tier layout (flips with
+//   light/dark mode like the rest of the app)
+// REFERENCE: Left brand block + right nav columns, bottom utility strip
+//
+// NOTE: No "use client" needed — all hover/focus effects are plain
+//   Tailwind pseudo-classes now, not JS event handlers. This also
+//   means keyboard users get a visible focus ring for free via the
+//   global :focus-visible rule in globals.css.
 
 import Link from "next/link";
 import { TreePine, ArrowUp } from "lucide-react";
+import type { ComponentType } from "react";
 
-const footerLinks = [
+// ── TypeScript Interfaces ──────────────────────────────────────────────────
+
+interface FooterLink {
+  label: string;
+  href: string;
+  external?: boolean; // opens in new tab if true
+}
+
+interface FooterColumn {
+  heading: string;
+  links: FooterLink[];
+}
+
+interface ContactItem {
+  label: string;
+  value: string;
+  href?: string; // optional — makes value a clickable link
+}
+
+interface SocialLink {
+  label: string;
+  href: string;
+  icon: ComponentType<{ className?: string }>;
+}
+// ── Custom brand icons ──────────────────────────────────────
+// lucide-react deliberately excludes brand/social logos — these
+// are small local SVGs instead of pulling in an extra package
+// for just two icons.
+
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M22 12.06C22 6.48 17.52 2 11.94 2S1.88 6.48 1.88 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.42V9.91c0-2.39 1.42-3.71 3.6-3.71 1.04 0 2.13.19 2.13.19v2.34h-1.2c-1.18 0-1.55.73-1.55 1.48v1.78h2.64l-.42 2.91h-2.22V22c4.78-.76 8.44-4.92 8.44-9.94Z" />
+    </svg>
+  );
+}
+
+function LinkedinIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45Z" />
+    </svg>
+  );
+}
+
+// ── Data ──────────────────────────────────────────────────────────────────
+
+const contactItems: ContactItem[] = [
+  {
+    label: "Address",
+    value: "MSU-IIT, Andres Bonifacio Avenue, Tibanga, Iligan City 9200",
+  },
+  {
+    label: "Office",
+    value: "CENRO Iligan City",
+  },
+  {
+    label: "Email Us",
+    value: "cenro.iligan@denr.gov.ph",
+    href: "mailto:cenro.iligan@denr.gov.ph",
+  },
+];
+
+const navColumns: FooterColumn[] = [
   {
     heading: "Community",
     links: [
@@ -26,93 +98,192 @@ const footerLinks = [
   {
     heading: "Information",
     links: [
-      { label: "CITIA-IS Offers", href: "#features-strip" },
       { label: "About CITIA-IS", href: "#about-section" },
       { label: "How It Works", href: "#how-it-works" },
+      { label: "Ecological Impact", href: "/species" },
     ],
   },
   {
-    heading: "Administration",
+    heading: "Institution",
     links: [
-      { label: "CENRO Staff Login", href: "/admin/login" },
-      { label: "CENRO Iligan City", href: "/" },
-      { label: "MSU-IIT IS Department", href: "/" },
+      {
+        label: "CENRO Iligan City",
+        href: "https://denr.gov.ph",
+        external: true,
+      },
+      { label: "MSU-IIT", href: "https://msuiit.edu.ph", external: true },
+      { label: "Department of IS", href: "/" },
+      { label: "RA 9147 — Wildlife Act", href: "/species" },
     ],
   },
 ];
 
+const socialLinks: SocialLink[] = [
+  {
+    label: "Facebook",
+    href: "/",
+    icon: FacebookIcon,
+  },
+  {
+    label: "LinkedIn",
+    href: "/",
+    icon: LinkedinIcon,
+  },
+];
+
+// ── Component ─────────────────────────────────────────────────────────────
+
 export function Footer() {
   return (
-    <footer className="relative border-t border-border bg-muted px-6 py-12">
-      {/* Thin brand accent line — token-based, so it's correct in
-          both themes without a separate dark-mode override */}
-      <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary via-primary/40 to-transparent" />
+    <footer className="relative border-t border-border bg-muted">
+      {/* Top brand accent line — token-based, correct in both themes */}
+      <div className="h-[2px] bg-linear-to-r from-primary to-transparent" />
 
-      <div className="mx-auto max-w-5xl">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Brand column */}
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
+      {/* ── UPPER GRID ─────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[280px_1fr]">
+          {/* LEFT — Brand block (matches reference left column weight) */}
+          <div className="flex flex-col gap-6">
+            {/* Logo */}
+            <Link href="/#top" className="flex w-fit items-center gap-2.5">
+              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary">
                 <TreePine className="h-4 w-4 text-primary-foreground" />
               </div>
-              <span className="text-sm font-bold text-foreground">
+              <span className="text-xl font-bold tracking-tight text-foreground">
                 CITIA-IS
               </span>
+            </Link>
+
+            {/* System full name */}
+            <p className="max-w-[240px] text-xs leading-relaxed text-muted-foreground">
+              Community-Driven Invasive Tree Identification and Recommendation
+              Management Information System.
+            </p>
+
+            {/* Contact items — maps ContactItem[] */}
+            <div className="flex flex-col gap-4">
+              {contactItems.map((item) => (
+                <div key={item.label} className="flex flex-col gap-0.5">
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/70">
+                    {item.label}
+                  </span>
+                  {item.href ? (
+                    <a
+                      href={item.href}
+                      className="text-xs leading-relaxed text-muted-foreground transition-colors duration-200 hover:text-primary"
+                    >
+                      {item.value}
+                    </a>
+                  ) : (
+                    <span className="text-xs leading-relaxed text-muted-foreground">
+                      {item.value}
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
-
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Community-Driven Invasive Tree Identification and
-              Recommendation Management Information System.
-            </p>
-
-            <p className="mt-3 text-xs font-medium text-muted-foreground">
-              CENRO Iligan City &middot; MSU-IIT
-            </p>
           </div>
 
-          {/* Link groups */}
-          {footerLinks.map((group) => (
-            <div key={group.heading}>
-              <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-foreground">
-                {group.heading}
-              </h4>
-              <ul className="space-y-2">
-                {group.links.map((link) => (
-                  <li key={link.label}>
-                    {/* Micro-animation: underline slides in from the
-                        left on hover, rather than just a color change.
-                        `group` + `group-hover` lets the span (the
-                        underline) react to hovering the PARENT link,
-                        without needing separate JS or state. */}
-                    <Link
-                      href={link.href}
-                      className="group relative inline-block text-xs text-muted-foreground transition-colors hover:text-primary"
-                    >
-                      {link.label}
-                      <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-primary transition-all duration-300 group-hover:w-full" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* RIGHT — Navigation columns grid */}
+          {/*
+            grid-cols-3 on desktop — matches reference multi-column layout
+            grid-cols-1 on mobile — stacks vertically
+            sm:grid-cols-3 on tablet — side by side early
+          */}
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-3">
+            {navColumns.map((column) => (
+              <div key={column.heading}>
+                {/* Column header — uppercase white bold */}
+                <h4 className="mb-5 text-xs font-bold uppercase tracking-widest text-foreground">
+                  {column.heading}
+                </h4>
+
+                {/* Links — maps FooterLink[] */}
+                <ul className="flex flex-col gap-3">
+                  {column.links.map((link) => (
+                    <li key={link.label}>
+                      <Link
+                        href={link.href}
+                        target={link.external ? "_blank" : undefined}
+                        rel={link.external ? "noopener noreferrer" : undefined}
+                        className="inline-block text-xs leading-relaxed text-muted-foreground transition-colors duration-200 hover:text-primary"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
+      </div>
 
-        {/* Bottom bar */}
-        <div className="mt-10 flex flex-col items-center gap-4 border-t border-border pt-6 sm:flex-row sm:justify-between">
-          <p className="text-xs text-muted-foreground">
-            © 2026 CITIA-IS &middot; CENRO Iligan City &middot; MSU-IIT
-            Department of Information Systems &middot; All rights reserved.
-          </p>
+      {/*
+        Separated by a thin border line — matches reference bottom strip.
+        Left: copyright + CENRO Staff Login (moved here from nav columns)
+        Right: social icons + back to top
+      */}
+      <div className="border-t border-border">
+        <div className="mx-auto max-w-6xl px-6 py-5">
+          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+            {/* Left — copyright + legal links */}
+            <div className="flex flex-col items-center gap-2 sm:items-start">
+              <p className="text-[11px] text-muted-foreground">
+                © 2026 CITIA-IS &middot; CENRO Iligan City &middot; MSU-IIT
+                Department of Information Systems &middot; All rights reserved.
+              </p>
 
-          
-            <a href="#top"
-            className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-primary"
-          >
-            Back to top
-            <ArrowUp className="h-3 w-3" />
-          </a>
+              {/* Legal links row — CENRO Staff Login moved here */}
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/admin/login"
+                  className="text-[11px] text-muted-foreground transition-colors duration-200 hover:text-primary"
+                >
+                  CENRO Staff Login
+                </Link>
+
+                <span className="text-border">|</span>
+
+                <Link
+                  href="/privacy"
+                  className="text-[11px] text-muted-foreground transition-colors duration-200 hover:text-primary"
+                >
+                  Privacy Policy
+                </Link>
+              </div>
+            </div>
+
+            {/* Right — social icons + back to top */}
+            <div className="flex items-center gap-4">
+              {/* Social icons — maps SocialLink[] */}
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  aria-label={social.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors duration-200 hover:border-primary hover:text-primary"
+                >
+                  <social.icon className="h-3.5 w-3.5" />
+                </a>
+              ))}
+
+              {/* Divider */}
+              <div className="h-4 w-px bg-border" />
+
+              {/* Back to top */}
+
+              <a
+                href="#top"
+                className="flex items-center gap-1.5 text-[11px] text-muted-foreground transition-colors duration-200 hover:text-primary"
+              >
+                Back to top
+                <ArrowUp className="h-3 w-3" />
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
