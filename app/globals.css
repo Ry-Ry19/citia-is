@@ -321,41 +321,22 @@
 :root {
   /* ── Brand colors ──────────────────────────────────────────
      LEARN: Primary is the main action color. It appears on
-     buttons, links, and active states.
-
-     PRIMARY: oklch(0.42 0.12 145)
-     - L=0.42: Medium-dark (good contrast on light bg)
-     - C=0.12: Moderate chroma (visible but not overwhelming)
-     - H=145: Green hue (brand identity)
-
-     PRIMARY-FOREGROUND: oklch(0.98 0.01 145)
-     - Near-white with a hint of green.
-     - Used for text on primary backgrounds.
+     buttons, links, and active states.    
      ──────────────────────────────────────────────────────── */
-  --primary: oklch(0.4 0.13 145);
-  --primary-foreground: oklch(0.98 0.01 145);
+  --primary: oklch(0.48 0.09045 157.299);
+  --primary-foreground: oklch(0.98 0.01 145);   
 
   /* ── Background & foreground ──────────────────────────────
      LEARN: These are the main surface and text colors.
 
-     BACKGROUND: oklch(0.985 0.005 145)
-     - Almost white with a tiny hint of green.
-     - Warm and clean without being stark white.
-
-     FOREGROUND: oklch(0.18 0.02 145)
-     - Dark with a subtle green undertone.
-     - Warmer than pure black (#000) which can be harsh.
-     ──────────────────────────────────────────────────────── */
-  --background: oklch(0.985 0.005 145);
-  --foreground: oklch(0.18 0.02 145);
+     ──────────────────────────────────────────────────── */
+  --background: oklch(0.99 0.003 210);
+  --foreground: oklch(12.112% 0.04121 142.511);
 
   /* ── Surfaces ──────────────────────────────────────────────
      LEARN: Cards and popovers are elevated surfaces that
      appear above the background.
-
-     CARD: oklch(1 0 0) = pure white.
-     CARD-FOREGROUND: Same as foreground for consistency.
-     ──────────────────────────────────────────────────────── */
+   ──────────────────────────────────────────────────────── */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.18 0.02 145);
 
@@ -366,14 +347,7 @@
      LEARN: Secondary is a softer version of primary.
      Used for less prominent actions (secondary buttons,
      highlighted sections, badges).
-
-     SECONDARY: oklch(0.92 0.035 145)
-     - Light green background.
-     - Good for containers and subtle highlights.
-
-     SECONDARY-FOREGROUND: oklch(0.28 0.06 145)
-     - Darker green for text on secondary backgrounds.
-     ──────────────────────────────────────────────────────── */
+   ──────────────────────────────────────────────────────── */
   --secondary: oklch(0.92 0.035 145);
   --secondary-foreground: oklch(0.28 0.06 145);
 
@@ -381,11 +355,9 @@
      LEARN: Muted is for low-importance information.
      Used for secondary text, disabled states, metadata.
 
-     MUTED: oklch(0.95 0.01 145) - Very light gray-green.
-     MUTED-FOREGROUND: oklch(0.50 0.025 145) - Medium gray.
-     ──────────────────────────────────────────────────────── */
+   ───────────────────────────────────────────────────── */
   --muted: oklch(0.95 0.01 145);
-  --muted-foreground: oklch(31.714% 0.00004 271.152);
+  --muted-foreground: oklch(0.50 0.015 220);
 
   /* ── Accent ──────────────────────────────────────────────────
      LEARN: Accent draws attention. Used for hover states,
@@ -394,8 +366,8 @@
      Same as secondary but with a semantic distinction.
      This allows secondary and accent to diverge in the future.
      ──────────────────────────────────────────────────────── */
-  --accent: oklch(0.92 0.035 145);
-  --accent-foreground: oklch(0.28 0.06 145);
+  --accent: oklch(0.92 0.04 165);
+  --accent-foreground: oklch(0.22 0.05 165);
 
   /* ── Feedback colors ────────────────────────────────────────
      LEARN: These communicate status and urgency to users.
@@ -409,7 +381,7 @@
      ──────────────────────────────────────────────────────── */
   --destructive: oklch(0.52 0.21 25);
   --success: oklch(0.52 0.16 145);
-  --warning: oklch(0.72 0.16 85);
+  --warning: oklch(0.65 0.15 70);
   --info: oklch(0.52 0.13 240);
 
   /* ── Borders & Inputs ──────────────────────────────────────
@@ -420,9 +392,9 @@
      INPUT: Same as border for consistency.
      RING: Focus ring color (matches primary for brand consistency).
      ──────────────────────────────────────────────────────── */
-  --border: oklch(0.88 0.015 145);
-  --input: oklch(0.88 0.015 145);
-  --ring: oklch(0.4 0.13 145);
+  --border: oklch(0.90 0.008 210);
+  --input: oklch(0.90 0.008 210);
+  --ring: oklch(0.62 0.15 165);
 
   /* ── Charts ──────────────────────────────────────────────────
      LEARN: Chart colors are distinct and color-blind friendly.
@@ -521,8 +493,8 @@
      LEARN: Secondary is darker in dark mode but still
      distinct from the background.
      ──────────────────────────────────────────────────────── */
-  --secondary: oklch(0.27 0.035 145);
-  --secondary-foreground: oklch(0.95 0.01 145);
+  --secondary: oklch(0.88 0.06 200);
+  --secondary-foreground: oklch(0.22 0.05 200);
 
   /* ── Muted ──────────────────────────────────────────────────
      LEARN: Muted foreground is lighter in dark mode
