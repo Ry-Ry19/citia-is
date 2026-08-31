@@ -8,13 +8,22 @@
 //                            its animation from the start
 //   overflow-hidden gotcha — why the caption card lives OUTSIDE the
 //                            image's clipping container
+//
+// TOKEN NOTE: the carousel's arrow buttons and slide-info panel used
+//   to be a fixed bg-black/50 — a literal dark color assumed to
+//   always contrast against the photo. That assumption breaks on
+//   dark photo content (e.g. tree trunks), where a dark circle just
+//   disappears into the background. bg-background/80 backdrop-blur-md
+//   fixes this differently: it blurs and lightens whatever sits
+//   behind it rather than relying on out-contrasting it by color, so
+//   it stays legible regardless of what's in that part of the image.
 
 "use client";
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Named constant instead of a "magic number" repeated in two places —
@@ -22,27 +31,40 @@ import { Button } from "@/components/ui/button";
 // progress-bar animation duration stay in sync automatically.
 const SLIDE_DURATION_MS = 4000;
 
+interface Slide {
+  image: string;
+  label: string;
+  // Only set this when the label is genuinely a taxonomic binomial —
+  // it's the one thing on this page that MUST render in italics by
+  // scientific convention. Not every slide has one.
+  scientificName?: string;
+  // Short contextual line shown in the bottom overlay — this is what
+  // turns a generic forest photo into localized thesis evidence.
+  caption: string;
+}
+
 // Real photos go here — see the STEP 2 folder structure above.
-const slides = [
+const slides: Slide[] = [
   {
     image: "/assets/images/mahogany-forest.jpg",
     label: "Mahogany",
-    sublabel: "Swietenia macrophylla",
+    scientificName: "Swietenia macrophylla",
+    caption: "Pilot Zone: Dalipuga Forest, Iligan City",
   },
   {
     image: "/assets/images/field-documentation.jpg",
     label: "Field Documentation",
-    sublabel: "Community monitoring sites",
+    caption: "Community Volunteers Logging GPS-Tagged Sightings",
   },
   {
     image: "/assets/images/mahogany.jpg",
     label: "Leaf Identification",
-    sublabel: "Pinnate compound leaves",
+    caption: "Pinnate Compound Leaves Used for AI Classification",
   },
   {
     image: "/assets/images/ecological-impact.jpg",
     label: "Ecological Impact",
-    sublabel: "Suppressed understory vegetation",
+    caption: "Dense Canopy Shade Suppressing Native Understory",
   },
 ];
 
@@ -72,8 +94,9 @@ export function AboutSection() {
     <section id="about-section" className="bg-background py-20 px-6">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-col gap-12 md:flex-row md:items-center">
-          {/* LEFT: Text */}
-          <div className="flex-1">
+          {/* LEFT: Text — max-w-xl keeps lines from stretching too
+              wide on large desktop screens, per readability guidance */}
+          <div className="flex-1 max-w-xl">
             <p className="text-xs font-semibold uppercase tracking-widest text-primary">
               About CITIA-IS
             </p>
@@ -84,10 +107,10 @@ export function AboutSection() {
 
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               CITIA-IS was developed to bridge the gap between scientific
-              ecological knowledge and community-level action. Mahogany
-              (Swietenia macrophylla) is one of the most prevalent invasive
-              trees in Iligan City and it is widely planted but ecologically
-              harmful to native biodiversity.
+              ecological knowledge and community-level action. Mahogany (
+              <em>Swietenia macrophylla</em>) is one of the most prevalent
+              invasive trees in Iligan City and it is widely planted but
+              ecologically harmful to native biodiversity.
             </p>
 
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
@@ -97,7 +120,30 @@ export function AboutSection() {
               environmental management with no technical knowledge required.
             </p>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            {/* Key thesis pillars — scannable at a glance instead of
+                buried in paragraph text */}
+            <div className="grid grid-cols-3 gap-4 pt-2 pb-4">
+              <div className="border-l-2 border-primary pl-3">
+                <p className="text-xl font-bold text-foreground">YOLOv8</p>
+                <p className="text-xs text-muted-foreground">
+                  Leaf Classification
+                </p>
+              </div>
+              <div className="border-l-2 border-primary pl-3">
+                <p className="text-xl font-bold text-foreground">3 Zones</p>
+                <p className="text-xs text-muted-foreground">
+                  Iligan Pilot Testing
+                </p>
+              </div>
+              <div className="border-l-2 border-primary pl-3">
+                <p className="text-xl font-bold text-foreground">CENRO</p>
+                <p className="text-xs text-muted-foreground">
+                  Direct Decision Support
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-2 flex flex-col gap-3 sm:flex-row">
               <Button render={<Link href="/identify" />} nativeButton={false}>
                 Start Identifying
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -107,6 +153,7 @@ export function AboutSection() {
                 nativeButton={false}
                 variant="outline"
               >
+                <BookOpen className="mr-2 h-4 w-4" />
                 Learn About Mahogany
               </Button>
             </div>
@@ -151,21 +198,37 @@ export function AboutSection() {
                   </div>
                 ))}
 
-                {/* Slide counter — fixed dark overlay. Same rule as the
-                    hero video overlay: this sits directly on unpredictable
-                    photo content, not a themed surface, so it stays a
-                    literal color in both light and dark mode. */}
-                {/* Slide counter */}
-                <div className="absolute right-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-xs text-white backdrop-blur-sm">
+                {/* Slide counter — glassmorphism, matches the arrows
+                    below so the whole overlay set reads as one system */}
+                <div className="absolute right-3 top-3 rounded-full border border-border/50 bg-background/80 px-2.5 py-1 text-xs text-foreground backdrop-blur-md">
                   {current + 1} / {slides.length}
                 </div>
 
-                {/* Previous arrow */}
+                {/* Bottom overlay — contextual caption per slide.
+                    Only the scientificName span is italicized; the
+                    label and caption are ordinary text. */}
+                <div className="absolute inset-x-3 bottom-3 rounded-xl border border-border/50 bg-background/90 px-3.5 py-2.5 backdrop-blur-md">
+                  <p className="text-xs font-semibold text-foreground">
+                    {slides[current].label}
+                    {slides[current].scientificName && (
+                      <span className="ml-1.5 text-[11px] font-normal italic text-muted-foreground">
+                        {slides[current].scientificName}
+                      </span>
+                    )}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    {slides[current].caption}
+                  </p>
+                </div>
+
+                {/* Previous arrow — glassmorphism: blurs/lightens
+                    whatever's behind it instead of relying on a fixed
+                    dark color to out-contrast the photo. */}
                 <button
                   type="button"
                   onClick={goToPrevious}
                   aria-label="Previous slide"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-border/50 bg-background/80 text-foreground backdrop-blur-md transition-colors hover:bg-background"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
@@ -175,7 +238,7 @@ export function AboutSection() {
                   type="button"
                   onClick={goToNext}
                   aria-label="Next slide"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-border/50 bg-background/80 text-foreground backdrop-blur-md transition-colors hover:bg-background"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
