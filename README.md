@@ -47,6 +47,31 @@ CENRO / ADMIN (Authentication Required)
 
 ---
 
+## 🏗️ System Architecture
+
+CITIA-IS is built on a **Three-Tier Architecture**:
+
+1. **Presentation Tier (Frontend):** Next.js (App Router), React, TypeScript, Tailwind CSS, shadcn/ui
+2. **Application Tier (Backend API & AI):** Python, FastAPI, YOLOv8 (`YOLOv8n-cls` mode)
+3. **Data Tier (Database):** PostgreSQL
+
+---
+
+## 🛠️ Tech Stack
+
+| Domain | Technology | Usage |
+| :--- | :--- | :--- |
+| **Frontend Framework** | Next.js 14+ (App Router) | Responsive UI, SSR, Routing |
+| **Language** | TypeScript | Type-safe web development |
+| **Styling & UI** | Tailwind CSS / shadcn/ui | Civic environmental design system |
+| **Icons** | Lucide React | Contextual UI icons |
+| **Backend Framework** | FastAPI (Python) | High-performance inference API & routes |
+| **AI Classifier** | YOLOv8n-cls | Transfer learning leaf identification |
+| **Database** | PostgreSQL | Relational storage for sightings & logs |
+
+---
+
+
 ## Getting Started
 
 First, run the development server:
