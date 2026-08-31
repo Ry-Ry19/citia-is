@@ -1,4 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CITIA-IS: Community-Driven Mahogany Tree Identification and Recommendation Management Information System Using YOLOv8
+
+> **Undergraduate Thesis Proposal**  
+> **Degree:** Bachelor of Science in Information Systems  
+> **Institution:** Mindanao State University – Iligan Institute of Technology (MSU-IIT)  
+> **Stakeholder / Focus Area:** CENRO Iligan City (Palao Medical, Dalipuga, NPC Area)
+
+---
+
+## 🌿 About CITIA-IS
+
+**CITIA-IS** is a web-based, role-based environmental management information system anchored on **Citizen Science**. It enables community members to perform fast, browser-based AI identification of Mahogany (*Swietenia macrophylla*) leaves and log environmental sightings without requiring account creation. 
+
+Simultaneously, the platform provides local authorities at **CENRO Iligan City** with centralized monitoring, automated observation records, and data-driven decision support to replace paper-based and informal field documentation workflows.
+
+### Primary Gaps Addressed
+1. **Taxonomic Specificity Gap:** Addresses invasive tree species specifically (*Swietenia macrophylla*) rather than generic non-specific vegetation.
+2. **User Accessibility Gap:** Removes the requirement for specialized forestry hardware or mandatory user registration for public reporting.
+3. **Public Reporting Gap:** Transforms unstructured community observations into actionable, spatial database records accessible to local decision-makers.
+
+---
+
+## 🚀 Core Features & UX Architecture
+
+CITIA-IS enforces a clean separation of roles to ensure maximum accessibility and institutional control:
+PUBLIC / GUEST USER (No Account Required)
+└── Identify (YOLOv8 Leaf Classification)
+└── Learn (Ecological Guidance & Invasive Impact)
+└── Report (GIS Sighting Submission)
+
+CENRO / ADMIN (Authentication Required)
+└── Review & Verify Sightings
+└── Centralized Environmental Dashboard
+└── Spatial & Ecological Field Analytics
+
+---
+
+### Public Features
+* **AI-Assisted Mahogany Identification:** Upload or capture leaf imagery for real-time classification (`Mahogany`, `Non-Mahogany`, `Non-Tree`).
+* **Ecological Insights:** Access species characteristics, invasive impact summaries, and recommended mitigation actions.
+* **GIS Sighting Submission:** Report tree coordinates directly from standard mobile or desktop web browsers.
+
+### CENRO Administrative Features
+* **Centralized Reporting Dashboard:** Aggregate community observations and manage field verification statuses.
+* **Spatial & Ecological Monitoring:** Monitor localized invasive density across pilot zones in Iligan City.
+* **Audit & Records Management:** Transition paper records to structured digital records.
+
+---
 
 ## Getting Started
 
