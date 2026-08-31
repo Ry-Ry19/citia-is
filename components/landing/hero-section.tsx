@@ -4,7 +4,16 @@
 // CONCEPTS:
 //   relative/absolute — video fills parent, content sits above
 //   z-index layering  — video → overlay → content
-//   animate-bounce    — CSS animation from Tailwind 
+//   animate-bounce    — CSS animation from Tailwind
+//
+// TOKEN NOTE: text-white / bg-black/70 / border-white/40 / bg-white/10
+//   are intentionally literal, NOT tokens — same rule as the photo
+//   carousel in about-section.tsx. This content sits directly on
+//   unpredictable video footage, not a themed surface, so it must
+//   guarantee readability regardless of light/dark mode. The one
+//   token swap that DID matter: text-green-400 (an arbitrary Tailwind
+//   stock color) is now text-primary (the real brand green,
+//   #10B981), verified at 8.28:1 contrast against the dark overlay.
 
 "use client";
 
@@ -14,7 +23,10 @@ import { Button } from "@/components/ui/button";
 
 export function HeroSection() {
   return (
-    <section id="hero-section"className="relative flex min-h-screen items-center justify-center overflow-hidden pt-16">
+    <section
+      id="hero-section"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden pt-16"
+    >
       {/* Video background */}
       <video
         className="absolute inset-0 h-full w-full object-cover"
@@ -40,7 +52,7 @@ export function HeroSection() {
         {/* text-4xl(mobile screen approach),sm:text-5xl(target tablets), lg:text-6xl(target desktops) */}
         <h1 className="text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
           Identify and Report{" "}
-          <span className="text-green-400">Invasive Trees</span> in Iligan City
+          <span className="text-primary">Invasive Trees</span> in Iligan City
         </h1>
 
         <p className="mt-5 text-base font-medium leading-snug tracking-tight text-white/90 sm:text-lg">

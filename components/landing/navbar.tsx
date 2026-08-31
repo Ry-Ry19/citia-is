@@ -5,21 +5,25 @@
 //   usePathname — reads the current URL path
 //   useState    — tracks mobile menu open/close
 //   backdrop-blur — frosted glass effect on scroll
+//
+// TOKEN NOTE: "Identify a Tree" is promoted to a primary <Button>
+//   (not a plain link) because it's the single entry point of the
+//   guest flow (Identify → Learn → Report). Every other nav item
+//   stays a text link so the one CTA that matters doesn't get lost
+//   in a row of buttons.
 
 "use client";
 
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, TreePine } from "lucide-react";
+import { Menu, X, TreePine, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/common/theme-toggle";
 
-// Navigation links for community users
-// No login required for any of these
+// Informational / exploration links — plain text, equal weight
 const navLinks = [
   { label: "Home", href: "/#top" },
-  { label: "Identify a Tree", href: "/identify" },
   { label: "Report a Sighting", href: "/report" },
   { label: "Species Guide", href: "/species" },
 ];
@@ -68,10 +72,23 @@ export function Navbar() {
           ))}
         </nav>
 
-        {/* Theme toggle + Admin login — desktop */}
+        {/* Identify CTA + Theme toggle + Admin login — desktop */}
         <div className="hidden md:flex items-center gap-3">
-          <ThemeToggle />
+          <Button
+            render={<Link href="/identify" />}
+            nativeButton={false}
+            size="sm"
+          >
+            <Leaf className="mr-1.5 h-4 w-4" />
+            Identify a Tree
+          </Button>
+
           <div className="h-5 w-px bg-border" />
+
+          <ThemeToggle />
+
+          <div className="h-5 w-px bg-border" />
+
           <Button
             render={<Link href="/admin/login" />}
             nativeButton={false}
@@ -105,6 +122,20 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden border-t border-border bg-card px-4 pb-4 pt-2">
           <nav className="flex flex-col gap-1">
+            {/* Identify CTA — full-width, leads the mobile menu since
+                it's the primary guest action */}
+            <Button
+              render={<Link href="/identify" />}
+              nativeButton={false}
+              onClick={() => setIsMenuOpen(false)}
+              className="mt-2 w-full justify-center"
+            >
+              <Leaf className="mr-1.5 h-4 w-4" />
+              Identify a Tree
+            </Button>
+
+            <div className="my-2 border-t border-border" />
+
             {navLinks.map((link) => (
               <Link
                 key={link.href}

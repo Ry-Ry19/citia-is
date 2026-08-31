@@ -1,33 +1,14 @@
 "use client";
 
-import {
-  Leaf,
-  MapPin,
-  BookOpen,
-  LayoutDashboard,
-  BrainCircuit,
-  ClipboardList,
-  ShieldCheck,
-  Smartphone,
-  TreePine,
-  FileText,
-  Users,
-  Bell,
-} from "lucide-react";
+import { Zap, MapPinned, Landmark, Sprout, Lock, Globe } from "lucide-react";
 
 const badges = [
-  { icon: Leaf, label: "AI Tree Identification" },
-  { icon: MapPin, label: "Report a Sighting" },
-  { icon: BookOpen, label: "Species Guide" },
-  { icon: LayoutDashboard, label: "CENRO Dashboard" },
-  { icon: BrainCircuit, label: "YOLOv8 Powered" },
-  { icon: ClipboardList, label: "Management Recommendations" },
-  { icon: FileText, label: "Ecological Impact Info" },
-  { icon: ShieldCheck, label: "Free Community Access" },
-  { icon: TreePine, label: "Mahogany Detection" },
-  { icon: Users, label: "Centralized Records" },
-  { icon: Bell, label: "CENRO Backed" },
-  { icon: Smartphone, label: "Mobile Friendly" },
+  { icon: Zap, label: "Instant AI Inference — YOLOv8" },
+  { icon: MapPinned, label: "GIS-Enabled Community Sighting" },
+  { icon: Landmark, label: "CENRO Iligan Decision Support" },
+  { icon: Sprout, label: "Built for Citizen Science" },
+  { icon: Lock, label: "No Account Required for Public Use" },
+  { icon: Globe, label: "Tailored for Philippine Environmental Management" },
 ];
 
 // Single row of badges — reused in both tracks
@@ -37,11 +18,11 @@ function BadgeRow({ prefix }: { prefix: string }) {
       {badges.map((badge, index) => (
         <span
           key={`${prefix}-${index}`}
-          className="mx-8 inline-flex shrink-0 items-center gap-2 text-xs font-medium tracking-wide text-stone-300"
+          className="mx-8 inline-flex shrink-0 items-center gap-3 text-xs font-bold tracking-wide text-stone-300"
         >
-          <badge.icon className="h-3.5 w-3.5 shrink-0 text-primary" />
+          <badge.icon className="h-6 w-6 shrink-0 text-primary" />
           {badge.label}
-          <span className="ml-6 text-stone-600">·</span>
+          <span className="ml-6 text-white/25">&middot;</span>
         </span>
       ))}
     </>
@@ -51,17 +32,11 @@ function BadgeRow({ prefix }: { prefix: string }) {
 export function MarqueeStrip() {
   return (
     <div
-      style={{
-        overflow: "hidden",
-        width: "100%",
-        backgroundColor: "#1c1917",
-        paddingTop: "14px",
-        paddingBottom: "14px",
-      }}
+      className="group relative w-full overflow-hidden bg-[#1c1917] py-6"
     >
       {/*
         HOW SEAMLESS LOOP WORKS WITH TWO DIVS:
-
+ 
         Both Track1 and Track2 are identical.
         They sit side by side inside a flex container.
         Track1 animates from 0 to -100% of its own width.
@@ -69,38 +44,20 @@ export function MarqueeStrip() {
         the exact same space from the right.
         When Track1 resets to 0, it snaps back behind Track2
         which has taken its place — user never sees the jump.
-
+ 
         This is more reliable than -50% on one long div
         because each track is self-contained and the
         browser measures each independently.
       */}
-      <div
-        style={{
-          display: "flex",
-          width: "max-content",
-        }}
-      >
-        {/* Track 1 — animates left */}
-        <div
-          style={{
-            display: "inline-flex",
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-            animation: "marquee-track 30s linear infinite",
-          }}
-        >
+      <div className="flex w-max">
+        {/* Track 1 — animates left. group-hover pauses BOTH tracks
+            together since they share the parent's `group` class. */}
+        <div className="inline-flex flex-shrink-0 animate-marquee-track whitespace-nowrap group-hover:[animation-play-state:paused]">
           <BadgeRow prefix="track1" />
         </div>
 
         {/* Track 2 — identical clone, creates seamless fill */}
-        <div
-          style={{
-            display: "inline-flex",
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-            animation: "marquee-track 30s linear infinite",
-          }}
-        >
+        <div className="inline-flex flex-shrink-0 animate-marquee-track whitespace-nowrap group-hover:[animation-play-state:paused]">
           <BadgeRow prefix="track2" />
         </div>
       </div>

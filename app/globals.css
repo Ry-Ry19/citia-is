@@ -306,109 +306,127 @@
      these values.
    - The browser re-renders with the new values automatically.
 
-   DESIGN CHOICES:
-   - Green primary color (#CITIA-IS brand identity)
-   - High contrast for readability (WCAG AA compliant)
-   - Soft, approachable feel (rounded corners, muted tones)
-   - Environmental theme (green accents, natural palette)
+   DESIGN CHOICES — CITIA-IS OFFICIAL PALETTE:
+   - Primary Green  #10B981  → --primary (exact brand hex, converted to OKLCH)
+   - Deep Forest    #0F382C  → --foreground / --primary-foreground (brand dark)
+   - Light Green    #E8F5EE  → --secondary / --muted / --accent base
+   - Background     #F8FAFC  → --background
+   - Surface        #FFFFFF  → --card / --popover
+   - Secondary Text #64748B  → --muted-foreground
+   - Border         #E2E8F0  → --border / --input
+   - Danger         #DC2626  → --destructive
+   - Warning        #F59E0B  → --warning
 
-   ACCESSIBILITY NOTE:
-   Contrast ratios have been checked against WCAG 2.1 AA.
-   Text on background: ≥ 4.5:1 for normal text.
-   Large text: ≥ 3:1.
+   ACCESSIBILITY NOTE (IMPORTANT):
+   White text on the raw Primary Green (#10B981) button only
+   measures 2.54:1 contrast — that FAILS WCAG AA (needs 4.5:1).
+   Rather than darken the brand green itself (which would drift
+   from the official hex the thesis specifies), --primary stays
+   the exact brand color and --primary-foreground is set to Deep
+   Forest instead of white. Deep Forest on Primary Green measures
+   5.10:1 — passes AA. This means primary buttons render as
+   dark-green text on a bright-green fill, not white-on-green.
    ========================================================= */
 
 :root {
   /* ── Brand colors ──────────────────────────────────────────
      LEARN: Primary is the main action color. It appears on
-     buttons, links, and active states.    
+     buttons, links, and active states. This is the exact
+     CITIA-IS Primary Green (#10B981) converted to OKLCH.
      ──────────────────────────────────────────────────────── */
-  --primary: oklch(0.48 0.09045 157.299);
-  --primary-foreground: oklch(0.98 0.01 145);   
+  --primary: oklch(0.6959 0.14907 162.48);
+  --primary-foreground: oklch(0.3082 0.05047 170.223);
 
   /* ── Background & foreground ──────────────────────────────
      LEARN: These are the main surface and text colors.
-
-     ──────────────────────────────────────────────────── */
-  --background: oklch(0.99 0.003 210);
-  --foreground: oklch(12.112% 0.04121 142.511);
+     Background = official #F8FAFC. Foreground uses Deep Forest
+     (#0F382C) instead of a generic near-black — this keeps
+     body text on-brand while still hitting 12.4:1 contrast.
+     ──────────────────────────────────────────────────────── */
+  --background: oklch(0.9842 0.00341 247.858);
+  --foreground: oklch(0.3082 0.05047 170.223);
 
   /* ── Surfaces ──────────────────────────────────────────────
      LEARN: Cards and popovers are elevated surfaces that
-     appear above the background.
-   ──────────────────────────────────────────────────────── */
+     appear above the background. Official Surface = #FFFFFF.
+     ──────────────────────────────────────────────────────── */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 145);
+  --card-foreground: oklch(0.3082 0.05047 170.223);
 
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 145);
+  --popover-foreground: oklch(0.3082 0.05047 170.223);
 
   /* ── Secondary ─────────────────────────────────────────────
      LEARN: Secondary is a softer version of primary.
      Used for less prominent actions (secondary buttons,
-     highlighted sections, badges).
-   ──────────────────────────────────────────────────────── */
-  --secondary: oklch(0.92 0.035 145);
-  --secondary-foreground: oklch(0.28 0.06 145);
+     highlighted sections, badges). This is the official
+     Light Green (#E8F5EE).
+     ──────────────────────────────────────────────────────── */
+  --secondary: oklch(0.9585 0.01655 162.749);
+  --secondary-foreground: oklch(0.3082 0.05047 170.223);
 
   /* ── Muted ──────────────────────────────────────────────────
      LEARN: Muted is for low-importance information.
      Used for secondary text, disabled states, metadata.
-
+     Muted-foreground is the official Secondary Text (#64748B).
    ───────────────────────────────────────────────────── */
-  --muted: oklch(0.95 0.01 145);
-  --muted-foreground: oklch(0.50 0.015 220);
+  --muted: oklch(0.9585 0.01655 162.749);
+  --muted-foreground: oklch(0.5544 0.04072 257.417);
 
   /* ── Accent ──────────────────────────────────────────────────
      LEARN: Accent draws attention. Used for hover states,
      selected items, and subtle emphasis.
 
-     Same as secondary but with a semantic distinction.
-     This allows secondary and accent to diverge in the future.
+     A touch more saturated than secondary/muted so hover
+     states are visibly distinct, while staying in the brand
+     green family.
      ──────────────────────────────────────────────────────── */
-  --accent: oklch(0.92 0.04 165);
-  --accent-foreground: oklch(0.22 0.05 165);
+  --accent: oklch(0.88 0.05 162.48);
+  --accent-foreground: oklch(0.3082 0.05047 170.223);
 
   /* ── Feedback colors ────────────────────────────────────────
      LEARN: These communicate status and urgency to users.
 
-     DESTRUCTIVE: Red/orange for errors and dangerous actions.
-     SUCCESS: Green for confirmations and positive outcomes.
-     WARNING: Yellow/amber for cautions and pending states.
-     INFO: Blue for neutral information and guidance.
-
-     Each color has been chosen to be distinct and recognizable.
+     DESTRUCTIVE: Official Danger #DC2626.
+     SUCCESS: Reuses Primary Green — no separate success color
+       was specified in the brand palette.
+     WARNING: Official Warning #F59E0B.
+     INFO: Not part of the brand palette — kept as a neutral
+       blue for a 4th, distinct status color (e.g. "pending
+       review" in the CENRO dashboard). Revisit if you'd rather
+       collapse this into warning/muted.
      ──────────────────────────────────────────────────────── */
-  --destructive: oklch(0.52 0.21 25);
-  --success: oklch(0.52 0.16 145);
-  --warning: oklch(0.65 0.15 70);
+  --destructive: oklch(0.5771 0.21516 27.325);
+  --success: oklch(0.6959 0.14907 162.48);
+  --warning: oklch(0.7686 0.16466 70.08);
   --info: oklch(0.52 0.13 240);
 
   /* ── Borders & Inputs ──────────────────────────────────────
      LEARN: Borders define the edges of interactive elements.
      They should be visible but not distracting.
 
-     BORDER: oklch(0.88 0.015 145) - Light green-gray.
-     INPUT: Same as border for consistency.
-     RING: Focus ring color (matches primary for brand consistency).
+     BORDER / INPUT: Official Border #E2E8F0.
+     RING: Focus ring color matches Primary Green for brand
+     consistency.
      ──────────────────────────────────────────────────────── */
-  --border: oklch(0.90 0.008 210);
-  --input: oklch(0.90 0.008 210);
-  --ring: oklch(0.62 0.15 165);
+  --border: oklch(0.9288 0.01262 255.508);
+  --input: oklch(0.9288 0.01262 255.508);
+  --ring: oklch(0.6959 0.14907 162.48);
 
   /* ── Charts ──────────────────────────────────────────────────
      LEARN: Chart colors are distinct and color-blind friendly.
      They use different hues across the spectrum for clear
-     differentiation.
+     differentiation, anchored to the brand green plus the
+     warning/info accents already in the palette.
 
      WHY: Charts need to be readable by everyone, including
      users with color vision deficiencies.
      ──────────────────────────────────────────────────────── */
-  --chart-1: oklch(0.52 0.14 145);
-  --chart-2: oklch(0.62 0.14 165);
-  --chart-3: oklch(0.57 0.11 110);
-  --chart-4: oklch(0.47 0.11 185);
-  --chart-5: oklch(0.42 0.09 85);
+  --chart-1: oklch(0.6959 0.14907 162.48);
+  --chart-2: oklch(0.62 0.13 180);
+  --chart-3: oklch(0.55 0.1 145);
+  --chart-4: oklch(0.7686 0.16466 70.08);
+  --chart-5: oklch(0.52 0.13 240);
 
   /* ── Shape ──────────────────────────────────────────────────
      LEARN: A single radius value for consistent curvature.
@@ -420,21 +438,20 @@
   --radius: 0.75rem;
 
   /* ── Sidebar ──────────────────────────────────────────────────
-     LEARN: Sidebar is a dedicated navigation surface.
-     These variables allow the sidebar to have its own
-     color scheme while still fitting the overall design.
-
-     SIDEBAR: Slightly different from the main background
-     to create visual separation.
+     LEARN: Sidebar is a dedicated navigation surface — used by
+     the CENRO/admin dashboard. A subtle brand-green wash (rather
+     than plain gray) gives the admin area a distinct, "official"
+     feel that separates it visually from the public/community
+     pages, without breaking the light, civic aesthetic.
      ──────────────────────────────────────────────────────── */
-  --sidebar: oklch(0.97 0.01 145);
-  --sidebar-foreground: oklch(0.18 0.02 145);
-  --sidebar-primary: oklch(0.4 0.13 145);
-  --sidebar-primary-foreground: oklch(0.98 0.01 145);
-  --sidebar-accent: oklch(0.92 0.035 145);
-  --sidebar-accent-foreground: oklch(0.28 0.06 145);
-  --sidebar-border: oklch(0.88 0.015 145);
-  --sidebar-ring: oklch(0.4 0.13 145);
+  --sidebar: oklch(0.975 0.01 162.48);
+  --sidebar-foreground: oklch(0.3082 0.05047 170.223);
+  --sidebar-primary: oklch(0.6959 0.14907 162.48);
+  --sidebar-primary-foreground: oklch(0.3082 0.05047 170.223);
+  --sidebar-accent: oklch(0.9585 0.01655 162.749);
+  --sidebar-accent-foreground: oklch(0.3082 0.05047 170.223);
+  --sidebar-border: oklch(0.9 0.02 162.48);
+  --sidebar-ring: oklch(0.6959 0.14907 162.48);
 }
 
 /* =========================================================
@@ -448,71 +465,73 @@
    3. Everything using these variables updates automatically.
 
    DESIGN CHOICES:
-   - Dark background with subtle green undertone.
-   - Primary becomes brighter for visibility on dark backgrounds.
-   - Reduced contrast between surfaces for a more cohesive look.
+   - Dark background retinted to the brand's green-forest hue
+     family (H≈166, between Primary Green's H=162.5 and Deep
+     Forest's H=170.2) instead of the old generic hue.
+   - Primary becomes brighter (L=0.72 vs L=0.70 in light mode)
+     for visibility on dark backgrounds, still same brand hue.
    - Borders use opacity (10%) for a subtle glow effect.
 
    ACCESSIBILITY NOTE:
-   Dark mode must maintain WCAG AA contrast ratios.
-   Text on dark backgrounds needs to be bright enough
-   to be readable while not causing eye strain.
+   Dark foreground on dark background: 16.4:1.
+   Dark primary-foreground on dark primary: 8.1:1.
+   Both comfortably clear WCAG AA.
    ========================================================= */
 
 .dark {
   /* ── Brand colors ──────────────────────────────────────────
-     LEARN: Primary is brighter in dark mode (L=0.65 vs 0.40)
+     LEARN: Primary is brighter in dark mode (L=0.72 vs 0.70)
      to ensure sufficient contrast on dark backgrounds.
 
-     PRIMARY-FOREGROUND is darker (L=0.16) so text on
-     primary buttons is readable.
+     PRIMARY-FOREGROUND is a near-black deep forest so text on
+     primary buttons/badges stays readable (8.1:1 contrast).
      ──────────────────────────────────────────────────────── */
-  --primary: oklch(0.62 0.16 145);
-  --primary-foreground: oklch(0.16 0.02 145);
+  --primary: oklch(0.72 0.15 162.48);
+  --primary-foreground: oklch(0.18 0.03 170.22);
 
   /* ── Background & foreground ──────────────────────────────
      LEARN: Background is a dark green-gray instead of pure
-     black. This is easier on the eyes and fits the brand.
+     black — easier on the eyes and fits the brand hue.
 
      FOREGROUND is near-white for maximum readability.
      ──────────────────────────────────────────────────────── */
-  --background: oklch(0.16 0.02 145);
-  --foreground: oklch(0.96 0.01 145);
+  --background: oklch(0.19 0.02 166);
+  --foreground: oklch(0.96 0.01 166);
 
   /* ── Surfaces ──────────────────────────────────────────────
      LEARN: Cards and popovers are slightly lighter than the
      background to create depth and visual hierarchy.
      ──────────────────────────────────────────────────────── */
-  --card: oklch(0.2 0.025 145);
-  --card-foreground: oklch(0.96 0.01 145);
+  --card: oklch(0.23 0.025 166);
+  --card-foreground: oklch(0.96 0.01 166);
 
-  --popover: oklch(0.2 0.025 145);
-  --popover-foreground: oklch(0.96 0.01 145);
+  --popover: oklch(0.23 0.025 166);
+  --popover-foreground: oklch(0.96 0.01 166);
 
   /* ── Secondary ─────────────────────────────────────────────
      LEARN: Secondary is darker in dark mode but still
      distinct from the background.
      ──────────────────────────────────────────────────────── */
-  --secondary: oklch(0.88 0.06 200);
-  --secondary-foreground: oklch(0.22 0.05 200);
+  --secondary: oklch(0.28 0.03 166);
+  --secondary-foreground: oklch(0.92 0.01 166);
 
   /* ── Muted ──────────────────────────────────────────────────
      LEARN: Muted foreground is lighter in dark mode
      to remain readable against the dark background.
      ──────────────────────────────────────────────────────── */
-  --muted: oklch(0.27 0.03 145);
-  --muted-foreground: oklch(0.72 0.02 145);
+  --muted: oklch(0.27 0.02 166);
+  --muted-foreground: oklch(0.7 0.02 166);
 
   /* ── Accent ────────────────────────────────────────────────── */
-  --accent: oklch(0.27 0.035 145);
-  --accent-foreground: oklch(0.95 0.01 145);
+  --accent: oklch(0.3 0.035 162.48);
+  --accent-foreground: oklch(0.95 0.01 162.48);
 
   /* ── Feedback colors ────────────────────────────────────────
      LEARN: Feedback colors are brighter in dark mode to
      maintain visibility and emotional impact.
      ──────────────────────────────────────────────────────── */
   --destructive: oklch(0.62 0.2 25);
-  --success: oklch(0.62 0.16 145);
+  --success: oklch(0.72 0.15 162.48);
   --warning: oklch(0.75 0.16 85);
   --info: oklch(0.62 0.13 240);
 
@@ -525,30 +544,30 @@
      ──────────────────────────────────────────────────────── */
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.58 0.14 145);
+  --ring: oklch(0.72 0.15 162.48);
 
   /* ── Charts ──────────────────────────────────────────────────
      LEARN: Chart colors are slightly brighter in dark mode
      to ensure they pop against the dark background.
      ──────────────────────────────────────────────────────── */
-  --chart-1: oklch(0.58 0.14 145);
-  --chart-2: oklch(0.68 0.14 165);
-  --chart-3: oklch(0.63 0.11 110);
-  --chart-4: oklch(0.53 0.11 185);
-  --chart-5: oklch(0.48 0.09 85);
+  --chart-1: oklch(0.72 0.15 162.48);
+  --chart-2: oklch(0.68 0.13 180);
+  --chart-3: oklch(0.6 0.1 145);
+  --chart-4: oklch(0.78 0.16 85);
+  --chart-5: oklch(0.62 0.13 240);
 
   /* ── Sidebar ──────────────────────────────────────────────────
      LEARN: Sidebar in dark mode is slightly different from
      the main background to create depth.
      ──────────────────────────────────────────────────────── */
-  --sidebar: oklch(0.19 0.025 145);
-  --sidebar-foreground: oklch(0.95 0.01 145);
-  --sidebar-primary: oklch(0.62 0.16 145);
-  --sidebar-primary-foreground: oklch(0.16 0.02 145);
-  --sidebar-accent: oklch(0.27 0.035 145);
-  --sidebar-accent-foreground: oklch(0.95 0.01 145);
+  --sidebar: oklch(0.21 0.025 166);
+  --sidebar-foreground: oklch(0.95 0.01 166);
+  --sidebar-primary: oklch(0.72 0.15 162.48);
+  --sidebar-primary-foreground: oklch(0.18 0.03 170.22);
+  --sidebar-accent: oklch(0.3 0.035 162.48);
+  --sidebar-accent-foreground: oklch(0.95 0.01 162.48);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.58 0.14 145);
+  --sidebar-ring: oklch(0.72 0.15 162.48);
 }
 
 /* =========================================================
