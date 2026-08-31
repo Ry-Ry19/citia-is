@@ -857,13 +857,27 @@
   }
 }
 
-@keyframes marquee-vertical {
-  from {
-    transform: translateY(0);
+@keyframes marqueeVerticalUp {
+  0% {
+    transform: translateY(0%);
   }
-  to {
+  100% {
     transform: translateY(-50%);
   }
+}
+@keyframes marqueeVerticalDown {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+.animate-v-up {
+  animation: marqueeVerticalUp 18s linear infinite;
+}
+.animate-v-down {
+  animation: marqueeVerticalDown 22s linear infinite;
 }
 
 @keyframes progress-fill {

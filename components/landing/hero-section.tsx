@@ -66,7 +66,7 @@ export function HeroSection() {
             render={<Link href="/identify" />}
             nativeButton={false}
             size="lg"
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto backdrop-blur-md transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Leaf className="mr-2 h-4 w-4" />
             Identify a Tree
@@ -77,7 +77,7 @@ export function HeroSection() {
             nativeButton={false}
             size="lg"
             variant="outline"
-            className="w-full border-white/40 bg-white/10 text-white hover:bg-white/20 sm:w-auto"
+            className="w-full border-white/40 bg-white/10 text-white hover:bg-white/20 sm:w-auto backdrop-blur-md transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <MapPin className="mr-2 h-4 w-4" />
             Report a Sighting
