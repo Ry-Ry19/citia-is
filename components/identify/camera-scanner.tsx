@@ -34,6 +34,23 @@ import { Camera, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ScanStatus = "empty" | "ready" | "scanning" | "done";
+
+interface ClassificationResult {
+  label: "Mahogany" | "Non-Mahogany" | "Non-Tree";
+  confidence: number;
+}
+
+function mockClassify(): ClassificationResult {
+  const labels: ClassificationResult["label"][] = [
+    "Mahogany",
+    "Non-Mahogany",
+    "Non-Tree",
+  ];
+  const confidence = Math.floor(Math.random() * 100);
+  const label = labels[Math.floor(Math.random() * labels.length)];
+  return { label, confidence };
+}
+
 // ── Component ─────────────────────────────────────────────
 
 // Refs let us trigger the hidden native file inputs from our own
@@ -41,6 +58,7 @@ type ScanStatus = "empty" | "ready" | "scanning" | "done";
 export function CameraScanner() {
   const [status, setStatus] = useState<ScanStatus>("empty");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [result, setResult] = useState<ClassificationResult | null>(null);
 
   // Two separate refs — one per hidden input below. Each button
   // triggers its own input, but both inputs share the same
@@ -61,10 +79,22 @@ export function CameraScanner() {
     if (status === "ready") {
       setStatus("scanning");
       setTimeout(() => {
+        setResult(mockClassify());
         setStatus("done");
       }, 2000);
     }
   }
+
+  function handleReset() {
+    if (imageUrl) URL.revokeObjectURL(imageUrl);
+    setImageUrl(null);
+    setResult(null);
+    setStatus("empty");
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+    if (uploadInputRef.current) uploadInputRef.current.value = "";
+  }
+
+  
 
   return (
     <div className="mx-auto w-full max-w-2xl">
@@ -125,9 +155,17 @@ export function CameraScanner() {
         </div>
       )}
 
-      {status === "done" && (
-        <div className="mt-6 flex justify-center">
-          <p>Done!</p>
+      {status === "done" && result && (
+        <div className="mt-6 text-center">
+          <p className="font-semibold">{result.label}</p>
+          <p className="text-sm text-muted-foreground">
+            Confidence: {result.confidence}%
+          </p>
+          <div className="mt-4 flex justify-center">
+            <Button variant="outline" onClick={handleReset}>
+              Scan Another Photo
+            </Button>
+          </div>
         </div>
       )}
 
