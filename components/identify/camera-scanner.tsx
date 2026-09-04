@@ -33,7 +33,7 @@ import { useEffect, useRef, useState } from "react";
 import { Camera, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type ScanStatus = "empty" | "ready";
+type ScanStatus = "empty" | "ready" | "scanning" | "done";
 // ── Component ─────────────────────────────────────────────
 
 // Refs let us trigger the hidden native file inputs from our own
@@ -55,6 +55,15 @@ export function CameraScanner() {
 
     setImageUrl(URL.createObjectURL(file));
     setStatus("ready");
+  }
+
+  function handleScan() {
+    if (status === "ready") {
+      setStatus("scanning");
+      setTimeout(() => {
+        setStatus("done");
+      }, 2000);
+    }
   }
 
   return (
@@ -101,6 +110,24 @@ export function CameraScanner() {
             <Upload className="mr-2 h-4 w-4" />
             Upload Photo
           </Button>
+        </div>
+      )}
+
+      {status === "ready" && (
+        <div className="mt-6 flex justify-center">
+          <Button onClick={handleScan}>Scan for Mahogany</Button>
+        </div>
+      )}
+
+      {status === "scanning" && (
+        <div className="mt-6 flex justify-center">
+          <Button disabled>Analyzing...</Button>
+        </div>
+      )}
+
+      {status === "done" && (
+        <div className="mt-6 flex justify-center">
+          <p>Done!</p>
         </div>
       )}
 
