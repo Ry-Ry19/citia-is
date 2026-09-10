@@ -66,6 +66,21 @@ export function CameraScanner() {
   // same thing regardless of which button opened the picker.
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const uploadInputRef = useRef<HTMLInputElement>(null);
+  const [showBar, setShowBar] = useState(false);
+
+  useEffect(() => {
+    if (status === "done") {
+    
+      const timer = setTimeout(() => setShowBar(true), 50);
+      return () => clearTimeout(timer);
+    } 
+  }, [status]);
+
+  useEffect(() => {
+    return () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+    };
+  }, [imageUrl]);
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -76,8 +91,10 @@ export function CameraScanner() {
   }
 
   function handleScan() {
+    setShowBar(false);
     if (status === "ready") {
       setStatus("scanning");
+      
       setTimeout(() => {
         setResult(mockClassify());
         setStatus("done");
@@ -156,11 +173,21 @@ export function CameraScanner() {
       )}
 
       {status === "done" && result && (
-        <div className="mt-6 text-center">
-          <p className="font-semibold">{result.label}</p>
-          <p className="text-sm text-muted-foreground">
-            Confidence: {result.confidence}%
-          </p>
+        <div className="mt-3">
+          <div className="flex items-baseline justify-between">
+            <span className="text-xs font-medium text-muted-foreground">
+              Confidence
+            </span>
+            <span className="text-sm font-semibold text-foreground">
+              {result.confidence}%
+            </span>
+          </div>
+          <div className="mt-1.5 h-1.5 w-full overflow-hidden bg-muted">
+            <div
+              className="h-full bg-primary duration-700 transition:width ease-in-out"
+              style={{ width: showBar ? `${result.confidence}%` : "0%" }}
+            />
+          </div>
           <div className="mt-4 flex justify-center">
             <Button variant="outline" onClick={handleReset}>
               Scan Another Photo
