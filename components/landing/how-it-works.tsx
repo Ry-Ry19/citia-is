@@ -57,7 +57,7 @@ const steps: Step[] = [
     description:
       "Get a plain-language breakdown: species identification, ecological threat levels, and official CENRO mitigation guidance.",
     mockupPath: "/identify/result",
-    imgSrc: "/assets/images/eocological-impact.jpg",
+    imgSrc: "/assets/images/ecological-impact.jpg",
     badge: "Invasive Impact Analysis",
   },
   {
