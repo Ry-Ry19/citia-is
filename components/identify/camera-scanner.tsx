@@ -32,6 +32,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 type ScanStatus = "empty" | "ready" | "scanning" | "done";
 
@@ -51,6 +52,41 @@ function mockClassify(): ClassificationResult {
   return { label, confidence };
 }
 
+const RESULT_INFO: Record<
+  ClassificationResult["label"],
+  {
+    headline: string;
+    scientificName?: string;
+    imagePath?: string;
+    impact?: string;
+    recommendations?: string[];
+    showReportButton: boolean;
+  }
+> = {
+  Mahogany: {
+    headline: "Mahogany Detected",
+    scientificName: "Swietenia macrophylla",
+    imagePath: "/assets/images/mahogany.jpg",
+    impact:
+      "Mahogany suppresses native understory vegetation and offers little value to local wildlife, allowing it to spread readily into surrounding forest areas.",
+    recommendations: [
+      "Do not replant Mahogany in areas intended for native restoration.",
+      "Monitor existing occurrences and spread.",
+      "Avoid unauthorized removal or intervention.",
+      "Coordinate with CENRO or the appropriate environmental authority for assessment and management action.",
+    ],
+    showReportButton: true,
+  },
+  "Non-Mahogany": {
+    headline: "Mahogany Not Identified",
+    showReportButton: false,
+  },
+  "Non-Tree": {
+    headline: "Couldn't Identify a Leaf",
+    showReportButton: false,
+  },
+};
+
 // ── Component ─────────────────────────────────────────────
 
 // Refs let us trigger the hidden native file inputs from our own
@@ -68,12 +104,13 @@ export function CameraScanner() {
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const [showBar, setShowBar] = useState(false);
 
+  const info = result ? RESULT_INFO[result.label] : null;
+
   useEffect(() => {
     if (status === "done") {
-    
       const timer = setTimeout(() => setShowBar(true), 50);
       return () => clearTimeout(timer);
-    } 
+    }
   }, [status]);
 
   useEffect(() => {
@@ -94,7 +131,7 @@ export function CameraScanner() {
     setShowBar(false);
     if (status === "ready") {
       setStatus("scanning");
-      
+
       setTimeout(() => {
         setResult(mockClassify());
         setStatus("done");
@@ -110,8 +147,6 @@ export function CameraScanner() {
     if (cameraInputRef.current) cameraInputRef.current.value = "";
     if (uploadInputRef.current) uploadInputRef.current.value = "";
   }
-
-  
 
   return (
     <div className="mx-auto w-full max-w-2xl">
@@ -146,17 +181,33 @@ export function CameraScanner() {
       {/* ── Controls (vary by status) ─────────────────────── */}
       {status === "empty" && (
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button onClick={() => cameraInputRef.current?.click()}>
-            <Camera className="mr-2 h-4 w-4" />
-            Take Photo
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => uploadInputRef.current?.click()}
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Photo
-          </Button>
+          <div className="relative">
+            <Button>
+              <Camera className="mr-2 h-4 w-4" />
+              Take Photo
+            </Button>
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="absolute inset-0 z-10 opacity-0 cursor-pointer"
+              onChange={handleFileSelect}
+            />
+          </div>
+          <div className="relative">
+            <Button variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              Upload Photo
+            </Button>
+            <input
+              ref={uploadInputRef}
+              type="file"
+              accept="image/*"
+              className="absolute inset-0 z-10 opacity-0 cursor-pointer"
+              onChange={handleFileSelect}
+            />
+          </div>
         </div>
       )}
 
@@ -172,9 +223,28 @@ export function CameraScanner() {
         </div>
       )}
 
-      {status === "done" && result && (
+      {status === "done" && result && info && (
         <div className="mt-3">
-          <div className="flex items-baseline justify-between">
+          {info.imagePath && (
+            <div className="mb-4 rounded-xl border border-border bg-muted/30 p-3 flex flex-col items-center gap-1.5">
+              <Image
+                src={info.imagePath}
+                alt={`${result.label} reference photo`}
+                width={225}
+                height={300}
+                className="rounded-xl object-cover"
+              />
+              <p className="text-xs text-muted-foreground">
+                Reference photo: {info.scientificName ?? result.label}
+              </p>
+            </div>
+          )}
+
+          <p className="text-center font-semibold text-foreground">
+            {info.headline}
+          </p>
+
+          <div className="mt-3 flex items-baseline justify-between">
             <span className="text-xs font-medium text-muted-foreground">
               Confidence
             </span>
@@ -188,31 +258,37 @@ export function CameraScanner() {
               style={{ width: showBar ? `${result.confidence}%` : "0%" }}
             />
           </div>
-          <div className="mt-4 flex justify-center">
+
+          {info.impact && (
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+              <span className="font-semibold text-foreground">
+                Ecological Impact:{" "}
+              </span>
+              {info.impact}
+            </p>
+          )}
+
+          {info.recommendations && (
+            <div className="mt-4">
+              <p className="text-sm font-semibold text-foreground">
+                Management Recommendations
+              </p>
+              <ul className="mt-1.5 list-disc space-y-1 pl-5 text-sm text-muted-foreground">
+                {info.recommendations.map((rec) => (
+                  <li key={rec}>{rec}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-center">
+            {info.showReportButton && <Button>Report a Sighting</Button>}
             <Button variant="outline" onClick={handleReset}>
               Scan Another Photo
             </Button>
           </div>
         </div>
       )}
-
-      {/* Hidden native file inputs — one per button, triggered via
-          the refs above. Both call the same handleFileSelect. */}
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleFileSelect}
-      />
-      <input
-        ref={uploadInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileSelect}
-      />
     </div>
   );
 }
