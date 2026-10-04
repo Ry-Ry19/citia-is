@@ -15,7 +15,7 @@ import { Footer } from "@/components/landing/footer";
 
 export default function LandingPage() {
   return (
-    <div id="top" className="min-h-screen bg-white">
+    <div id="top" className="min-h-screen bg-background">
       <Navbar />
       <HeroSection />
       <MarqueeStrip />

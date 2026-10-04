@@ -60,13 +60,13 @@ const features: Feature[] = [
 
 export function FeaturesStrip() {
   return (
-    <section id="features-strip" className="bg-muted py-14 px-6">
+    <section id="features-strip" className="bg-surface-tint py-14 px-6">
       {/* Heading */}
       <div className="mx-auto mb-10 max-w-5xl text-center">
         <p className="text-xs font-semibold uppercase tracking-widest text-primary">
           What CITIA-IS Offers
         </p>
-        <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+        <h2 className="section-title mt-2 font-bold text-foreground">
           Everything Your Community Needs
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">

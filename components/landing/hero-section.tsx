@@ -50,7 +50,7 @@ export function HeroSection() {
         </p>
 
         {/* text-4xl(mobile screen approach),sm:text-5xl(target tablets), lg:text-6xl(target desktops) */}
-        <h1 className="text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+        <h1 className="display-title font-bold text-white">
           Identify and Report{" "}
           <span className="text-primary">Invasive Trees</span> in Iligan City
         </h1>
@@ -86,7 +86,10 @@ export function HeroSection() {
       </div>
 
       {/* Scroll bounce indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce"
+        aria-hidden="true"
+      >
         <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white/40">
           <div className="h-1.5 w-1.5 rounded-full bg-white/60" />
         </div>

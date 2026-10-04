@@ -45,7 +45,6 @@ import {
   Home,
   MapPin,
   BookOpen,
-  Sprout,
   Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -136,7 +135,9 @@ export function Navbar() {
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-navigation"
+            className="flex h-11 w-11 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-[0.98]"
           >
             {isMenuOpen ? (
               <X className="h-5 w-5" />
@@ -154,7 +155,7 @@ export function Navbar() {
           4. Reassurance note, then Staff Access separated at the very
              bottom in its own small, muted container */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-border bg-card px-4 pb-4">
+        <div id="mobile-navigation" className="md:hidden border-t border-border bg-card px-4 pb-4">
           
 
           {/* 2. Primary quick action */}

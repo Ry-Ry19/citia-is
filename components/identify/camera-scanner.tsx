@@ -105,6 +105,7 @@ export function CameraScanner() {
   const [showBar, setShowBar] = useState(false);
 
   const info = result ? RESULT_INFO[result.label] : null;
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "done") {
@@ -123,13 +124,20 @@ export function CameraScanner() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file (JPG, PNG, etc.).");
+      e.target.value="";
+      return;
+    }
+
+    setError(null);
     setImageUrl(URL.createObjectURL(file));
     setStatus("ready");
   }
 
   function handleScan() {
-    setShowBar(false);
     if (status === "ready") {
+      setShowBar(false);
       setStatus("scanning");
 
       setTimeout(() => {
@@ -144,6 +152,7 @@ export function CameraScanner() {
     setImageUrl(null);
     setResult(null);
     setStatus("empty");
+    setError(null);
     if (cameraInputRef.current) cameraInputRef.current.value = "";
     if (uploadInputRef.current) uploadInputRef.current.value = "";
   }
@@ -151,7 +160,7 @@ export function CameraScanner() {
   return (
     <div className="mx-auto w-full max-w-2xl">
       {/* ── Stage ─────────────────────────────────────────── */}
-      <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-border bg-card shadow-lg">
+      <div className="relative aspect-4/3 overflow-hidden rounded-3xl border border-border bg-card shadow-lg">
         {/* Empty state — no photo yet */}
         {status === "empty" && (
           <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
@@ -169,47 +178,58 @@ export function CameraScanner() {
 
         {/* Photo preview — shown while ready, scanning, or done */}
         {imageUrl && status !== "empty" && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={imageUrl}
             alt="Selected leaf photo"
-            className="h-full w-full object-cover"
+            fill
+            unoptimized
+            sizes="(max-width: 768px) 100vw, 672px"
+            className="object-cover"
           />
         )}
       </div>
 
+      {error && (
+        <p role ="alert" className="mt-4 text-center text-sm text-destructive">
+          {error}
+        </p>
+      )}
+
+
+
       {/* ── Controls (vary by status) ─────────────────────── */}
       {status === "empty" && (
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <div className="relative">
-            <Button>
-              <Camera className="mr-2 h-4 w-4" />
-              Take Photo
-            </Button>
-            <input
-              ref={cameraInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="absolute inset-0 z-10 opacity-0 cursor-pointer"
-              onChange={handleFileSelect}
-            />
-          </div>
-          <div className="relative">
-            <Button variant="outline">
-              <Upload className="mr-2 h-4 w-4" />
-              Upload Photo
-            </Button>
-            <input
-              ref={uploadInputRef}
-              type="file"
-              accept="image/*"
-              className="absolute inset-0 z-10 opacity-0 cursor-pointer"
-              onChange={handleFileSelect}
-            />
-          </div>
+          <Button onClick={() => cameraInputRef.current?.click()}>
+            <Camera className="mr-2 h-4 w-4" />
+            Take Photo
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => uploadInputRef.current?.click()}
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Upload Photo
+          </Button>
         </div>
       )}
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleFileSelect}
+        aria-label="Take a photo"
+      />
+      <input
+        ref={uploadInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileSelect}
+        aria-label="Upload a photo"
+      />
 
       {status === "ready" && (
         <div className="mt-6 flex justify-center">
@@ -254,7 +274,7 @@ export function CameraScanner() {
           </div>
           <div className="mt-1.5 h-1.5 w-full overflow-hidden bg-muted">
             <div
-              className="h-full bg-primary duration-700 transition:width ease-in-out"
+              className="h-full bg-primary transition-[width] duration-700 ease-in-out"
               style={{ width: showBar ? `${result.confidence}%` : "0%" }}
             />
           </div>

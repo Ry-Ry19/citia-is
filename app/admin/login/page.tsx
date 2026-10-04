@@ -26,6 +26,7 @@ export default function AdminLoginPage() {
               loop
               muted
               playsInline
+              aria-hidden="true"
             >
               <source src="/assets/videos/citia-intro.mp4" type="video/mp4" />
               Your browser does not support the video tag.
