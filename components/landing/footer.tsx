@@ -1,7 +1,7 @@
 // components/landing/footer.tsx
 //
-// WHAT: Site footer — theme-aware, two-tier layout (flips with
-//   light/dark mode like the rest of the app)
+// WHAT: Site footer — strict High-Contrast Dark Theme (#09090b
+//   base, #27272a borders, #10b981 emerald highlights)
 // REFERENCE: Left brand block + right nav columns, bottom utility strip
 //
 // NOTE: No "use client" needed — all hover/focus effects are plain
@@ -83,7 +83,7 @@ function LinkedinIcon({ className }: { className?: string }) {
 const contactItems: ContactItem[] = [
   {
     label: "Address",
-    value: "MSU-IIT, Andres Bonifacio Avenue, Tibanga, Iligan City 9200",
+    value: "4th East St., Cenro Compound, Rosary Heights, Tubod, Iligan City, Lanao del Norte, 9200",
     icon: MapPin,
   },
   {
@@ -125,7 +125,6 @@ const navColumns: FooterColumn[] = [
         external: true,
       },
       { label: "MSU-IIT", href: "https://msuiit.edu.ph", external: true },
-      { label: "Department of IS", href: "/" },
       { label: "RA 9147 — Wildlife Act", href: "/species" },
     ],
   },
@@ -148,18 +147,18 @@ const socialLinks: SocialLink[] = [
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-border bg-muted">
-      {/* Top brand accent line — token-based, correct in both themes */}
-      <div className="h-[2px] bg-linear-to-r from-primary to-transparent" />
+    <footer className="relative border-t border-[#27272a] bg-[#09090b]">
+      {/* Top brand accent line — strict emerald on dark */}
+      <div className="h-[2px] bg-linear-to-r from-[#10b981] to-transparent" />
 
       {/* ── UPPER GRID ─────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-6xl px-6 py-16">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-[280px_1fr]">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-14">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[260px_1fr] lg:gap-16">
           {/* LEFT — Brand block (matches reference left column weight) */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5">
             {/* Logo */}
             <Link href="/#top" className="group flex items-center gap-2.5">
-              <SiteLogo className="h-16 w-18 transition-transform duration-200 group-hover:scale-105" />
+              <SiteLogo className="h-16 w-16 transition-transform duration-200 group-hover:scale-105" />
               <span className="flex items-baseline text-base font-extrabold tracking-tight">
                 <span className="text-foreground">CITIA</span>
                 <span className="text-primary">-IS</span>
@@ -168,8 +167,8 @@ export function Footer() {
 
             {/* System full name */}
             <p className="max-w-[240px] text-xs leading-relaxed text-muted-foreground">
-              Community-Driven Invasive Tree Identification and Recommendation
-              Management Information System.
+              A community-friendly guide for learning about Mahogany and
+              documenting sightings in Iligan City.
             </p>
 
             {/* Contact items — maps ContactItem[]. Each label now has a
@@ -210,7 +209,7 @@ export function Footer() {
             sm:grid-cols-3 — all three get their own column from
               tablet width up.
           */}
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3">
             {navColumns.map((column) => (
               <div key={column.heading}>
                 {/* Column header — uppercase white bold */}
@@ -247,14 +246,14 @@ export function Footer() {
         Left: copyright + CENRO Staff Access + Privacy Policy
         Right: social icons + back to top
       */}
-      <div className="border-t border-border">
+      <div className="border-t border-[#27272a]">
         <div className="mx-auto max-w-6xl px-6 py-5">
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
             {/* Left — copyright + legal links */}
             <div className="flex flex-col items-center gap-2 sm:items-start">
               <p className="text-[11px] text-muted-foreground">
                 © 2026 CITIA-IS &middot; CENRO Iligan City &middot; MSU-IIT
-                Department of Information Systems &middot; All rights reserved.
+                &middot; All rights reserved.
               </p>
 
               {/* Legal links row — Lock icon + "CENRO Staff Access"
@@ -271,7 +270,7 @@ export function Footer() {
                   CENRO Staff Access
                 </Link>
 
-                <span className="text-border">|</span>
+                <span className="text-[#27272a]">|</span>
 
                 <Link
                   href="/privacy"
@@ -292,14 +291,14 @@ export function Footer() {
                   aria-label={social.label}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors duration-200 hover:border-primary hover:text-primary"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#27272a] text-muted-foreground transition-colors duration-200 hover:border-primary hover:text-primary"
                 >
                   <social.icon className="h-3.5 w-3.5" />
                 </a>
               ))}
 
               {/* Divider */}
-              <div className="h-4 w-px bg-border" />
+              <div className="h-4 w-px bg-[#27272a]" />
 
               {/* Back to top — plain anchor. See SCROLL NOTE at the
                   top of this file for how to make this animate

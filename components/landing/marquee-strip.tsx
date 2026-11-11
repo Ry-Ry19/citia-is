@@ -18,11 +18,11 @@ function BadgeRow({ prefix }: { prefix: string }) {
       {badges.map((badge, index) => (
         <span
           key={`${prefix}-${index}`}
-          className="mx-8 inline-flex shrink-0 items-center gap-3 text-xs font-bold tracking-wide text-foreground/80"
+          className="mx-8 inline-flex shrink-0 items-center gap-3 text-xs font-bold tracking-wide text-white/90"
         >
           <badge.icon className="h-6 w-6 shrink-0 text-primary" />
           {badge.label}
-          <span className="ml-6 text-foreground/25">&middot;</span>
+          <span className="ml-6 text-white/35">&middot;</span>
         </span>
       ))}
     </>
@@ -33,7 +33,7 @@ export function MarqueeStrip() {
   return (
     <div
       className="group relative w-full overflow-hidden bg-hero-accent py-6"
-        aria-hidden="true"
+      aria-hidden="true"
     >
       {/*
         HOW SEAMLESS LOOP WORKS WITH TWO DIVS:

@@ -1,8 +1,9 @@
 // app/page.tsx
 //
-// WHAT: Landing page — composes all section components
-// RULE: This file only imports and arranges.
-//       All logic lives inside each component file.
+// Landing page — composes all section components into a
+// Linear-style bento grid layout on a pitch-black surface.
+// This file only imports and arranges.
+// All logic lives inside each component file.
 
 import { Navbar } from "@/components/landing/navbar";
 import { HeroSection } from "@/components/landing/hero-section";
