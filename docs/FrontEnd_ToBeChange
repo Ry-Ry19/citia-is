@@ -1,0 +1,43 @@
+Frontend surfaces that must change
+
+1.) Scanner
+
+* Replace mockClassify() in components/identify/camera-scanner.tsx with POST /classify.
+* Handle API errors, unavailable model status, request cancellation, and response validation.
+
+2.) Report form
+
+* Replace the preparation-only submit handler in components/report-form.tsx with multipart submission to POST /reports.
+* Submit actual form fields and image data.
+* Display a server-generated reference number.
+* Handle duplicate submissions, validation failures, and upload failures.
+
+3.) Admin reports queue
+
+* Replace getStoredReports() in components/admin/reports-queue.tsx with API loading, pagination, filtering, and server-side search.
+
+4.) Report detail and review
+
+* Replace persistReviewDecision() in components/admin/report-detail.tsx with authenticated PATCH /reports/{id}/review.
+* Refresh the server response after a decision.
+* Preserve audit history and handle authorization/conflict errors.
+
+5.) Dashboard
+
+* Replace hard-coded constants in components/admin/admin-dashboard.tsx with /dashboard/stats and /dashboard/activity.
+
+6.) Monitoring
+
+* Replace sample records in components/admin/monitoring-workspace.tsx with /monitoring/records.
+* Keep the existing missing-coordinate behavior.
+
+7.) Species reference
+
+* Initially expose lib/species-data.ts through a read-only API endpoint.
+* Move to database-backed management only if CENRO staff need to edit reference data.
+
+8.) Authentication
+
+* Decide whether FastAPI trusts the existing Next.js session through a backend-issued token, a signed service-to-service assertion, or a Next.js proxy/BFF.
+* Do not expose the session secret or database credentials to browser code.
+* Enforce staff authorization independently on review and administrative endpoints.
