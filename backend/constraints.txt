@@ -1,0 +1,22 @@
+# backend/constraints.txt
+#
+# WHAT: Version limits for important INDIRECT dependencies — packages
+#   CITIA-IS does not list itself, but that strongly affect how it
+#   behaves. A constraint never installs anything on its own; it only
+#   says "if this package gets installed, use this version".
+#
+# WHY THESE:
+#   - starlette: the web framework underneath FastAPI. FastAPI only asks
+#     for "starlette>=0.46.0" with no upper limit, so without this pin a
+#     fresh install could jump to a new major version. Our error
+#     handlers and the test client depend on its behaviour.
+#   - pydantic: validates every request and every setting. (pydantic
+#     pins its own matching pydantic-core, so that is not listed.)
+#   - cryptography: does the actual ES256 signature check for PyJWT, so
+#     its version should only change deliberately.
+#   - botocore: does the actual S3 request signing and sending for boto3,
+#     and must match boto3's version.
+starlette==1.8.0
+pydantic==2.14.1
+cryptography==50.0.2
+botocore==1.43.117

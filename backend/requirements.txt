@@ -1,0 +1,24 @@
+# Runtime dependencies for the CITIA-IS FastAPI service.
+#
+# VERSION STRATEGY (see README "Dependencies"):
+#   - Packages our code imports are pinned exactly here.
+#   - Two important indirect packages are pinned in constraints.txt.
+#   - All other indirect packages are left to pip.
+#
+# Ultralytics is added once the trained weights are available (it is
+# imported only when a model is loaded, so the API runs without it).
+# Alembic is not used: migrations are reviewed SQL files applied by hand
+# (see backend/migrations/).
+-c constraints.txt
+fastapi==0.143.3
+uvicorn[standard]==0.54.0
+pydantic-settings==2.16.0
+pillow==12.3.0
+python-multipart==0.0.32
+# PostgreSQL driver (with its prebuilt binary) and connection pool.
+psycopg[binary]==3.3.6
+psycopg-pool==3.3.3
+# Verifies Supabase Auth access tokens (ES256) for staff endpoints.
+PyJWT[crypto]==2.15.1
+# Stores report photos in Supabase Storage through its S3 protocol.
+boto3==1.43.117
