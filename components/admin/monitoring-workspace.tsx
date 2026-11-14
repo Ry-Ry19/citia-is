@@ -117,7 +117,7 @@ export function MonitoringWorkspace() {
       {/* ── 1. Page Header ────────────────────────────────────── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+          <p className="text-xs font-semibold text-primary">
             CENRO Iligan City · Spatial Analysis
           </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -232,7 +232,7 @@ export function MonitoringWorkspace() {
             </span>
             <span>&middot;</span>
             <span>
-              Mapped: <strong className="text-emerald-400">{reportsWithCoords.length}</strong>
+              Mapped: <strong className="text-primary">{reportsWithCoords.length}</strong>
             </span>
             {reportsWithoutCoords.length > 0 && (
               <>
@@ -338,18 +338,18 @@ export function MonitoringWorkspace() {
                   <p className="text-muted-foreground truncate" title={selectedReport.specificLocation}>
                     {selectedReport.specificLocation}
                   </p>
-                  <p className="text-[11px] text-foreground">
+                  <p className="text-xs text-foreground">
                     AI: <strong>{selectedReport.aiClassification.label}</strong>{" "}
                     ({Math.round(selectedReport.aiClassification.confidence * 100)}%)
                   </p>
                   {selectedReport.coordinates ? (
-                    <p className="text-[10px] font-mono text-muted-foreground flex items-center gap-1">
+                    <p className="text-xs font-mono text-muted-foreground flex items-center gap-1">
                       <Navigation className="h-3 w-3 text-primary" />
                       {selectedReport.coordinates.lat.toFixed(4)}° N,{" "}
                       {selectedReport.coordinates.lng.toFixed(4)}° E
                     </p>
                   ) : (
-                    <p className="text-[10px] text-amber-400 italic">
+                    <p className="text-xs text-amber-400 italic">
                       No coordinates supplied
                     </p>
                   )}
@@ -377,7 +377,7 @@ export function MonitoringWorkspace() {
               <span className="text-xs font-semibold text-foreground">
                 Sighting Submissions ({filteredReports.length})
               </span>
-              <span className="text-[11px] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 Click to inspect &amp; locate
               </span>
             </div>
@@ -407,10 +407,10 @@ export function MonitoringWorkspace() {
                       {/* Status indicator icon */}
                       <span
                         className={cn(
-                          "mt-0.5 h-5 w-5 shrink-0 rounded-full flex items-center justify-center text-[10px] font-bold text-white",
-                          report.reviewStatus === "Verified" && "bg-emerald-500",
+                          "mt-0.5 h-5 w-5 shrink-0 rounded-full flex items-center justify-center text-xs font-bold text-white",
+                          report.reviewStatus === "Verified" && "bg-[#1f4d33]",
                           report.reviewStatus === "Rejected" && "bg-red-500",
-                          report.reviewStatus === "Pending" && "bg-amber-500 text-zinc-950"
+                          report.reviewStatus === "Pending" && "bg-amber-500 text-black"
                         )}
                         aria-hidden="true"
                       >
@@ -426,7 +426,7 @@ export function MonitoringWorkspace() {
                           <span className="font-mono text-xs font-semibold text-foreground">
                             {report.referenceNumber}
                           </span>
-                          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
                             {report.displayDate}
                           </span>
                         </div>
@@ -434,12 +434,12 @@ export function MonitoringWorkspace() {
                         <p className="text-xs text-foreground font-medium truncate">
                           {report.studyArea}
                         </p>
-                        <p className="text-[11px] text-muted-foreground truncate">
+                        <p className="text-xs text-muted-foreground truncate">
                           {report.specificLocation}
                         </p>
 
                         {!hasCoords && (
-                          <span className="inline-block mt-1 text-[10px] text-amber-400/90 font-medium bg-amber-500/10 px-1.5 py-0.2 rounded">
+                          <span className="inline-block mt-1 text-xs text-amber-400/90 font-medium bg-amber-500/10 px-1.5 py-0.2 rounded">
                             No coordinates
                           </span>
                         )}

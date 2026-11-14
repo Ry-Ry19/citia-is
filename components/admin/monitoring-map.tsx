@@ -32,13 +32,13 @@ const STUDY_AREA_CENTERS: Record<string, { lat: number; lng: number; zoom: numbe
 function createMarkerIcon(status: ReportStatus, isSelected: boolean) {
   const bgClass =
     status === "Verified"
-      ? "bg-emerald-500 border-white text-white"
+      ? "bg-[#1f4d33] border-white text-white"
       : status === "Rejected"
         ? "bg-red-500 border-white text-white"
-        : "bg-amber-500 border-white text-zinc-950";
+        : "bg-amber-500 border-white text-black";
 
   const selectedRing = isSelected
-    ? "ring-4 ring-emerald-400 scale-125 z-50 shadow-xl"
+    ? "ring-4 ring-primary scale-125 z-50 shadow-xl"
     : "hover:scale-110 shadow-md";
 
   const symbol =
@@ -48,7 +48,7 @@ function createMarkerIcon(status: ReportStatus, isSelected: boolean) {
     className: "citia-map-marker",
     html: `
       <div style="display:flex;align-items:center;justify-content:center;cursor:pointer;">
-        <div class="h-6 w-6 rounded-full border-2 ${bgClass} ${selectedRing} flex items-center justify-center font-bold text-[11px] transition-all">
+        <div class="h-6 w-6 rounded-full border-2 ${bgClass} ${selectedRing} flex items-center justify-center font-bold text-xs transition-all">
           ${symbol}
         </div>
       </div>
@@ -127,14 +127,14 @@ export function MonitoringMap({
 
       // Popup Content
       const popupHtml = `
-        <div style="font-family: inherit; min-width: 190px; color: #f4f4f5; background: #18181b; padding: 4px; border-radius: 6px;">
+        <div style="font-family: inherit; min-width: 190px; color: #f4f4f5; background: #17221c; padding: 4px; border-radius: 6px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <span style="font-family: monospace; font-size: 11px; font-weight: 700; color: #10b981;">
+            <span style="font-family: monospace; font-size: 11px; font-weight: 700; color: #8fcb9b;">
               ${report.referenceNumber}
             </span>
             <span style="font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 9999px; background: rgba(255,255,255,0.1); color: ${
               report.reviewStatus === "Verified"
-                ? "#10b981"
+                ? "#8fcb9b"
                 : report.reviewStatus === "Rejected"
                   ? "#ef4444"
                   : "#f59e0b"
@@ -155,7 +155,7 @@ export function MonitoringMap({
           </div>
           <a
             href="/admin/reports/${report.id}"
-            style="display: block; text-align: center; font-size: 11px; font-weight: 600; padding: 5px 8px; border-radius: 4px; background: #10b981; color: #09090b; text-decoration: none;"
+            style="display: block; text-align: center; font-size: 11px; font-weight: 600; padding: 5px 8px; border-radius: 4px; background: #8fcb9b; color: #09090b; text-decoration: none;"
           >
             Open Report Details &rarr;
           </a>
@@ -206,18 +206,18 @@ export function MonitoringMap({
 
       {/* Floating Map Legend */}
       <div className="absolute bottom-3 left-3 z-[400] rounded-md border border-border/80 bg-neutral-950/90 p-2.5 backdrop-blur-md text-xs shadow-lg">
-        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5 font-semibold">
+        <p className="text-xs text-muted-foreground mb-1.5 font-semibold">
           Observation Status
         </p>
-        <div className="flex flex-col gap-1.5 text-[11px]">
+        <div className="flex flex-col gap-1.5 text-xs">
           <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-emerald-500 text-[8px] text-white font-bold flex items-center justify-center">
+            <span className="h-3 w-3 rounded-full bg-[#1f4d33] text-[8px] text-white font-bold flex items-center justify-center">
               ✓
             </span>
             <span className="text-zinc-200">Verified Sighting</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-amber-500 text-[8px] text-zinc-950 font-bold flex items-center justify-center">
+            <span className="h-3 w-3 rounded-full bg-amber-500 text-[8px] text-black font-bold flex items-center justify-center">
               !
             </span>
             <span className="text-zinc-200">Pending Review</span>

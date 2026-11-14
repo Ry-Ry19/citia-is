@@ -237,7 +237,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                   <p className="text-xs font-medium text-foreground">
                     No image submitted
                   </p>
-                  <p className="text-[11px] text-muted-foreground max-w-xs mt-1">
+                  <p className="text-xs text-muted-foreground max-w-xs mt-1">
                     The reporter submitted this observation without attaching
                     photographic evidence.
                   </p>
@@ -248,7 +248,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                   <p className="text-xs font-medium text-foreground">
                     Image failed to load
                   </p>
-                  <p className="text-[11px] text-muted-foreground max-w-xs mt-1">
+                  <p className="text-xs text-muted-foreground max-w-xs mt-1">
                     The requested image file could not be rendered.
                   </p>
                 </div>
@@ -325,14 +325,14 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
           <Card className="rounded-lg border border-border bg-card p-5 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] font-mono uppercase tracking-wider text-primary">
+                <p className="text-xs text-primary">
                   Automated Model Inference
                 </p>
                 <h3 className="text-base font-semibold text-foreground">
                   AI Classification Assessment
                 </h3>
               </div>
-              <span className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-[10px] font-mono text-muted-foreground">
+              <span className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-xs font-mono text-muted-foreground">
                 {report.aiClassification.modelVersion}
               </span>
             </div>
@@ -375,7 +375,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                     }}
                   />
                 </div>
-                <div className="flex justify-between text-[10px] text-muted-foreground">
+                <div className="flex justify-between text-xs text-muted-foreground">
                   <span>0%</span>
                   <span>Analyzed {report.aiClassification.analyzedAt}</span>
                   <span>100%</span>
@@ -473,7 +473,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                 <dd className="mt-0.5 text-foreground">
                   {report.reporterName || "Community Member"}
                   {report.contactInfo && (
-                    <span className="block text-[11px] text-muted-foreground">
+                    <span className="block text-xs text-muted-foreground">
                       {report.contactInfo}
                     </span>
                   )}
@@ -591,7 +591,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
             <span className="font-medium text-white">
               {currentPhoto?.caption || "Submitted leaf specimen"}
             </span>
-            <span className="font-mono text-[11px] text-neutral-400">
+            <span className="font-mono text-xs text-neutral-400">
               {report.referenceNumber} · Specimen {selectedPhotoIndex + 1} of{" "}
               {photos.length}
             </span>

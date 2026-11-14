@@ -66,7 +66,7 @@ export function ThemeToggle() {
         <div
           role="menu"
           aria-label="Theme selection"
-          className="absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-36 rounded-xl border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur-xl"
+          className="absolute right-0 top-[calc(100%+0.5rem)] z-50 min-w-36 rounded-lg border border-border bg-card/95 p-1.5 shadow-xl backdrop-blur-xl"
         >
           {[
             { value: "light", label: "Light", icon: Sun },

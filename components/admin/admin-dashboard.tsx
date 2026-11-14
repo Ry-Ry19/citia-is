@@ -354,7 +354,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
           <div className="mx-auto flex max-w-7xl flex-col gap-6">
             {/* ── 1. Page Header ────────────────────────────────────── */}
             <header>
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+              <p className="text-xs font-semibold text-primary">
                 CENRO Iligan City · Staff Workspace
               </p>
               <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -400,13 +400,13 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                       <Card className="rounded-lg border border-border bg-card p-5 transition-all group-hover:border-primary/50 group-hover:bg-muted/20">
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground group-hover:text-foreground transition-colors">
+                            <p className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                               {card.label}
                             </p>
                             <p className="text-3xl font-bold tracking-tight text-foreground">
                               {card.value}
                             </p>
-                            <p className="text-[11px] text-muted-foreground">
+                            <p className="text-xs text-muted-foreground">
                               {card.description}
                             </p>
                           </div>
@@ -557,7 +557,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                       </div>
 
                       {/* Legend */}
-                      <div className="mt-4 flex flex-wrap items-center gap-4 pt-3 border-t border-border/60 text-[11px] text-muted-foreground">
+                      <div className="mt-4 flex flex-wrap items-center gap-4 pt-3 border-t border-border/60 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1.5">
                           <span className="h-2 w-2 rounded-full bg-success" />
                           Verified
@@ -595,23 +595,23 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                           >
                             <div className="mb-2 flex h-24 w-full flex-col justify-end items-center">
                               <div
-                                className="w-8 rounded-t bg-primary/25 border-t border-x border-primary flex items-center justify-center text-[10px] font-bold text-primary transition-all"
+                                className="w-8 rounded-t bg-primary/25 border-t border-x border-primary flex items-center justify-center text-xs font-bold text-primary transition-all"
                                 style={{ height: `${(t.count / 3) * 100}%` }}
                               >
                                 {t.count}
                               </div>
                             </div>
-                            <span className="text-[11px] font-medium text-foreground">
+                            <span className="text-xs font-medium text-foreground">
                               {t.period}
                             </span>
-                            <span className="text-[10px] text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                               {t.verified} ver · {t.pending} pend
                             </span>
                           </div>
                         ))}
                       </div>
 
-                      <p className="pt-2 text-[11px] leading-relaxed text-muted-foreground">
+                      <p className="pt-2 text-xs leading-relaxed text-muted-foreground">
                         Reflects demonstration submission clusters. Once live
                         records are connected, period intervals will reflect
                         actual database timestamps.
@@ -650,7 +650,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                       <p className="mt-2 text-xs font-semibold text-foreground">
                         No activity records
                       </p>
-                      <p className="text-[11px] text-muted-foreground">
+                      <p className="text-xs text-muted-foreground">
                         Administrative activity will appear here as reviews occur.
                       </p>
                     </div>
@@ -670,7 +670,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                           >
                             <span
                               className={cn(
-                                "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px]",
+                                "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs",
                                 isVerified && "bg-success/15 text-success",
                                 isRejected && "bg-destructive/15 text-destructive",
                                 isPending && "bg-warning/15 text-warning"
@@ -687,11 +687,11 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                                 <p className="truncate text-xs font-medium text-foreground">
                                   {event.action}
                                 </p>
-                                <span className="text-[10px] whitespace-nowrap text-muted-foreground">
+                                <span className="text-xs whitespace-nowrap text-muted-foreground">
                                   {event.timestamp}
                                 </span>
                               </div>
-                              <p className="line-clamp-1 text-[11px] text-muted-foreground">
+                              <p className="line-clamp-1 text-xs text-muted-foreground">
                                 {event.detail}
                               </p>
                             </div>

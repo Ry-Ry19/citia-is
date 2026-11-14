@@ -88,7 +88,7 @@ export function UpdatePasswordForm() {
           required
           className="h-10 rounded-md text-sm"
         />
-        <p className="text-[11px] text-muted-foreground">At least 12 characters.</p>
+        <p className="text-xs text-muted-foreground">At least 12 characters.</p>
       </div>
       <div className="space-y-1.5 text-left">
         <Label htmlFor="confirm" className="text-xs font-medium text-foreground">

@@ -24,7 +24,7 @@ export function AuthCard({
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Back to home
       </Link>
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <div className="w-full max-w-sm rounded-lg border border-border bg-card p-8 shadow-sm">
         <div className="mb-5 space-y-1 text-center">
           <h1 className="text-base font-semibold text-foreground">{title}</h1>
           <p className="text-xs text-muted-foreground">{description}</p>

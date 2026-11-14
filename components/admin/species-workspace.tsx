@@ -135,7 +135,7 @@ export function SpeciesWorkspace() {
       {/* ── Page Header ────────────────────────────────────────────── */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+          <p className="text-xs font-semibold text-primary">
             CENRO Reference Information System
           </p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -175,7 +175,7 @@ export function SpeciesWorkspace() {
             do <strong>NOT</strong> authorize tree cutting, pruning, or removal. All physical actions
             remain subject to on-site CENRO evaluation and official DENR permits under Presidential Decree No. 705.
           </p>
-          <p className="text-[11px] text-muted-foreground/80 whitespace-normal break-words">
+          <p className="text-xs text-muted-foreground/80 whitespace-normal break-words">
             The YOLOv8n-cls model classifies leaf images into three broad classes. Non-Mahogany entries
             illustrate negative-sample baselines and are not individually predicted by the AI model.
           </p>
@@ -243,7 +243,7 @@ export function SpeciesWorkspace() {
               <button
                 type="button"
                 onClick={expandAll}
-                className="text-[11px] font-medium text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                className="text-xs font-medium text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
               >
                 Expand all
               </button>
@@ -251,7 +251,7 @@ export function SpeciesWorkspace() {
               <button
                 type="button"
                 onClick={collapseAll}
-                className="text-[11px] font-medium text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                className="text-xs font-medium text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
               >
                 Collapse all
               </button>
@@ -264,7 +264,7 @@ export function SpeciesWorkspace() {
             Showing <strong className="text-foreground">{filteredSpecies.length}</strong> of{" "}
             <strong className="text-foreground">{allSpecies.length}</strong> reference entries
           </span>
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             Select &ldquo;View details&rdquo; to expand characteristics and recommendations
           </span>
         </div>
@@ -273,7 +273,7 @@ export function SpeciesWorkspace() {
       {/* ── 4-Column Practical Reference Table ──────────────────────── */}
       <Card className="rounded-lg border border-border bg-card p-0 overflow-hidden w-full max-w-full">
         <div className="border-b border-border bg-muted/20 px-4 py-3">
-          <p className="text-[11px] leading-relaxed text-muted-foreground">
+          <p className="text-xs leading-relaxed text-muted-foreground">
             These are reference entries, not additional AI species classes.
             Molave, Narra, and Yemane are examples within the broad{" "}
             <strong className="font-semibold text-foreground">Non-Mahogany</strong>{" "}
@@ -351,7 +351,7 @@ export function SpeciesWorkspace() {
                               ({sp.scientificName})
                             </span>
                           </p>
-                          <p className="text-[11px] font-mono text-muted-foreground/80">
+                          <p className="text-xs font-mono text-muted-foreground/80">
                             Family: {sp.family}
                           </p>
                         </div>
@@ -371,7 +371,7 @@ export function SpeciesWorkspace() {
                             {sp.classification}
                           </span>
                           {sp.classification === "Non-Mahogany" && (
-                            <span className="block text-[10px] text-muted-foreground">
+                            <span className="block text-xs text-muted-foreground">
                               Broad model class
                             </span>
                           )}
@@ -381,8 +381,8 @@ export function SpeciesWorkspace() {
                       {/* Column 3: Reference status */}
                       <TableCell className="py-3.5 align-middle whitespace-nowrap">
                         {sp.isConfirmed ? (
-                          <span className="inline-flex items-center gap-1.5 rounded bg-emerald-950/40 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-medium text-emerald-400">
-                            <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                          <span className="inline-flex items-center gap-1.5 rounded bg-primary/10 border border-primary/30 px-2.5 py-0.5 text-xs font-medium text-primary">
+                            <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
                             {sp.referenceStatus}
                           </span>
                         ) : (
@@ -431,13 +431,13 @@ export function SpeciesWorkspace() {
                                 </p>
                                 {sp.studyLocations && sp.studyLocations.length > 0 && (
                                   <div className="pt-1 flex flex-wrap items-center gap-1.5 text-xs">
-                                    <span className="text-[11px] font-medium text-muted-foreground">
+                                    <span className="text-xs font-medium text-muted-foreground">
                                       Study Areas:
                                     </span>
                                     {sp.studyLocations.map((loc) => (
                                       <span
                                         key={loc}
-                                        className="inline-flex items-center gap-1 rounded bg-muted/70 px-2 py-0.5 text-[10px] text-muted-foreground"
+                                        className="inline-flex items-center gap-1 rounded bg-muted/70 px-2 py-0.5 text-xs text-muted-foreground"
                                       >
                                         <MapPin className="h-2.5 w-2.5 text-primary shrink-0" />
                                         {loc}
@@ -448,20 +448,20 @@ export function SpeciesWorkspace() {
                               </div>
 
                               <div className="w-full lg:w-80 shrink-0 rounded-lg border border-border/80 bg-muted/40 p-3 space-y-1">
-                                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground block">
+                                <span className="text-xs text-muted-foreground block">
                                   Source &amp; Scope Verification
                                 </span>
                                 <span
                                   className={cn(
-                                    "inline-block rounded px-2 py-0.5 text-[11px] font-medium border",
+                                    "inline-block rounded px-2 py-0.5 text-xs font-medium border",
                                     sp.isConfirmed
-                                      ? "border-emerald-500/30 bg-emerald-950/40 text-emerald-400"
+                                      ? "border-primary/30 bg-primary/10 text-primary"
                                       : "border-border bg-muted text-muted-foreground"
                                   )}
                                 >
                                   {sp.referenceStatus}
                                 </span>
-                                <p className="text-[11px] leading-relaxed text-muted-foreground whitespace-normal break-words mt-1">
+                                <p className="text-xs leading-relaxed text-muted-foreground whitespace-normal break-words mt-1">
                                   {sp.sourceAndScope}
                                 </p>
                               </div>
@@ -472,17 +472,17 @@ export function SpeciesWorkspace() {
                               {/* Left: Available Identification Characteristics (8 cols on lg) */}
                               <div className="space-y-3 lg:col-span-8 min-w-0">
                                 <div>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                                  <span className="text-xs font-bold text-muted-foreground block">
                                     Leaf Characteristics
                                   </span>
-                                  <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                                     Relevant to the scanner. These are botanical reference traits, not proof that the trained model explicitly learned or checks each feature.
                                   </p>
                                 </div>
 
                                 <dl className="grid gap-3 text-xs w-full min-w-0">
                                   <div className="rounded border border-primary/30 bg-primary/5 p-3 space-y-1 min-w-0">
-                                    <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                                    <dt className="text-xs font-bold text-primary">
                                       Leaf Structure
                                     </dt>
                                     <dd className="text-foreground leading-relaxed whitespace-normal break-words">
@@ -492,7 +492,7 @@ export function SpeciesWorkspace() {
 
                                   <div className="grid gap-3 sm:grid-cols-2">
                                     <div className="rounded border border-primary/30 bg-primary/5 p-3 space-y-1 min-w-0">
-                                      <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                                      <dt className="text-xs font-bold text-primary">
                                         Leaflet Shape
                                       </dt>
                                       <dd className="text-foreground leading-relaxed whitespace-normal break-words">
@@ -505,7 +505,7 @@ export function SpeciesWorkspace() {
                                     </div>
 
                                     <div className="rounded border border-primary/30 bg-primary/5 p-3 space-y-1 min-w-0">
-                                      <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                                      <dt className="text-xs font-bold text-primary">
                                         Leaf Color &amp; Surface
                                       </dt>
                                       <dd className="text-foreground leading-relaxed whitespace-normal break-words">
@@ -521,10 +521,10 @@ export function SpeciesWorkspace() {
 
                                 <div className="space-y-3 pt-2">
                                   <div>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                                    <span className="text-xs font-bold text-muted-foreground block">
                                       Additional Botanical Characteristics
                                     </span>
-                                    <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                                       Reference only for human verification; these characteristics are not directly assessed by a leaf-only scan.
                                     </p>
                                   </div>
@@ -536,7 +536,7 @@ export function SpeciesWorkspace() {
                                       ["Bark & Trunk", sp.botanicalFeatures.barkAndForm],
                                     ].map(([label, value]) => (
                                       <div key={label} className="rounded border border-border bg-card p-3 space-y-1 min-w-0">
-                                        <dt className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                                        <dt className="text-xs font-bold text-primary">
                                           {label}
                                         </dt>
                                         <dd className="text-foreground leading-relaxed whitespace-normal break-words">
@@ -554,7 +554,7 @@ export function SpeciesWorkspace() {
 
                               {/* Right: Reference Imagery (4 cols on lg) */}
                               <div className="space-y-2.5 lg:col-span-4 min-w-0">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">
+                                <span className="text-xs font-bold text-muted-foreground block">
                                   Reference Imagery
                                 </span>
 
@@ -568,7 +568,7 @@ export function SpeciesWorkspace() {
                                         sizes="(max-width: 1024px) 100vw, 320px"
                                         className="object-cover"
                                       />
-                                      <div className="absolute inset-x-0 bottom-0 bg-black/80 p-2 text-[10px] text-white">
+                                      <div className="absolute inset-x-0 bottom-0 bg-black/80 p-2 text-xs text-white">
                                         <p className="line-clamp-2 leading-tight">
                                           {currentImage.caption}
                                         </p>
@@ -615,7 +615,7 @@ export function SpeciesWorkspace() {
                                     <p className="text-xs font-semibold text-foreground">
                                       No Image on File
                                     </p>
-                                    <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed whitespace-normal break-words">
+                                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed whitespace-normal break-words">
                                       Representative entry for the Non-Mahogany negative training class.
                                     </p>
                                   </div>
@@ -627,7 +627,7 @@ export function SpeciesWorkspace() {
                             <div className="space-y-3 pt-3 border-t border-border w-full min-w-0">
                               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary block">
+                                  <span className="text-xs font-bold text-primary block">
                                     Operational Guidance
                                   </span>
                                   <h3 className="text-sm font-bold text-foreground">
@@ -677,10 +677,10 @@ export function SpeciesWorkspace() {
                                     </div>
 
                                     <div className="rounded bg-muted/40 p-2.5 border border-border/60">
-                                      <span className="font-semibold text-foreground block text-[11px]">
+                                      <span className="font-semibold text-foreground block text-xs">
                                         On-Site Verification Requirements:
                                       </span>
-                                      <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-normal break-words mt-0.5">
+                                      <p className="text-xs text-muted-foreground leading-relaxed whitespace-normal break-words mt-0.5">
                                         {rec.verificationRequirements}
                                       </p>
                                     </div>
@@ -719,7 +719,7 @@ export function SpeciesWorkspace() {
             <span className="font-mono text-xs font-bold text-destructive block">
               Class 0: Mahogany
             </span>
-            <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-normal break-words">
+            <p className="text-xs text-muted-foreground leading-relaxed whitespace-normal break-words">
               <em>Swietenia macrophylla</em>. Primary research target. Sighting report workflow active for community documentation.
             </p>
           </div>
@@ -728,7 +728,7 @@ export function SpeciesWorkspace() {
             <span className="font-mono text-xs font-bold text-primary block">
               Class 1: Non-Mahogany
             </span>
-            <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-normal break-words">
+            <p className="text-xs text-muted-foreground leading-relaxed whitespace-normal break-words">
               Broad negative flora class (native/introduced trees and plants). The model does not predict individual non-target species names.
             </p>
           </div>
@@ -737,7 +737,7 @@ export function SpeciesWorkspace() {
             <span className="font-mono text-xs font-bold text-muted-foreground block">
               Class 2: Non-Tree
             </span>
-            <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-normal break-words">
+            <p className="text-xs text-muted-foreground leading-relaxed whitespace-normal break-words">
               Broad negative non-leaf/background class. Prompts the user to capture a clear, well-lit leaf photograph.
             </p>
           </div>

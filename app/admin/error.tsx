@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 export default function AdminError({ reset }: { error: Error; reset: () => void }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+      <div className="w-full max-w-md rounded-lg border border-border bg-card p-8 text-center shadow-sm">
         <AlertTriangle className="mx-auto h-8 w-8 text-amber-500" aria-hidden="true" />
         <h1 className="mt-4 text-lg font-semibold text-foreground">
           The staff portal is temporarily unavailable

@@ -183,7 +183,7 @@ function AdminSidebarNav({ onNavigate, staff }: AdminSidebarNavProps) {
             <span className="text-foreground">CITIA</span>
             <span className="text-primary">-IS</span>
           </span>
-          <span className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             CENRO Portal
           </span>
         </span>
@@ -196,7 +196,7 @@ function AdminSidebarNav({ onNavigate, staff }: AdminSidebarNavProps) {
       >
         {ADMIN_NAV_GROUPS.map((group) => (
           <div key={group.label} className="mb-4 last:mb-0">
-            <p className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="px-3 pb-1.5 text-xs font-bold text-muted-foreground">
               {group.label}
             </p>
             <ul className="flex flex-col gap-0.5">
@@ -235,7 +235,7 @@ function AdminSidebarNav({ onNavigate, staff }: AdminSidebarNavProps) {
               <span className="truncate text-xs font-semibold text-foreground">
                 {staff.fullName}
               </span>
-              <span className="truncate text-[11px] text-muted-foreground">
+              <span className="truncate text-xs text-muted-foreground">
                 {staff.email}
               </span>
             </span>
@@ -274,7 +274,7 @@ function SidebarLink({ item, isActive, onNavigate }: SidebarLinkProps) {
       >
         <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span className="flex-1 truncate">{item.label}</span>
-        <span className="rounded border border-border px-1 py-0.2 text-[9px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+        <span className="rounded border border-border px-1 py-0.2 text-xs font-semibold text-muted-foreground/70">
           Soon
           <span className="sr-only"> — page not yet available</span>
         </span>

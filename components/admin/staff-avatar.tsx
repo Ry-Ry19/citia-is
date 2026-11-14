@@ -42,7 +42,7 @@ export function StaffAvatar({
   return (
     // Decorative: the name is always shown or announced next to it.
     <Avatar size={size} className={className} aria-hidden="true">
-      <AvatarFallback className="bg-primary/15 text-[11px] font-bold text-primary">
+      <AvatarFallback className="bg-primary/15 text-xs font-bold text-primary">
         {staffInitials(staff)}
       </AvatarFallback>
     </Avatar>
@@ -54,7 +54,7 @@ export function StaffNameplate({ staff, className }: { staff: StaffIdentity; cla
   return (
     <span className={cn("flex min-w-0 flex-col leading-tight", className)}>
       <span className="truncate text-xs font-semibold text-foreground">{staff.fullName}</span>
-      <span className="truncate text-[10px] uppercase tracking-wider text-muted-foreground">
+      <span className="truncate text-xs text-muted-foreground">
         {ROLE_LABELS[staff.role]} · CENRO Iligan City
       </span>
     </span>

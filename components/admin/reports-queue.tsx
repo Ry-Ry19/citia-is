@@ -111,7 +111,7 @@ export function ReportsQueue() {
     <div className="space-y-6">
       {/* ── Page Header & Notice ───────────────────────────────────── */}
       <div>
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+        <p className="text-xs font-semibold text-primary">
           CENRO Environmental Monitoring
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -311,7 +311,7 @@ export function ReportsQueue() {
                             <MapPin className="h-3 w-3 text-primary shrink-0" />
                             {report.studyArea}
                           </span>
-                          <span className="text-[11px] text-muted-foreground truncate" title={report.specificLocation}>
+                          <span className="text-xs text-muted-foreground truncate" title={report.specificLocation}>
                             {report.specificLocation}
                           </span>
                         </div>
@@ -323,7 +323,7 @@ export function ReportsQueue() {
                           <span className="font-medium text-foreground">
                             {report.aiClassification.label}
                           </span>
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="text-xs text-muted-foreground">
                             {(report.aiClassification.confidence * 100).toFixed(1)}% confidence
                           </span>
                         </div>
@@ -362,7 +362,7 @@ export function ReportsQueue() {
           <span>
             Showing {filteredReports.length} of {reports.length} demonstration reports
           </span>
-          <span className="text-[11px]">
+          <span className="text-xs">
             {filteredReports.filter((r) => r.reviewStatus === "Pending").length} pending review
           </span>
         </div>

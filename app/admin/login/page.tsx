@@ -47,7 +47,7 @@ export default async function AdminLoginPage({
       </Link>
 
       {/* Single unified card with video panel and login fields */}
-      <div className="flex w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-2xl md:flex-row">
+      <div className="flex w-full max-w-5xl flex-col overflow-hidden rounded-lg border border-border bg-card shadow-2xl md:flex-row">
         {/* Left Side: Dark media panel (Desktop: Left/order-1, Mobile: Bottom/order-2) */}
         <div className="order-2 flex flex-col bg-neutral-950 md:order-1 md:w-3/5">
           {/* Media content */}
