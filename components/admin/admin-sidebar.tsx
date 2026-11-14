@@ -148,7 +148,7 @@ export function AdminSidebar({
             <SheetTitle className="text-sm font-semibold text-foreground">
               CENRO Administration
             </SheetTitle>
-            <SheetDescription className="text-xs text-muted-foreground">
+            <SheetDescription className="text-sm text-muted-foreground">
               CITIA-IS Staff Navigation
             </SheetDescription>
           </SheetHeader>
@@ -183,7 +183,7 @@ function AdminSidebarNav({ onNavigate, staff }: AdminSidebarNavProps) {
             <span className="text-foreground">CITIA</span>
             <span className="text-primary">-IS</span>
           </span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             CENRO Portal
           </span>
         </span>
@@ -196,7 +196,7 @@ function AdminSidebarNav({ onNavigate, staff }: AdminSidebarNavProps) {
       >
         {ADMIN_NAV_GROUPS.map((group) => (
           <div key={group.label} className="mb-4 last:mb-0">
-            <p className="px-3 pb-1.5 text-xs font-bold text-muted-foreground">
+            <p className="px-3 pb-1.5 text-sm font-bold text-muted-foreground">
               {group.label}
             </p>
             <ul className="flex flex-col gap-0.5">
@@ -219,7 +219,7 @@ function AdminSidebarNav({ onNavigate, staff }: AdminSidebarNavProps) {
         <Link
           href="/"
           onClick={onNavigate}
-          className="focus-ring flex min-h-10 items-center gap-2.5 rounded-md px-3 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="focus-ring flex min-h-10 items-center gap-2.5 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <ExternalLink className="h-4 w-4 shrink-0" aria-hidden="true" />
           Public Site
@@ -232,10 +232,10 @@ function AdminSidebarNav({ onNavigate, staff }: AdminSidebarNavProps) {
           <div className="mb-2 flex items-center gap-2.5 px-3 py-1" title={staff.email}>
             <StaffAvatar staff={staff} />
             <span className="flex min-w-0 flex-col leading-tight">
-              <span className="truncate text-xs font-semibold text-foreground">
+              <span className="truncate text-sm font-semibold text-foreground">
                 {staff.fullName}
               </span>
-              <span className="truncate text-xs text-muted-foreground">
+              <span className="truncate text-sm text-muted-foreground">
                 {staff.email}
               </span>
             </span>
@@ -245,7 +245,7 @@ function AdminSidebarNav({ onNavigate, staff }: AdminSidebarNavProps) {
           <button
             type="submit"
             onClick={onNavigate}
-            className="focus-ring flex min-h-10 w-full items-center gap-2.5 rounded-md px-3 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="focus-ring flex min-h-10 w-full items-center gap-2.5 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <LogOut className="h-4 w-4 shrink-0" aria-hidden="true" />
             Sign Out
@@ -270,11 +270,11 @@ function SidebarLink({ item, isActive, onNavigate }: SidebarLinkProps) {
     return (
       <span
         aria-disabled="true"
-        className="flex min-h-9 items-center gap-2.5 rounded-md px-3 py-1.5 text-xs text-muted-foreground/60 select-none"
+        className="flex min-h-9 items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-muted-foreground/60 select-none"
       >
         <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span className="flex-1 truncate">{item.label}</span>
-        <span className="rounded border border-border px-1 py-0.2 text-xs font-semibold text-muted-foreground/70">
+        <span className="rounded border border-border px-1 py-0.2 text-sm font-semibold text-muted-foreground/70">
           Soon
           <span className="sr-only"> — page not yet available</span>
         </span>
@@ -289,14 +289,14 @@ function SidebarLink({ item, isActive, onNavigate }: SidebarLinkProps) {
       onClick={onNavigate}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "focus-ring flex min-h-9 items-center gap-2.5 rounded-r-md rounded-l-none border-l-[3px] px-3 py-1.5 text-xs transition-colors",
+        "focus-ring flex min-h-9 items-center gap-2.5 rounded-r-md rounded-l-none border-l-[3px] px-3 py-1.5 text-sm transition-colors",
         isActive
           ? "border-primary bg-primary/10 font-semibold text-primary"
           : "border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
       )}
     >
       <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-      <span className="truncate">{item.label}</span>
+      <span className="leading-snug">{item.label}</span>
     </Link>
   );
 }

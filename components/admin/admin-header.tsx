@@ -47,7 +47,7 @@ export function AdminHeader({ onOpenNav, staff }: AdminHeaderProps) {
 
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="min-w-0">
-        <ol className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">
           <li className="whitespace-nowrap">CENRO Iligan City</li>
           <li aria-hidden="true">/</li>
           <li className="truncate font-semibold text-foreground">

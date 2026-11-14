@@ -46,7 +46,7 @@ const DynamicMonitoringMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full min-h-[450px] w-full items-center justify-center rounded-lg border border-border bg-neutral-950 text-xs text-muted-foreground">
+      <div className="flex h-full min-h-[450px] w-full items-center justify-center rounded-lg border border-border bg-neutral-950 text-sm text-muted-foreground">
         <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" />
         Loading environmental monitoring map…
       </div>
@@ -117,13 +117,13 @@ export function MonitoringWorkspace() {
       {/* ── 1. Page Header ────────────────────────────────────── */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-semibold text-primary">
+          <p className="text-sm font-semibold text-primary">
             CENRO Iligan City · Spatial Analysis
           </p>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <h1 className="mt-1 section-title text-foreground">
             Environmental Monitoring
           </h1>
-          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+          <p className="mt-1 text-sm text-muted-foreground sm:text-sm">
             Geographic distribution of community Mahogany sightings across focal study areas.
           </p>
         </div>
@@ -134,7 +134,7 @@ export function MonitoringWorkspace() {
             type="button"
             onClick={() => setMobileView("map")}
             className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors",
+              "flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium transition-colors",
               mobileView === "map"
                 ? "bg-card text-foreground shadow-xs font-semibold"
                 : "text-muted-foreground hover:text-foreground"
@@ -146,7 +146,7 @@ export function MonitoringWorkspace() {
             type="button"
             onClick={() => setMobileView("list")}
             className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors",
+              "flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium transition-colors",
               mobileView === "list"
                 ? "bg-card text-foreground shadow-xs font-semibold"
                 : "text-muted-foreground hover:text-foreground"
@@ -160,7 +160,7 @@ export function MonitoringWorkspace() {
       {/* ── 2. Data Honesty & Environmental Disclaimer ───────── */}
       <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-3.5">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-        <p className="text-xs leading-relaxed text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           <span className="font-semibold text-foreground">
             Demonstration Spatial Workspace.
           </span>{" "}
@@ -183,7 +183,7 @@ export function MonitoringWorkspace() {
                 aria-label="Filter by focal study area"
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
-                className="h-8 rounded-md border border-border bg-card px-2.5 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+                className="h-8 rounded-md border border-border bg-card px-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
               >
                 {STUDY_AREAS.map((area) => (
                   <option key={area} value={area}>
@@ -201,7 +201,7 @@ export function MonitoringWorkspace() {
                   type="button"
                   onClick={() => setSelectedStatus(s.value)}
                   className={cn(
-                    "rounded px-2.5 py-1 text-xs font-medium transition-colors",
+                    "rounded px-2.5 py-1 text-sm font-medium transition-colors",
                     selectedStatus === s.value
                       ? "bg-card text-foreground shadow-xs font-semibold"
                       : "text-muted-foreground hover:text-foreground"
@@ -217,7 +217,7 @@ export function MonitoringWorkspace() {
                 variant="ghost"
                 size="sm"
                 onClick={resetFilters}
-                className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                className="h-8 px-2 text-sm text-muted-foreground hover:text-foreground"
               >
                 <RotateCcw className="mr-1 h-3 w-3" />
                 Reset
@@ -226,7 +226,7 @@ export function MonitoringWorkspace() {
           </div>
 
           {/* Counts metrics */}
-          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
             <span>
               Total: <strong className="text-foreground">{filteredReports.length}</strong>
             </span>
@@ -261,7 +261,7 @@ export function MonitoringWorkspace() {
               <h3 className="text-sm font-semibold text-foreground">
                 No Geographic Coordinates Plotted
               </h3>
-              <p className="mt-1 text-xs text-muted-foreground max-w-sm">
+              <p className="mt-1 text-sm text-muted-foreground max-w-sm">
                 None of the {filteredReports.length} reports in the current filter
                 contain verified latitude and longitude values. Unmapped reports
                 remain accessible in the list.
@@ -271,7 +271,7 @@ export function MonitoringWorkspace() {
                   variant="outline"
                   size="sm"
                   onClick={resetFilters}
-                  className="mt-3 text-xs h-8"
+                  className="mt-3 text-sm h-8"
                 >
                   Clear Filters
                 </Button>
@@ -299,7 +299,7 @@ export function MonitoringWorkspace() {
             <Card className="rounded-lg border border-border bg-card p-4 space-y-3">
               <div className="flex items-start justify-between gap-2 pb-2 border-b border-border">
                 <div>
-                  <span className="font-mono text-xs font-bold text-primary">
+                  <span className="tabular-nums text-sm font-bold text-primary">
                     {selectedReport.referenceNumber}
                   </span>
                   <h3 className="text-sm font-semibold text-foreground">
@@ -334,22 +334,22 @@ export function MonitoringWorkspace() {
                   )}
                 </div>
 
-                <div className="space-y-1 min-w-0 flex-1 text-xs">
+                <div className="space-y-1 min-w-0 flex-1 text-sm">
                   <p className="text-muted-foreground truncate" title={selectedReport.specificLocation}>
                     {selectedReport.specificLocation}
                   </p>
-                  <p className="text-xs text-foreground">
+                  <p className="text-sm text-foreground">
                     AI: <strong>{selectedReport.aiClassification.label}</strong>{" "}
                     ({Math.round(selectedReport.aiClassification.confidence * 100)}%)
                   </p>
                   {selectedReport.coordinates ? (
-                    <p className="text-xs font-mono text-muted-foreground flex items-center gap-1">
+                    <p className="text-sm tabular-nums text-muted-foreground flex items-center gap-1">
                       <Navigation className="h-3 w-3 text-primary" />
                       {selectedReport.coordinates.lat.toFixed(4)}° N,{" "}
                       {selectedReport.coordinates.lng.toFixed(4)}° E
                     </p>
                   ) : (
-                    <p className="text-xs text-amber-400 italic">
+                    <p className="text-sm text-amber-400 italic">
                       No coordinates supplied
                     </p>
                   )}
@@ -361,7 +361,7 @@ export function MonitoringWorkspace() {
                   href={`/admin/reports/${selectedReport.id}`}
                   className={cn(
                     buttonVariants({ variant: "outline", size: "sm" }),
-                    "h-8 text-xs font-medium"
+                    "h-8 text-sm font-medium"
                   )}
                 >
                   Open Full Report
@@ -374,17 +374,17 @@ export function MonitoringWorkspace() {
           {/* Filtered Reports List */}
           <Card className="rounded-lg border border-border bg-card p-0 flex-1 flex flex-col overflow-hidden max-h-[500px]">
             <div className="p-3 border-b border-border bg-muted/30 flex items-center justify-between">
-              <span className="text-xs font-semibold text-foreground">
+              <span className="text-sm font-semibold text-foreground">
                 Sighting Submissions ({filteredReports.length})
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-sm text-muted-foreground">
                 Click to inspect &amp; locate
               </span>
             </div>
 
             <div className="overflow-y-auto divide-y divide-border/60">
               {filteredReports.length === 0 ? (
-                <div className="p-6 text-center text-xs text-muted-foreground">
+                <div className="p-6 text-center text-sm text-muted-foreground">
                   No reports match the selected filters.
                 </div>
               ) : (
@@ -407,7 +407,7 @@ export function MonitoringWorkspace() {
                       {/* Status indicator icon */}
                       <span
                         className={cn(
-                          "mt-0.5 h-5 w-5 shrink-0 rounded-full flex items-center justify-center text-xs font-bold text-white",
+                          "mt-0.5 h-5 w-5 shrink-0 rounded-full flex items-center justify-center text-sm font-bold text-white",
                           report.reviewStatus === "Verified" && "bg-[#1f4d33]",
                           report.reviewStatus === "Rejected" && "bg-red-500",
                           report.reviewStatus === "Pending" && "bg-amber-500 text-black"
@@ -423,23 +423,23 @@ export function MonitoringWorkspace() {
 
                       <div className="min-w-0 flex-1 space-y-0.5">
                         <div className="flex items-center justify-between gap-1">
-                          <span className="font-mono text-xs font-semibold text-foreground">
+                          <span className="tabular-nums text-sm font-semibold text-foreground">
                             {report.referenceNumber}
                           </span>
-                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          <span className="text-sm text-muted-foreground whitespace-nowrap">
                             {report.displayDate}
                           </span>
                         </div>
 
-                        <p className="text-xs text-foreground font-medium truncate">
+                        <p className="text-sm text-foreground font-medium truncate">
                           {report.studyArea}
                         </p>
-                        <p className="text-xs text-muted-foreground truncate">
+                        <p className="text-sm text-muted-foreground truncate">
                           {report.specificLocation}
                         </p>
 
                         {!hasCoords && (
-                          <span className="inline-block mt-1 text-xs text-amber-400/90 font-medium bg-amber-500/10 px-1.5 py-0.2 rounded">
+                          <span className="inline-block mt-1 text-sm text-amber-400/90 font-medium bg-amber-500/10 px-1.5 py-0.2 rounded">
                             No coordinates
                           </span>
                         )}

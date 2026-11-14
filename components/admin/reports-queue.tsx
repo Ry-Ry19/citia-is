@@ -111,13 +111,13 @@ export function ReportsQueue() {
     <div className="space-y-6">
       {/* ── Page Header & Notice ───────────────────────────────────── */}
       <div>
-        <p className="text-xs font-semibold text-primary">
+        <p className="text-sm font-semibold text-primary">
           CENRO Environmental Monitoring
         </p>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+        <h1 className="mt-2 section-title text-foreground">
           Reports Queue
         </h1>
-        <p className="mt-1 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+        <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:text-sm">
           Review, verify, and document community-submitted tree observations
           across Iligan City study areas.
         </p>
@@ -126,7 +126,7 @@ export function ReportsQueue() {
       {/* Demo Mode Banner */}
       <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-3.5">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-        <p className="text-xs leading-relaxed text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           <span className="font-semibold text-foreground">
             Demonstration Mode.
           </span>{" "}
@@ -147,7 +147,7 @@ export function ReportsQueue() {
               placeholder="Search reference, location, or notes…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 pl-9 text-xs rounded-md"
+              className="h-9 pl-9 text-sm rounded-md"
             />
           </div>
 
@@ -161,7 +161,7 @@ export function ReportsQueue() {
                   type="button"
                   onClick={() => setSelectedStatus(opt.value)}
                   className={cn(
-                    "rounded px-2.5 py-1 text-xs font-medium transition-colors",
+                    "rounded px-2.5 py-1 text-sm font-medium transition-colors",
                     selectedStatus === opt.value
                       ? "bg-card text-foreground shadow-xs font-semibold"
                       : "text-muted-foreground hover:text-foreground"
@@ -178,7 +178,7 @@ export function ReportsQueue() {
                 aria-label="Filter by study area"
                 value={selectedArea}
                 onChange={(e) => setSelectedArea(e.target.value)}
-                className="h-8 rounded-md border border-border bg-card px-2.5 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+                className="h-8 rounded-md border border-border bg-card px-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
               >
                 {STUDY_AREAS.map((area) => (
                   <option key={area} value={area}>
@@ -194,7 +194,7 @@ export function ReportsQueue() {
                 variant="ghost"
                 size="sm"
                 onClick={resetFilters}
-                className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+                className="h-8 px-2 text-sm text-muted-foreground hover:text-foreground"
               >
                 <RotateCcw className="mr-1 h-3 w-3" />
                 Reset
@@ -210,17 +210,17 @@ export function ReportsQueue() {
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="w-16 text-xs pl-4">Photo</TableHead>
-                <TableHead className="text-xs">Reference</TableHead>
-                <TableHead className="hidden text-xs md:table-cell">
+                <TableHead className="w-16 text-sm pl-4">Photo</TableHead>
+                <TableHead className="text-sm">Reference</TableHead>
+                <TableHead className="hidden text-sm md:table-cell">
                   Date Submitted
                 </TableHead>
-                <TableHead className="text-xs">Study Area &amp; Location</TableHead>
-                <TableHead className="hidden text-xs sm:table-cell">
+                <TableHead className="text-sm">Study Area &amp; Location</TableHead>
+                <TableHead className="hidden text-sm sm:table-cell">
                   AI Classification
                 </TableHead>
-                <TableHead className="text-xs">Review Status</TableHead>
-                <TableHead className="text-right text-xs pr-4">Action</TableHead>
+                <TableHead className="text-sm">Review Status</TableHead>
+                <TableHead className="text-right text-sm pr-4">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -235,7 +235,7 @@ export function ReportsQueue() {
                       <p className="text-sm font-semibold text-foreground">
                         No reports match these filters
                       </p>
-                      <p className="text-xs text-muted-foreground max-w-sm">
+                      <p className="text-sm text-muted-foreground max-w-sm">
                         Try clearing your search query or adjusting status and
                         study area selections.
                       </p>
@@ -244,7 +244,7 @@ export function ReportsQueue() {
                           variant="outline"
                           size="sm"
                           onClick={resetFilters}
-                          className="mt-2 text-xs h-8"
+                          className="mt-2 text-sm h-8"
                         >
                           Clear all filters
                         </Button>
@@ -290,7 +290,7 @@ export function ReportsQueue() {
                       </TableCell>
 
                       {/* Reference Number */}
-                      <TableCell className="font-mono text-xs font-semibold text-foreground py-3">
+                      <TableCell className="tabular-nums text-sm font-semibold text-foreground py-3">
                         <Link
                           href={`/admin/reports/${report.id}`}
                           className="hover:text-primary transition-colors hover:underline focus-ring rounded"
@@ -300,30 +300,30 @@ export function ReportsQueue() {
                       </TableCell>
 
                       {/* Date Submitted */}
-                      <TableCell className="hidden md:table-cell text-xs text-muted-foreground py-3 whitespace-nowrap">
+                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground py-3 whitespace-nowrap">
                         {report.displayDate}
                       </TableCell>
 
                       {/* Study Area & Location */}
-                      <TableCell className="text-xs py-3 max-w-[220px]">
+                      <TableCell className="text-sm py-3 max-w-[220px]">
                         <div className="flex flex-col">
                           <span className="font-medium text-foreground flex items-center gap-1">
                             <MapPin className="h-3 w-3 text-primary shrink-0" />
                             {report.studyArea}
                           </span>
-                          <span className="text-xs text-muted-foreground truncate" title={report.specificLocation}>
+                          <span className="text-sm text-muted-foreground truncate" title={report.specificLocation}>
                             {report.specificLocation}
                           </span>
                         </div>
                       </TableCell>
 
                       {/* AI Classification */}
-                      <TableCell className="hidden sm:table-cell text-xs py-3">
+                      <TableCell className="hidden sm:table-cell text-sm py-3">
                         <div className="flex flex-col">
                           <span className="font-medium text-foreground">
                             {report.aiClassification.label}
                           </span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-sm text-muted-foreground">
                             {(report.aiClassification.confidence * 100).toFixed(1)}% confidence
                           </span>
                         </div>
@@ -343,7 +343,7 @@ export function ReportsQueue() {
                           href={`/admin/reports/${report.id}`}
                           className={cn(
                             buttonVariants({ variant: "outline", size: "sm" }),
-                            "h-8 rounded-md px-3 text-xs"
+                            "h-8 rounded-md px-3 text-sm"
                           )}
                         >
                           Review
@@ -358,11 +358,11 @@ export function ReportsQueue() {
         </div>
 
         {/* Footer info */}
-        <div className="flex items-center justify-between border-t border-border px-4 py-3 text-xs text-muted-foreground">
+        <div className="flex items-center justify-between border-t border-border px-4 py-3 text-sm text-muted-foreground">
           <span>
             Showing {filteredReports.length} of {reports.length} demonstration reports
           </span>
-          <span className="text-xs">
+          <span className="text-sm">
             {filteredReports.filter((r) => r.reviewStatus === "Pending").length} pending review
           </span>
         </div>

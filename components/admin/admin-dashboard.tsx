@@ -354,13 +354,13 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
           <div className="mx-auto flex max-w-7xl flex-col gap-6">
             {/* ── 1. Page Header ────────────────────────────────────── */}
             <header>
-              <p className="text-xs font-semibold text-primary">
+              <p className="text-sm font-semibold text-primary">
                 CENRO Iligan City · Staff Workspace
               </p>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h1 className="mt-2 section-title text-foreground">
                 CENRO Dashboard
               </h1>
-              <p className="mt-1 max-w-3xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
+              <p className="mt-1 max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-sm">
                 Executive overview of community Mahogany sightings across the
                 focal study areas (Palao Medical, Dalipuga, and NPC area).
               </p>
@@ -372,7 +372,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                 className="mt-0.5 h-4 w-4 shrink-0 text-primary"
                 aria-hidden="true"
               />
-              <p className="text-xs leading-relaxed text-muted-foreground">
+              <p className="text-sm leading-relaxed text-muted-foreground">
                 <span className="font-semibold text-foreground">
                   Demonstration Data Mode.
                 </span>{" "}
@@ -400,13 +400,13 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                       <Card className="rounded-lg border border-border bg-card p-5 transition-all group-hover:border-primary/50 group-hover:bg-muted/20">
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1">
-                            <p className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                            <p className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
                               {card.label}
                             </p>
                             <p className="text-3xl font-bold tracking-tight text-foreground">
                               {card.value}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-sm text-muted-foreground">
                               {card.description}
                             </p>
                           </div>
@@ -442,7 +442,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                       >
                         Reports Visualization
                       </h2>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         Aggregate breakdown of submitted sample records.
                       </p>
                     </div>
@@ -461,7 +461,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                         aria-controls="panel-location"
                         onClick={() => setVisualizationTab("location")}
                         className={cn(
-                          "focus-ring inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors",
+                          "focus-ring inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium transition-colors",
                           visualizationTab === "location"
                             ? "bg-card text-foreground shadow-xs"
                             : "text-muted-foreground hover:text-foreground"
@@ -478,7 +478,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                         aria-controls="panel-timeline"
                         onClick={() => setVisualizationTab("timeline")}
                         className={cn(
-                          "focus-ring inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors",
+                          "focus-ring inline-flex items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium transition-colors",
                           visualizationTab === "timeline"
                             ? "bg-card text-foreground shadow-xs"
                             : "text-muted-foreground hover:text-foreground"
@@ -498,7 +498,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                       aria-labelledby="tab-location"
                       className="mt-5 flex-1 space-y-4"
                     >
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <span>Study Area</span>
                         <span>Sample Distribution</span>
                       </div>
@@ -510,7 +510,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                           );
                           return (
                             <div key={loc.name} className="space-y-1.5">
-                              <div className="flex items-center justify-between text-xs">
+                              <div className="flex items-center justify-between text-sm">
                                 <span className="font-medium text-foreground">
                                   {loc.name}
                                 </span>
@@ -557,7 +557,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                       </div>
 
                       {/* Legend */}
-                      <div className="mt-4 flex flex-wrap items-center gap-4 pt-3 border-t border-border/60 text-xs text-muted-foreground">
+                      <div className="mt-4 flex flex-wrap items-center gap-4 pt-3 border-t border-border/60 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1.5">
                           <span className="h-2 w-2 rounded-full bg-success" />
                           Verified
@@ -582,7 +582,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                       aria-labelledby="tab-timeline"
                       className="mt-5 flex-1 space-y-4"
                     >
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <span>Reporting Period (Oct 2026)</span>
                         <span>Volume</span>
                       </div>
@@ -595,23 +595,23 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                           >
                             <div className="mb-2 flex h-24 w-full flex-col justify-end items-center">
                               <div
-                                className="w-8 rounded-t bg-primary/25 border-t border-x border-primary flex items-center justify-center text-xs font-bold text-primary transition-all"
+                                className="w-8 rounded-t bg-primary/25 border-t border-x border-primary flex items-center justify-center text-sm font-bold text-primary transition-all"
                                 style={{ height: `${(t.count / 3) * 100}%` }}
                               >
                                 {t.count}
                               </div>
                             </div>
-                            <span className="text-xs font-medium text-foreground">
+                            <span className="text-sm font-medium text-foreground">
                               {t.period}
                             </span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-sm text-muted-foreground">
                               {t.verified} ver · {t.pending} pend
                             </span>
                           </div>
                         ))}
                       </div>
 
-                      <p className="pt-2 text-xs leading-relaxed text-muted-foreground">
+                      <p className="pt-2 text-sm leading-relaxed text-muted-foreground">
                         Reflects demonstration submission clusters. Once live
                         records are connected, period intervals will reflect
                         actual database timestamps.
@@ -635,7 +635,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                       >
                         Recent Activity
                       </h2>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         Latest staff reviews and submissions.
                       </p>
                     </div>
@@ -647,10 +647,10 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                   {SAMPLE_ACTIVITY.length === 0 ? (
                     <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
                       <Activity className="h-8 w-8 text-muted-foreground" />
-                      <p className="mt-2 text-xs font-semibold text-foreground">
+                      <p className="mt-2 text-sm font-semibold text-foreground">
                         No activity records
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         Administrative activity will appear here as reviews occur.
                       </p>
                     </div>
@@ -670,7 +670,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                           >
                             <span
                               className={cn(
-                                "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs",
+                                "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm",
                                 isVerified && "bg-success/15 text-success",
                                 isRejected && "bg-destructive/15 text-destructive",
                                 isPending && "bg-warning/15 text-warning"
@@ -684,14 +684,14 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
 
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center justify-between gap-2">
-                                <p className="truncate text-xs font-medium text-foreground">
+                                <p className="truncate text-sm font-medium text-foreground">
                                   {event.action}
                                 </p>
-                                <span className="text-xs whitespace-nowrap text-muted-foreground">
+                                <span className="text-sm whitespace-nowrap text-muted-foreground">
                                   {event.timestamp}
                                 </span>
                               </div>
-                              <p className="line-clamp-1 text-xs text-muted-foreground">
+                              <p className="line-clamp-1 text-sm text-muted-foreground">
                                 {event.detail}
                               </p>
                             </div>
@@ -715,7 +715,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                     >
                       Recent Sighting Submissions
                     </h2>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Sample community observations from target study areas.
                     </p>
                   </div>
@@ -728,16 +728,16 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead className="text-xs">Reference</TableHead>
-                        <TableHead className="hidden text-xs md:table-cell">
+                        <TableHead className="text-sm">Reference</TableHead>
+                        <TableHead className="hidden text-sm md:table-cell">
                           Date Submitted
                         </TableHead>
-                        <TableHead className="text-xs">Study Area</TableHead>
-                        <TableHead className="hidden text-xs lg:table-cell">
+                        <TableHead className="text-sm">Study Area</TableHead>
+                        <TableHead className="hidden text-sm lg:table-cell">
                           AI Result
                         </TableHead>
-                        <TableHead className="text-xs">Review Status</TableHead>
-                        <TableHead className="text-right text-xs">
+                        <TableHead className="text-sm">Review Status</TableHead>
+                        <TableHead className="text-right text-sm">
                           Action
                         </TableHead>
                       </TableRow>
@@ -745,13 +745,13 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                     <TableBody>
                       {SAMPLE_REPORTS.slice(0, 6).map((report) => (
                         <TableRow key={report.id}>
-                          <TableCell className="font-mono text-xs text-foreground">
+                          <TableCell className="tabular-nums text-sm text-foreground">
                             {report.id}
                           </TableCell>
-                          <TableCell className="hidden text-xs text-muted-foreground md:table-cell">
+                          <TableCell className="hidden text-sm text-muted-foreground md:table-cell">
                             {report.submittedOn}
                           </TableCell>
-                          <TableCell className="text-xs">
+                          <TableCell className="text-sm">
                             <span className="flex items-center gap-1.5 text-muted-foreground">
                               <MapPin
                                 className="h-3.5 w-3.5 shrink-0 text-primary/70"
@@ -760,7 +760,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                               {report.location}
                             </span>
                           </TableCell>
-                          <TableCell className="hidden text-xs lg:table-cell">
+                          <TableCell className="hidden text-sm lg:table-cell">
                             <span className="flex items-center gap-1.5">
                               <Leaf
                                 className="h-3.5 w-3.5 shrink-0 text-primary"
@@ -782,7 +782,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                               href={`/admin/reports/${report.id}`}
                               className={cn(
                                 buttonVariants({ variant: "outline", size: "sm" }),
-                                "h-8 rounded-md px-2.5 text-xs inline-flex"
+                                "h-8 rounded-md px-2.5 text-sm inline-flex"
                               )}
                             >
                               Review
@@ -807,7 +807,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                     >
                       Pending Review Queue
                     </h2>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm text-muted-foreground">
                       Submissions awaiting review by authorized CENRO officers.
                     </p>
                   </div>
@@ -823,7 +823,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                       className="flex flex-col gap-2.5 rounded-lg border border-border bg-background p-3.5"
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <span className="font-mono text-xs font-semibold text-foreground">
+                        <span className="tabular-nums text-sm font-semibold text-foreground">
                           {report.id}
                         </span>
                         <StatusBadge
@@ -831,7 +831,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                           variant={STATUS_STYLES[report.status].variant}
                         />
                       </div>
-                      <div className="space-y-1 text-xs text-muted-foreground">
+                      <div className="space-y-1 text-sm text-muted-foreground">
                         <p className="flex items-center gap-1.5">
                           <MapPin
                             className="h-3.5 w-3.5 shrink-0"
@@ -851,7 +851,7 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
                         href={`/admin/reports/${report.id}`}
                         className={cn(
                           buttonVariants({ variant: "outline", size: "sm" }),
-                          "mt-2 h-8 w-full rounded-md text-xs inline-flex justify-center"
+                          "mt-2 h-8 w-full rounded-md text-sm inline-flex justify-center"
                         )}
                       >
                         Review Sighting
@@ -877,14 +877,14 @@ export function AdminDashboard({ staff }: AdminDashboardProps) {
             <DialogTitle className="text-base font-semibold">
               {selectedReport?.id}
             </DialogTitle>
-            <DialogDescription className="text-xs">
+            <DialogDescription className="text-sm">
               Demonstration submission record for previewing the CENRO review
               inspector.
             </DialogDescription>
           </DialogHeader>
 
           {selectedReport && (
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 text-xs">
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2.5 text-sm">
               <dt className="text-muted-foreground">Date submitted</dt>
               <dd className="font-medium text-foreground">
                 {selectedReport.submittedOn}

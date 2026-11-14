@@ -89,7 +89,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
         <h2 className="text-lg font-semibold text-foreground">
           Report Not Found
         </h2>
-        <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+        <p className="text-sm text-muted-foreground max-w-sm mx-auto">
           The requested report reference ({reportId}) was not found in the
           demonstration dataset.
         </p>
@@ -97,7 +97,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
           href="/admin/reports"
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
-            "text-xs"
+            "text-sm"
           )}
         >
           <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back to Reports Queue
@@ -181,19 +181,19 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
             href="/admin/reports"
             className={cn(
               buttonVariants({ variant: "ghost", size: "sm" }),
-              "h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+              "h-8 px-2 text-sm text-muted-foreground hover:text-foreground"
             )}
           >
             <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Reports Queue
           </Link>
           <span className="text-muted-foreground/40">/</span>
-          <span className="font-mono text-xs font-bold text-foreground">
+          <span className="tabular-nums text-sm font-bold text-foreground">
             {report.referenceNumber}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Review Status:</span>
+          <span className="text-sm text-muted-foreground">Review Status:</span>
           <StatusBadge label={report.reviewStatus} variant={statusVariant} />
         </div>
       </div>
@@ -201,7 +201,9 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
       {/* ── Main Two-Column Layout (60 / 40 on lg) ─────────────────── */}
       <div className="grid gap-6 lg:grid-cols-12">
         {/* ── Left Column: Photo Gallery & AI Classification (7 cols) ── */}
-        <div className="space-y-6 lg:col-span-7">
+        {/* The photo stays in view while the staff member reads the
+            details and decides. */}
+        <div className="space-y-6 lg:sticky lg:top-20 lg:col-span-7 lg:self-start">
           {/* Sighting Photo Gallery */}
           <Card className="overflow-hidden rounded-lg border border-border bg-card p-0">
             <div className="border-b border-border p-4 flex items-center justify-between">
@@ -209,7 +211,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                 <h2 className="text-sm font-semibold text-foreground">
                   Submitted Photo Documentation
                 </h2>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   {photos.length === 0
                     ? "No photographic evidence attached"
                     : `Displaying photo ${selectedPhotoIndex + 1} of ${photos.length}`}
@@ -221,7 +223,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                   size="sm"
                   variant="outline"
                   onClick={() => setLightboxOpen(true)}
-                  className="h-7 px-2 text-xs"
+                  className="h-7 px-2 text-sm"
                 >
                   <Maximize2 className="mr-1.5 h-3 w-3" />
                   Inspect
@@ -234,10 +236,10 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
               {photos.length === 0 ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
                   <ImageIcon className="h-10 w-10 text-muted-foreground/40 mb-2" />
-                  <p className="text-xs font-medium text-foreground">
+                  <p className="text-sm font-medium text-foreground">
                     No image submitted
                   </p>
-                  <p className="text-xs text-muted-foreground max-w-xs mt-1">
+                  <p className="text-sm text-muted-foreground max-w-xs mt-1">
                     The reporter submitted this observation without attaching
                     photographic evidence.
                   </p>
@@ -245,10 +247,10 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
               ) : imageError ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground">
                   <AlertTriangle className="h-10 w-10 text-warning mb-2" />
-                  <p className="text-xs font-medium text-foreground">
+                  <p className="text-sm font-medium text-foreground">
                     Image failed to load
                   </p>
-                  <p className="text-xs text-muted-foreground max-w-xs mt-1">
+                  <p className="text-sm text-muted-foreground max-w-xs mt-1">
                     The requested image file could not be rendered.
                   </p>
                 </div>
@@ -271,7 +273,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                     />
                   )}
                   <div className="absolute inset-0 bg-black/30 opacity-0 transition-opacity group-hover:opacity-100 flex items-center justify-center">
-                    <span className="flex items-center gap-1.5 rounded-md bg-black/75 px-3 py-1.5 text-xs text-white">
+                    <span className="flex items-center gap-1.5 rounded-md bg-black/75 px-3 py-1.5 text-sm text-white">
                       <Eye className="h-3.5 w-3.5" /> Click to enlarge
                     </span>
                   </div>
@@ -282,7 +284,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
             {/* Photo Caption & Thumbnails */}
             {currentPhoto && (
               <div className="p-4 border-t border-border bg-card">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                   <span className="font-medium text-foreground">Caption: </span>
                   {currentPhoto.caption || "Community leaf observation photograph"}
                 </p>
@@ -320,19 +322,24 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
               </div>
             )}
           </Card>
+        </div>
 
-          {/* AI Inference Classification Card (YOLOv8n-cls) */}
-          <Card className="rounded-lg border border-border bg-card p-5 space-y-4">
+        {/* ── Right Column: Report Metadata & CENRO Decision (5 cols) ─ */}
+        <div className="space-y-6 lg:col-span-5">
+          {/* The AI's result comes first in the reading order, drawn with a
+              dashed outline and neutral colours: it is a suggestion, and
+              green is kept for CENRO's own decision. */}
+          <Card className="rounded-lg border border-dashed border-foreground/40 bg-transparent p-5 space-y-4 shadow-none ring-0">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-xs text-primary">
-                  Automated Model Inference
+                <p className="text-sm text-muted-foreground">
+                  A suggestion, not a decision
                 </p>
                 <h3 className="text-base font-semibold text-foreground">
                   AI Classification Assessment
                 </h3>
               </div>
-              <span className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-xs font-mono text-muted-foreground">
+              <span className="rounded-md border border-border bg-muted/60 px-2 py-0.5 text-sm tabular-nums text-muted-foreground">
                 {report.aiClassification.modelVersion}
               </span>
             </div>
@@ -341,17 +348,17 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
             <div className="rounded-lg border border-border bg-background p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Predicted Class</p>
+                  <p className="text-sm text-muted-foreground">Predicted Class</p>
                   <p className="text-base font-bold text-foreground">
                     {report.aiClassification.label}
                   </p>
-                  <p className="text-xs italic text-muted-foreground">
+                  <p className="text-sm italic text-muted-foreground">
                     {report.aiClassification.scientificName}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Confidence</p>
-                  <p className="text-xl font-bold font-mono text-primary">
+                  <p className="text-sm text-muted-foreground">Confidence</p>
+                  <p className="text-xl font-bold tabular-nums text-foreground">
                     {(report.aiClassification.confidence * 100).toFixed(1)}%
                   </p>
                 </div>
@@ -367,15 +374,15 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                     className={cn(
                       "h-full transition-all duration-500",
                       report.aiClassification.label === "Mahogany"
-                        ? "bg-primary"
-                        : "bg-destructive"
+                        ? "bg-foreground/60"
+                        : "bg-foreground/60"
                     )}
                     style={{
                       width: `${report.aiClassification.confidence * 100}%`,
                     }}
                   />
                 </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
+                <div className="flex justify-between text-sm text-muted-foreground">
                   <span>0%</span>
                   <span>Analyzed {report.aiClassification.analyzedAt}</span>
                   <span>100%</span>
@@ -384,7 +391,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
             </div>
 
             {/* Mandatory Informational Disclaimer */}
-            <div className="flex items-start gap-2.5 rounded-md border border-border/80 bg-muted/40 p-3 text-xs leading-relaxed text-muted-foreground">
+            <div className="flex items-start gap-2.5 rounded-md border border-border/80 bg-muted/40 p-3 text-sm leading-relaxed text-muted-foreground">
               <Info className="h-4 w-4 shrink-0 text-primary mt-0.5" aria-hidden="true" />
               <p>
                 <strong className="text-foreground">Informational Guidance Only:</strong>{" "}
@@ -396,17 +403,14 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
               </p>
             </div>
           </Card>
-        </div>
 
-        {/* ── Right Column: Report Metadata & CENRO Decision (5 cols) ─ */}
-        <div className="space-y-6 lg:col-span-5">
           {/* Location & Sighting Information */}
           <Card className="rounded-lg border border-border bg-card p-5 space-y-4">
             <h3 className="text-sm font-semibold text-foreground pb-2 border-b border-border">
               Observation Details
             </h3>
 
-            <dl className="space-y-3 text-xs">
+            <dl className="space-y-3 text-sm">
               <div>
                 <dt className="text-muted-foreground flex items-center gap-1.5">
                   <MapPin className="h-3.5 w-3.5 text-primary" />
@@ -431,7 +435,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                     <Navigation className="h-3.5 w-3.5 text-primary" />
                     GPS Coordinates
                   </dt>
-                  <dd className="mt-0.5 font-mono text-xs text-foreground bg-muted/60 px-2 py-1 rounded inline-block">
+                  <dd className="mt-0.5 tabular-nums text-sm text-foreground bg-muted/60 px-2 py-1 rounded inline-block">
                     {report.coordinates.lat.toFixed(4)}° N,{" "}
                     {report.coordinates.lng.toFixed(4)}° E
                   </dd>
@@ -473,7 +477,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                 <dd className="mt-0.5 text-foreground">
                   {report.reporterName || "Community Member"}
                   {report.contactInfo && (
-                    <span className="block text-xs text-muted-foreground">
+                    <span className="block text-sm text-muted-foreground">
                       {report.contactInfo}
                     </span>
                   )}
@@ -483,10 +487,10 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
 
             {/* Community Notes */}
             <div className="pt-2 border-t border-border">
-              <p className="text-xs font-medium text-foreground mb-1">
+              <p className="text-sm font-medium text-foreground mb-1">
                 Community Notes
               </p>
-              <p className="text-xs leading-relaxed text-muted-foreground bg-background p-3 rounded border border-border">
+              <p className="text-sm leading-relaxed text-muted-foreground bg-background p-3 rounded border border-border">
                 {report.communityNotes}
               </p>
             </div>
@@ -504,7 +508,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
 
             {/* Active Decision Summary */}
             {report.reviewStatus !== "Pending" ? (
-              <div className="space-y-3 rounded-lg border border-border bg-background p-3.5 text-xs">
+              <div className="space-y-3 rounded-lg border border-border bg-background p-3.5 text-sm">
                 <div>
                   <span className="text-muted-foreground">Reviewed By: </span>
                   <span className="font-medium text-foreground">
@@ -537,7 +541,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                 )}
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 This sighting submission is currently pending evaluation. Review
                 the photographic specimen and submit an official decision below.
               </p>
@@ -547,7 +551,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
             <div className="pt-2 flex flex-col sm:flex-row gap-2">
               <Button
                 type="button"
-                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-9 text-xs font-semibold"
+                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-11 text-sm font-semibold"
                 onClick={() => setDecisionModal("verify")}
               >
                 <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
@@ -559,7 +563,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
               <Button
                 type="button"
                 variant="destructive"
-                className="flex-1 h-9 text-xs font-semibold"
+                className="flex-1 h-11 text-sm font-semibold"
                 onClick={() => setDecisionModal("reject")}
               >
                 <XCircle className="mr-1.5 h-3.5 w-3.5" />
@@ -587,11 +591,11 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
               />
             )}
           </div>
-          <div className="pt-2 px-1 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 text-neutral-300">
+          <div className="pt-2 px-1 text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 text-neutral-300">
             <span className="font-medium text-white">
               {currentPhoto?.caption || "Submitted leaf specimen"}
             </span>
-            <span className="font-mono text-xs text-neutral-400">
+            <span className="tabular-nums text-sm text-neutral-400">
               {report.referenceNumber} · Specimen {selectedPhotoIndex + 1} of{" "}
               {photos.length}
             </span>
@@ -613,14 +617,14 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                 ? "Confirm Sighting Verification"
                 : "Confirm Report Rejection"}
             </DialogTitle>
-            <DialogDescription className="text-xs">
+            <DialogDescription className="text-sm">
               {decisionModal === "verify"
                 ? "Verifying confirms that this observation represents Swietenia macrophylla and registers it for monitoring."
                 : "Rejection excludes this observation from confirmed invasive Mahogany records. A valid reason must be stated."}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 py-2 text-xs">
+          <div className="space-y-3 py-2 text-sm">
             {decisionModal === "reject" && (
               <div className="space-y-1.5">
                 <label
@@ -633,7 +637,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                   id="rejection-reason"
                   value={rejectionReasonInput}
                   onChange={(e) => setRejectionReasonInput(e.target.value)}
-                  className="w-full rounded-md border border-border bg-card p-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-destructive"
+                  className="w-full rounded-md border border-border bg-card p-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-destructive"
                 >
                   <option value="">Select a reason…</option>
                   <option value="Specimen does not match Swietenia macrophylla botanical criteria.">
@@ -670,7 +674,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
                 placeholder="Enter notes for CENRO records or field reference…"
                 value={staffNotesInput}
                 onChange={(e) => setStaffNotesInput(e.target.value)}
-                className="h-20 text-xs resize-none"
+                className="h-20 text-sm resize-none"
               />
             </div>
           </div>
@@ -682,7 +686,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
               size="sm"
               onClick={() => setDecisionModal(null)}
               disabled={isSubmittingDecision}
-              className="text-xs"
+              className="text-sm"
             >
               Cancel
             </Button>
@@ -692,7 +696,7 @@ export function ReportDetail({ reportId, staffEmail }: ReportDetailProps) {
               size="sm"
               onClick={handleConfirmDecision}
               disabled={isSubmittingDecision}
-              className="text-xs font-semibold"
+              className="text-sm font-semibold"
             >
               {isSubmittingDecision
                 ? "Recording Decision…"
