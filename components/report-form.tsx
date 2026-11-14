@@ -26,9 +26,7 @@ import {
   ImagePlus,
   Loader2,
   LocateFixed,
-  MapPin,
   Search,
-  ShieldCheck,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -99,8 +97,14 @@ const LABEL_TEXT: Record<string, string> = {
   "Non-Tree": "Non-Tree (no tree leaf recognised)",
 };
 
+// Fields use 16px text. Besides being easier to read, that stops
+// iPhones from zooming the page in when a field is tapped.
 const inputClass =
-  "h-11 bg-background border border-zinc-300 dark:border-zinc-800 text-foreground focus-visible:ring-2 focus-visible:ring-[#10b981]";
+  "h-12 bg-card border border-input text-base text-foreground md:text-base focus-visible:ring-2 focus-visible:ring-ring";
+
+const labelClass = "block space-y-2 text-sm font-semibold text-foreground";
+const optionalClass = "font-normal text-muted-foreground";
+const sectionClass = "border-t-2 border-foreground pt-6";
 
 interface TreeLocation extends MapPoint {
   /** True while the pin is still exactly on the device's GPS fix. */
@@ -118,10 +122,30 @@ function formatCoordinate(value: number): string {
   return value.toFixed(6);
 }
 
+/**
+ * The heading of one numbered part of the form. The parts are numbered
+ * because the visitor fills them in order.
+ */
+function SectionHeading({ number, title }: { number: number; title: string }) {
+  return (
+    <div className="mb-6 flex items-baseline gap-4">
+      <span
+        aria-hidden="true"
+        className="text-5xl font-extrabold leading-none text-foreground [font-stretch:75%]"
+      >
+        {number}
+      </span>
+      <h2 className="text-2xl font-bold text-foreground [font-stretch:85%]">
+        {title}
+      </h2>
+    </div>
+  );
+}
+
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return (
-    <p className="mt-1.5 text-xs font-medium text-destructive" role="alert">
+    <p className="mt-1.5 text-sm font-medium text-destructive" role="alert">
       {message}
     </p>
   );
@@ -386,36 +410,32 @@ export function ReportForm() {
   if (savedReport) {
     const classification = savedReport.classification;
     return (
-      <section
-        className="rounded-xl border border-primary/40 bg-card p-6 shadow-sm md:p-8"
-        aria-live="polite"
-      >
+      <section className="border-t-2 border-primary pt-6" aria-live="polite">
         <div className="flex items-start gap-3">
-          <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-primary" aria-hidden="true" />
+          <CheckCircle2 className="mt-1 h-7 w-7 shrink-0 text-primary" aria-hidden="true" />
           <div className="min-w-0">
-            <h2 className="text-xl font-bold text-card-foreground">
+            <h2 className="text-2xl font-bold text-foreground [font-stretch:85%]">
               {savedReport.alreadySaved ? "This report was already received" : "Report received"}
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-base text-muted-foreground">
               Keep this reference number for any follow-up with CENRO.
             </p>
           </div>
         </div>
 
-        <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-border bg-background p-4">
-            <dt className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Reference number
-            </dt>
-            <dd className="mt-1 text-2xl font-bold tabular-nums text-foreground" data-testid="reference-number">
+        <dl className="mt-8 grid gap-6 border-t border-border pt-6 sm:grid-cols-2">
+          <div>
+            <dt className="text-sm font-semibold text-muted-foreground">Reference number</dt>
+            <dd
+              className="mt-1 text-4xl font-extrabold tabular-nums text-foreground [font-stretch:85%]"
+              data-testid="reference-number"
+            >
               {savedReport.referenceNumber}
             </dd>
           </div>
-          <div className="rounded-lg border border-border bg-background p-4">
-            <dt className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Status
-            </dt>
-            <dd className="mt-1 text-base font-semibold text-foreground">
+          <div>
+            <dt className="text-sm font-semibold text-muted-foreground">Status</dt>
+            <dd className="mt-2 text-lg font-semibold text-foreground">
               {savedReport.status === "pending_review"
                 ? "Pending CENRO review"
                 : savedReport.status === "verified"
@@ -425,7 +445,9 @@ export function ReportForm() {
           </div>
         </dl>
 
-        <div className="mt-4 rounded-lg border border-border bg-background p-4 text-sm leading-relaxed">
+        {/* The AI's result has a dashed outline: dashed means "a
+            suggestion, not a decision", as on the landing page. */}
+        <div className="mt-6 rounded-lg border border-dashed border-foreground/40 p-4 text-base leading-relaxed">
           {classification.outcome === "succeeded" ? (
             <>
               <p className="font-semibold text-foreground">
@@ -443,7 +465,7 @@ export function ReportForm() {
               Not classified. CENRO staff will review your report.
             </p>
           )}
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             AI results are preliminary and are verified by CENRO. CITIA-IS does not authorize tree
             cutting or removal.
           </p>
@@ -452,29 +474,21 @@ export function ReportForm() {
         <Button
           type="button"
           onClick={handleStartAnother}
-          className="mt-6 min-h-11 bg-primary font-semibold text-primary-foreground hover:bg-emerald-600"
+          variant="outline"
+          className="mt-8 min-h-12 border-foreground/30 bg-transparent px-5 text-base font-semibold"
         >
-          Submit another report
+          Send another report
         </Button>
       </section>
     );
   }
 
   return (
-    <form className="space-y-8" onSubmit={handleSubmit} noValidate>
-      <section className="rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
-        <div className="mb-5 flex items-center gap-3">
-          <ImagePlus className="h-5 w-5 text-primary" />
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              Section 1
-            </p>
-            <h2 className="text-xl font-bold text-card-foreground">
-              Sighting Photo
-            </h2>
-          </div>
-        </div>
-        <div className="relative flex min-h-56 items-center justify-center overflow-hidden rounded-lg border border-border bg-background">
+    <form className="space-y-12" onSubmit={handleSubmit} noValidate>
+      {/* ── 1. Photo ─────────────────────────────────────────── */}
+      <section className={sectionClass}>
+        <SectionHeading number={1} title="Photo" />
+        <div className="relative flex min-h-56 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-tint">
           {photoUrl ? (
             <Image
               src={photoUrl}
@@ -486,54 +500,49 @@ export function ReportForm() {
             />
           ) : (
             <div className="text-center text-muted-foreground">
-              <ImagePlus className="mx-auto mb-2 h-8 w-8 text-primary" />
-              <p className="text-sm">No sighting photo selected</p>
+              <ImagePlus className="mx-auto mb-2 h-8 w-8 text-primary" aria-hidden="true" />
+              <p className="text-base">No sighting photo selected</p>
             </div>
           )}
         </div>
-        <label
-          htmlFor="sighting-image"
-          className="mt-4 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-primary/40 px-4 text-sm font-medium text-foreground transition-colors hover:border-primary hover:bg-primary/10"
-        >
-          <Upload className="h-4 w-4 text-primary" />
-          {photo ? "Change Photo" : "Add Photo"}
-          <input
-            id="sighting-image"
-            type="file"
-            accept={ACCEPTED_TYPES.join(",")}
-            className="sr-only"
-            onChange={(event: ChangeEvent<HTMLInputElement>) => {
-              handlePhotoChange(event.target.files?.[0]);
-              event.target.value = "";
-            }}
-          />
-        </label>
-        <p className="mt-2 text-xs text-muted-foreground">JPEG or PNG, up to 10 MB. Required.</p>
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <label
+            htmlFor="sighting-image"
+            className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-lg border border-foreground/30 px-4 text-base font-semibold text-foreground transition-colors focus-within:ring-2 focus-within:ring-ring hover:border-primary hover:text-primary"
+          >
+            <Upload className="h-4 w-4" aria-hidden="true" />
+            {photo ? "Change Photo" : "Add Photo"}
+            <input
+              id="sighting-image"
+              type="file"
+              accept={ACCEPTED_TYPES.join(",")}
+              className="sr-only"
+              onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                handlePhotoChange(event.target.files?.[0]);
+                event.target.value = "";
+              }}
+            />
+          </label>
+          <p className="text-sm text-muted-foreground">JPEG or PNG, up to 10 MB. Required.</p>
+        </div>
         <FieldError message={fieldErrors.photo} />
       </section>
 
-      <section className="rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
-        <div className="mb-5 flex items-center gap-3">
-          <MapPin className="h-5 w-5 text-primary" />
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              Section 2
-            </p>
-            <h2 className="text-xl font-bold text-card-foreground">
-              Geospatial Location
-            </h2>
-          </div>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="space-y-2 text-sm font-medium">
-            Area Selection
+      {/* ── 2. Where the tree is ─────────────────────────────── */}
+      <section className={sectionClass}>
+        <SectionHeading number={2} title="Where the tree is" />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <label className={labelClass}>
+            Area
             <Select
               value={sector}
               // Lets the closed select show "Palao Medical", not "palao".
               items={sectors}
               onValueChange={(value) => setSector((value as StudyArea | null) ?? "palao")}
             >
-              <SelectTrigger className={`w-full ${inputClass}`}>
+              {/* "h-12!" beats the select's own built-in height, so it lines
+                  up with the text fields beside it. */}
+              <SelectTrigger className={`h-12! w-full ${inputClass}`}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -546,8 +555,8 @@ export function ReportForm() {
             </Select>
             <FieldError message={fieldErrors.study_area} />
           </label>
-          <label className="space-y-2 text-sm font-medium">
-            Barangay <span className="text-muted-foreground">(Optional)</span>
+          <label className={labelClass}>
+            Barangay <span className={optionalClass}>(Optional)</span>
             <Input
               id="barangay"
               value={barangay}
@@ -559,8 +568,8 @@ export function ReportForm() {
             <FieldError message={fieldErrors.barangay} />
           </label>
         </div>
-        <label className="mt-4 block space-y-2 text-sm font-medium">
-          Specific Landmark <span className="text-muted-foreground">(Optional)</span>
+        <label className={`mt-5 ${labelClass}`}>
+          Landmark <span className={optionalClass}>(Optional)</span>
           <Input
             id="landmark"
             value={landmark}
@@ -572,11 +581,11 @@ export function ReportForm() {
           <FieldError message={fieldErrors.landmark} />
         </label>
 
-        <div className="mt-6">
+        <div className="mt-8">
           <p className="text-sm font-semibold text-foreground">
-            Tree location on the map <span className="font-medium text-muted-foreground">(Optional)</span>
+            Tree location on the map <span className={optionalClass}>(Optional)</span>
           </p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+          <p className="mt-1 max-w-[44rem] text-sm leading-relaxed text-muted-foreground">
             Tap the map or drag the green pin to where the tree is. If you are near the tree, you
             can start from your current location. Your location is only requested when you press
             the button, and only the green pin&apos;s position is sent with this report.
@@ -588,7 +597,7 @@ export function ReportForm() {
               variant="outline"
               onClick={handleUseCurrentLocation}
               disabled={locating}
-              className="min-h-11"
+              className="min-h-12 border-foreground/30 bg-transparent px-4 text-base"
             >
               {locating ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
@@ -602,13 +611,18 @@ export function ReportForm() {
                 type="button"
                 variant="outline"
                 onClick={() => focusOn(device, zoomForAccuracy(device.accuracyM))}
-                className="min-h-11"
+                className="min-h-12 border-foreground/30 bg-transparent px-4 text-base"
               >
                 Back to my location
               </Button>
             )}
             {tree && (
-              <Button type="button" variant="outline" onClick={handleRemoveLocation} className="min-h-11">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleRemoveLocation}
+                className="min-h-12 border-foreground/30 bg-transparent px-4 text-base"
+              >
                 <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
                 Remove location
               </Button>
@@ -632,7 +646,7 @@ export function ReportForm() {
               variant="outline"
               onClick={() => void runSearch()}
               disabled={searching}
-              className="min-h-11 shrink-0"
+              className="min-h-12 shrink-0 border-foreground/30 bg-transparent px-4 text-base"
             >
               {searching ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -644,13 +658,13 @@ export function ReportForm() {
             </Button>
           </div>
           {searchResults.length > 0 && (
-            <ul className="mt-2 divide-y divide-border overflow-hidden rounded-lg border border-border bg-background">
+            <ul className="mt-2 divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
               {searchResults.map((place) => (
                 <li key={`${place.latitude},${place.longitude},${place.name}`}>
                   <button
                     type="button"
                     onClick={() => handleChoosePlace(place)}
-                    className="w-full px-3 py-2.5 text-left text-xs text-foreground transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#10b981]"
+                    className="min-h-11 w-full px-3 py-2.5 text-left text-sm text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {place.name}
                   </button>
@@ -659,7 +673,7 @@ export function ReportForm() {
             </ul>
           )}
           {searchMessage && (
-            <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">
+            <p className="mt-2 text-sm text-muted-foreground" aria-live="polite">
               {searchMessage}
             </p>
           )}
@@ -667,11 +681,11 @@ export function ReportForm() {
           <div className="mt-3">
             <ReportLocationMap tree={tree} device={device} focus={focus} onPick={handlePick} />
           </div>
-          <p className="mt-1.5 text-[11px] text-muted-foreground">
+          <p className="mt-1.5 text-xs text-muted-foreground">
             Place search by OpenStreetMap Nominatim. Map data © OpenStreetMap contributors.
           </p>
 
-          <div className="mt-3 space-y-1 text-xs" aria-live="polite">
+          <div className="mt-3 space-y-1 text-sm" aria-live="polite">
             {tree ? (
               <p className="text-foreground" data-testid="tree-location">
                 <span className="font-semibold">Tree location:</span>{" "}
@@ -696,7 +710,7 @@ export function ReportForm() {
             )}
             {locationMessage && (
               <p className="flex items-start gap-1.5 text-amber-700 dark:text-amber-400" role="status">
-                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                 {locationMessage}
               </p>
             )}
@@ -707,14 +721,10 @@ export function ReportForm() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-          Section 3
-        </p>
-        <h2 className="mt-1 text-xl font-bold text-card-foreground">
-          Observation Details
-        </h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Observation type">
+      {/* ── 3. What you saw ──────────────────────────────────── */}
+      <section className={sectionClass}>
+        <SectionHeading number={3} title="What you saw" />
+        <div className="grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Observation type">
           {observationTypes.map((type) => (
             <button
               key={type.value}
@@ -722,10 +732,10 @@ export function ReportForm() {
               role="radio"
               aria-checked={observationType === type.value}
               onClick={() => setObservationType(type.value)}
-              className={`min-h-11 rounded-lg border px-3 text-left text-sm font-medium transition-colors ${
+              className={`focus-ring min-h-12 rounded-lg border px-4 text-left text-base font-medium transition-colors ${
                 observationType === type.value
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:border-primary/50"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-input bg-card text-foreground hover:border-primary"
               }`}
             >
               {type.label}
@@ -733,35 +743,26 @@ export function ReportForm() {
           ))}
         </div>
         <FieldError message={fieldErrors.observation_type} />
-        <label htmlFor="observations" className="mt-5 block space-y-2 text-sm font-medium">
-          Additional Observations <span className="text-muted-foreground">(Optional)</span>
+        <label htmlFor="observations" className={`mt-5 ${labelClass}`}>
+          Notes <span className={optionalClass}>(Optional)</span>
           <textarea
             id="observations"
             value={observations}
             maxLength={2000}
             onChange={(event) => setObservations(event.target.value)}
-            className="min-h-28 w-full rounded-lg bg-background border border-zinc-300 dark:border-zinc-800 text-foreground px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-[#10b981]"
+            className="min-h-28 w-full rounded-lg border border-input bg-card px-3 py-2 text-base font-normal text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             placeholder="Add any details that may help CENRO review this sighting."
           />
           <FieldError message={fieldErrors.community_notes} />
         </label>
       </section>
 
-      <section className="rounded-xl border border-border bg-card p-6 shadow-sm md:p-8">
-        <div className="mb-5 flex items-center gap-3">
-          <ShieldCheck className="h-5 w-5 text-primary" />
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-              Section 4
-            </p>
-            <h2 className="text-xl font-bold text-card-foreground">
-              Reporter Privacy Shield
-            </h2>
-          </div>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <label className="space-y-2 text-sm font-medium">
-            Reporter Name (Optional)
+      {/* ── 4. About you ─────────────────────────────────────── */}
+      <section className={sectionClass}>
+        <SectionHeading number={4} title="About you" />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <label className={labelClass}>
+            Your name <span className={optionalClass}>(Optional)</span>
             <Input
               id="reporter-name"
               value={reporterName}
@@ -772,8 +773,8 @@ export function ReportForm() {
             />
             <FieldError message={fieldErrors.reporter_name} />
           </label>
-          <label className="space-y-2 text-sm font-medium">
-            Contact Info (Optional)
+          <label className={labelClass}>
+            Email or phone <span className={optionalClass}>(Optional)</span>
             <Input
               id="contact-info"
               value={contactInfo}
@@ -785,13 +786,14 @@ export function ReportForm() {
             <FieldError message={fieldErrors.reporter_contact} />
           </label>
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">
+        <p className="mt-3 text-sm text-muted-foreground">
           Your name and contact details are seen only by CENRO staff and are never shown publicly.
         </p>
       </section>
 
-      <section className="space-y-5">
-        <label className="flex items-start gap-3 text-sm text-foreground">
+      {/* ── Confirm and send ─────────────────────────────────── */}
+      <section className="space-y-5 border-t border-border pt-6">
+        <label className="flex items-start gap-3 text-base text-foreground">
           <input
             id="reporter-consent"
             type="checkbox"
@@ -800,7 +802,7 @@ export function ReportForm() {
               setConsent(event.target.checked);
               clearFieldError("consent_confirmed");
             }}
-            className="mt-0.5 h-4 w-4 accent-primary"
+            className="mt-1 h-5 w-5 shrink-0 accent-primary"
           />
           <span>
             I confirm that the information provided is based on my observation
@@ -811,11 +813,11 @@ export function ReportForm() {
 
         {formError && (
           <div
-            className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+            className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-base text-destructive"
             role="alert"
             data-testid="form-error"
           >
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+            <AlertTriangle className="mt-1 h-4 w-4 shrink-0" aria-hidden="true" />
             {formError}
           </div>
         )}
@@ -823,20 +825,18 @@ export function ReportForm() {
         <Button
           type="submit"
           disabled={!consent || submitting}
-          className="min-h-12 w-full bg-primary text-base font-bold text-primary-foreground hover:bg-emerald-600"
+          className="min-h-12 w-full text-base font-bold sm:w-auto sm:min-w-64 sm:px-8"
         >
           {submitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
           ) : (
-            <Check className="mr-2 h-4 w-4" />
+            <Check className="mr-2 h-4 w-4" aria-hidden="true" />
           )}
-          {submitting ? "Sending report…" : "Submit Sighting Report"}
+          {submitting ? "Sending report…" : "Send report"}
         </Button>
-        <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-          Your report will be reviewed by CENRO. CITIA-IS acts solely as an
-          information and decision-support system; it does NOT authorize tree
-          cutting, removal, or alternative autonomous environmental
-          interventions.
+        <p className="max-w-[44rem] text-sm leading-relaxed text-muted-foreground">
+          Your report will be reviewed by CENRO. CITIA-IS provides information
+          to support decisions. It does not authorize tree cutting or removal.
         </p>
       </section>
     </form>

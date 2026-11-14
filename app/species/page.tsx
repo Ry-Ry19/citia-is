@@ -22,21 +22,21 @@
 //
 // SERVER COMPONENT: no "use client" — Navbar and Footer are
 //   already client components and are imported unmodified.
+//
+// LAYOUT: the page follows the same system as the landing page —
+//   narrow headlines, sections separated by a line instead of boxes,
+//   and facts set out as "term / detail" lists. A row of section links
+//   under the header stays in view while the visitor scrolls, because
+//   the page is long.
+//
+// ANCHORS: other pages link to the ids on this page (for example the
+//   landing page links to #ecological-impact-heading), so the ids must
+//   not be renamed.
 
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRight,
-  Camera,
-  BookOpen,
-  Leaf,
-  Map,
-  MapPin,
-  ShieldCheck,
-  TriangleAlert,
-} from "lucide-react";
+import { Leaf, MapPin, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/landing/navbar";
 import { Footer } from "@/components/landing/footer";
 import { SpeciesReferenceBrowser } from "@/components/species-reference-browser";
@@ -117,243 +117,241 @@ const managementRecommendations = [
 
 // ── Page ────────────────────────────────────────────────────────────────────
 
+/** The links in the row under the header, in page order. */
+const sectionLinks = [
+  { label: "Overview", href: "#profile-overview" },
+  { label: "How to recognise it", href: "#identification" },
+  { label: "Other species", href: "#other-species" },
+  { label: "Ecological impact", href: "#ecological-impact-heading" },
+  { label: "Management Recommendations", href: "#management-recommendations-heading" },
+];
+
+const atAGlance = [
+  { term: "Common name", detail: "Big-leaf Mahogany" },
+  { term: "Scientific name", detail: "Swietenia macrophylla", italic: true },
+  { term: "Family", detail: "Meliaceae" },
+  { term: "Reference classification", detail: "Target Species" },
+  { term: "Native origin", detail: "Tropical Central and South America" },
+  { term: "Leaf type", detail: "Even-pinnately compound" },
+  { term: "CITIA-IS role", detail: "Primary target for leaf screening" },
+];
+
+// Shared pieces of the layout.
+const container = "mx-auto max-w-[96rem] px-6 lg:px-10 xl:px-16 2xl:px-24";
+const sectionSpace = "border-t border-border py-14 sm:py-16 lg:py-20";
+// Headings that are link targets stop below the top bar and the row of
+// section links, not underneath them.
+const anchorOffset = "scroll-mt-32";
+const bodyText = "max-w-[44rem] text-base leading-relaxed text-muted-foreground";
+const termRow =
+  "grid gap-1 border-b border-border py-4 sm:grid-cols-[13rem_minmax(0,1fr)] sm:gap-6";
+
 export default function SpeciesPage() {
   return (
     <div id="top" className="min-h-screen bg-background">
       <Navbar />
 
-      <main className="pt-24 sm:pt-28">
-        {/* ── A. Compact page header ───────────────────────────────────── */}
-        <section
-          aria-labelledby="species-guide-heading"
-          className="border-b border-border px-4 pb-8 sm:px-6"
-        >
-          <div className="mx-auto max-w-6xl">
-            <nav aria-label="Breadcrumb" className="pt-2 text-xs text-muted-foreground">
-              <ol className="flex flex-wrap items-center gap-2">
-                <li>CITIA-IS</li>
-                <li aria-hidden="true">/</li>
-                <li>Species Guide</li>
-                <li aria-hidden="true">/</li>
-                <li className="text-foreground">Mahogany</li>
-              </ol>
-            </nav>
-            <h1
-              id="species-guide-heading"
-              className="mt-6 text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
-            >
-              Big-leaf Mahogany
-            </h1>
-            <p className="mt-2 text-base italic text-muted-foreground">
-              Swietenia macrophylla
-            </p>
-            <p className="mt-4 max-w-3xl text-sm leading-relaxed text-muted-foreground">
-              The target species reference for CITIA-IS leaf screening and
-              community observation. Use this guide alongside CENRO review;
-              the classifier is a screening aid, not definitive botanical
-              identification.
-            </p>
-            <nav
-              aria-label="Species profile sections"
-              className="mt-7 flex flex-wrap gap-x-5 gap-y-2 border-t border-border pt-4 text-xs font-medium"
-            >
-              <a className="text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" href="#profile-overview">Overview</a>
-              <a className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" href="#identification">Identification</a>
-              <a className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" href="#ecological-impact-heading">Ecological context</a>
-              <a className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" href="#distribution-heading">Distribution</a>
-              <a className="text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" href="#management-recommendations-heading">Community guidance</a>
-            </nav>
+      <main className="pt-16">
+        {/* ── A. Page header ───────────────────────────────────────────── */}
+        <section aria-labelledby="species-guide-heading" className="py-10 sm:py-12">
+          <div className={`${container} grid gap-8 lg:grid-cols-[minmax(0,1fr)_26rem] lg:items-center lg:gap-14`}>
+            <div>
+              <nav aria-label="Breadcrumb" className="text-sm text-muted-foreground">
+                <ol className="flex flex-wrap items-center gap-2">
+                  <li>CITIA-IS</li>
+                  <li aria-hidden="true">/</li>
+                  <li>Species Guide</li>
+                  <li aria-hidden="true">/</li>
+                  <li className="text-foreground">Mahogany</li>
+                </ol>
+              </nav>
+              <h1
+                id="species-guide-heading"
+                className="display-title mt-5 text-foreground"
+              >
+                Big-leaf Mahogany
+              </h1>
+              <p className="mt-3 text-xl italic text-muted-foreground">
+                Swietenia macrophylla
+              </p>
+              <p className="mt-5 max-w-[40rem] text-lg leading-relaxed text-foreground/85">
+                The target species reference for CITIA-IS leaf screening and
+                community observation. Use this guide alongside CENRO review;
+                the classifier is a screening aid, not definitive botanical
+                identification.
+              </p>
+            </div>
+
+            <figure className="m-0">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
+                <Image
+                  src="/assets/images/mahogany.jpg"
+                  alt="Mahogany leaves, shown as an illustrative species reference"
+                  fill
+                  priority
+                  sizes="(max-width: 1023px) 100vw, 26rem"
+                  className="object-cover"
+                />
+              </div>
+              <figcaption className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Illustrative reference image; not a verified local sighting.
+              </figcaption>
+            </figure>
           </div>
         </section>
 
-        {/* ── B. Encyclopedia-style species profile ───────────────────── */}
+        {/* ── Section links — stay in view while scrolling ─────────────── */}
+        <nav
+          aria-label="Species profile sections"
+          className="sticky top-16 z-30 border-y border-border bg-background/95 backdrop-blur-sm"
+        >
+          <div className={`${container} scrollbar-hide flex gap-1 overflow-x-auto`}>
+            {sectionLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="focus-ring inline-flex min-h-12 shrink-0 items-center whitespace-nowrap rounded-md px-3 text-sm font-medium text-muted-foreground underline-offset-4 transition-colors first:-ml-3 hover:text-foreground hover:underline"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </nav>
+
+        {/* ── B. Overview ──────────────────────────────────────────────── */}
         <section
           aria-labelledby="featured-species-heading"
           id="profile-overview"
-          className="px-4 py-12 sm:px-6"
+          className={`${anchorOffset} py-14 sm:py-16 lg:py-20`}
         >
-          <div className="mx-auto grid max-w-6xl items-start gap-10 lg:grid-cols-[0.88fr_1.12fr] lg:gap-12">
-            <div className="space-y-10">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                  Species overview
-                </p>
-                <h2
-                  id="featured-species-heading"
-                  className="mt-3 text-2xl font-bold tracking-tight text-foreground"
-                >
-                  A Mahogany-focused reference for Iligan City
-                </h2>
-                <p className="mt-5 text-base leading-relaxed text-muted-foreground">
-                  Big-leaf mahogany is a tree of the Meliaceae family, native to
-                  tropical Central and South America. It was introduced to the
-                  Philippines as a commercial plantation species and is now
-                  planted widely across the country. In Iligan City it is
-                  familiar in streets, parks, school grounds, homes, and
-                  agricultural areas.
-                </p>
-              </div>
-
-              <div id="identification" className="scroll-mt-24">
-                <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                  Identification
-                </p>
-                <h3 className="mt-3 text-xl font-bold text-foreground">
-                  Leaf characteristics for visual screening
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                  These features may be visible in a leaf photograph. They are
-                  botanical reference traits, not proof that the trained model
-                  explicitly learned or checks each feature.
-                </p>
-                <ul className="mt-5 space-y-4">
-                  {leafCharacteristics.map((item) => (
-                    <li key={item.term} className="border-l-2 border-primary/50 pl-4">
-                      <p className="text-sm leading-relaxed text-muted-foreground">
-                        <span className="font-semibold text-foreground">
-                          {item.term} —{" "}
-                        </span>
-                        {item.detail}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-5 rounded-lg border border-primary/20 bg-primary/5 p-4 text-xs leading-relaxed text-muted-foreground">
-                  Leaf shape alone rarely establishes a definitive
-                  identification. Use CITIA-IS to check a photo, then confirm
-                  records with CENRO or a local forestry expert.
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-bold uppercase tracking-widest text-foreground">
-                  Additional botanical characteristics
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  These details support human verification and are not directly
-                  assessed by a leaf-only scan.
-                </p>
-                <ul className="mt-4 grid gap-3 sm:grid-cols-3">
-                  {additionalCharacteristics.map((item) => (
-                    <li key={item.term} className="rounded-lg border border-border bg-card p-3">
-                      <p className="text-xs font-semibold text-foreground">{item.term}</p>
-                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{item.detail}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            <aside className="space-y-5 lg:sticky lg:top-24">
-              <div className="grid gap-5 sm:grid-cols-2">
-                <figure className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card">
-                  <div className="relative aspect-[4/3] shrink-0">
-                    <Image
-                      src="/assets/images/mahogany.jpg"
-                      alt="Mahogany leaves, shown as an illustrative species reference"
-                      fill
-                      sizes="(max-width: 1024px) 100vw, 45vw"
-                      className="object-cover"
-                    />
-                  </div>
-                  <figcaption className="flex min-h-16 flex-1 items-start gap-3 border-t border-border px-4 py-3">
-                    <Leaf className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-                    <p className="min-w-0 text-xs leading-relaxed text-muted-foreground">
-                      Illustrative reference image; not a verified local sighting.
-                    </p>
-                  </figcaption>
-                </figure>
-
-                <div className="rounded-xl border border-border bg-card p-5">
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-primary" aria-hidden="true" />
-                    <h3 className="text-sm font-bold text-foreground">At a Glance</h3>
-                  </div>
-                  <dl className="mt-4 divide-y divide-border text-sm">
-                    <div className="flex justify-between gap-4 py-2 first:pt-0">
-                      <dt className="text-muted-foreground">Common name</dt>
-                      <dd className="text-right font-medium text-foreground">Big-leaf Mahogany</dd>
-                    </div>
-                    <div className="flex justify-between gap-4 py-2">
-                      <dt className="text-muted-foreground">Scientific name</dt>
-                      <dd className="text-right italic text-foreground">Swietenia macrophylla</dd>
-                    </div>
-                    <div className="flex justify-between gap-4 py-2">
-                      <dt className="text-muted-foreground">Family</dt>
-                      <dd className="text-right text-foreground">Meliaceae</dd>
-                    </div>
-                    <div className="flex justify-between gap-4 py-2">
-                      <dt className="text-muted-foreground">Reference classification</dt>
-                      <dd className="text-right font-medium text-primary">Target Species</dd>
-                    </div>
-                    <div className="flex justify-between gap-4 py-2">
-                      <dt className="text-muted-foreground">Native origin</dt>
-                      <dd className="text-right text-foreground">Tropical Central and South America</dd>
-                    </div>
-                    <div className="flex justify-between gap-4 py-2 last:pb-0">
-                      <dt className="text-muted-foreground">Leaf type</dt>
-                      <dd className="text-right text-foreground">Even-pinnately compound</dd>
-                    </div>
-                    <div className="flex justify-between gap-4 py-2 last:pb-0">
-                      <dt className="text-muted-foreground">CITIA-IS role</dt>
-                      <dd className="text-right text-foreground">Primary target for leaf screening</dd>
-                    </div>
-                  </dl>
-                </div>
-              </div>
-
-              <div
-                id="distribution-heading"
-                className="scroll-mt-24 rounded-xl border border-border bg-card p-5"
+          <div className={`${container} grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,28rem)] lg:gap-16`}>
+            <div>
+              <h2
+                id="featured-species-heading"
+                className="section-title max-w-[16em] text-foreground"
               >
-                <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                  Distribution
-                </p>
-                <h3 className="mt-2 text-base font-bold text-foreground">
+                A Mahogany-focused reference for Iligan City
+              </h2>
+              <p className={`mt-6 ${bodyText}`}>
+                Big-leaf mahogany is a tree of the Meliaceae family, native to
+                tropical Central and South America. It was introduced to the
+                Philippines as a commercial plantation species and is now
+                planted widely across the country. In Iligan City it is
+                familiar in streets, parks, school grounds, homes, and
+                agricultural areas.
+              </p>
+
+              <div id="distribution-heading" className={`mt-10 ${anchorOffset}`}>
+                <h3 className="text-xl font-bold text-foreground">
                   Distribution and Local Observations
                 </h3>
-                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                <p className={`mt-3 ${bodyText}`}>
                   Big-leaf Mahogany is native to tropical Central and South
                   America and has been introduced elsewhere, including the
                   Philippines. General geographic origin is different from a
                   confirmed CITIA-IS observation in Iligan City.
                 </p>
-                <div className="mt-4 flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 px-5 text-center">
-                  <Map className="h-7 w-7 text-primary/80" aria-hidden="true" />
-                  <p className="mt-2 text-sm font-semibold text-foreground">
-                    Interactive map setup pending.
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                    No markers or local records are displayed until valid,
-                    source-backed observations are available.
-                  </p>
-                </div>
               </div>
-            </aside>
+            </div>
+
+            <div>
+              <h3 className="text-base font-bold text-foreground">At a Glance</h3>
+              <dl className="mt-3 border-t border-border">
+                {atAGlance.map((item) => (
+                  <div
+                    key={item.term}
+                    className="flex justify-between gap-6 border-b border-border py-3 text-base"
+                  >
+                    <dt className="text-muted-foreground">{item.term}</dt>
+                    <dd
+                      className={`m-0 text-right font-medium text-foreground ${
+                        item.italic ? "italic" : ""
+                      }`}
+                    >
+                      {item.detail}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
         </section>
 
-        {/* ── C. Species reference browser ─────────────────────────────── */}
-        <SpeciesReferenceBrowser />
-
-        {/* ── C. Ecological Impact ─────────────────────────────────────── */}
+        {/* ── C. Identification ────────────────────────────────────────── */}
         <section
-          aria-labelledby="ecological-impact-heading"
-          className="border-t border-border bg-card px-4 py-16 sm:px-6"
+          id="identification"
+          aria-labelledby="identification-heading"
+          className={`${anchorOffset} ${sectionSpace}`}
         >
-          <div className="mx-auto grid max-w-6xl items-start gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14">
+          <div className={`${container} grid gap-12 lg:grid-cols-2 lg:gap-16`}>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                Ecological Context
+              <h2 id="identification-heading" className="section-title text-foreground">
+                Leaf characteristics for visual screening
+              </h2>
+              <p className={`mt-5 ${bodyText}`}>
+                These features may be visible in a leaf photograph. They are
+                botanical reference traits, not proof that the trained model
+                explicitly learned or checks each feature.
               </p>
+              <dl className="mt-6 border-t border-border">
+                {leafCharacteristics.map((item) => (
+                  <div key={item.term} className={termRow}>
+                    <dt className="text-base font-semibold text-foreground">{item.term}</dt>
+                    <dd className="m-0 text-base leading-relaxed text-muted-foreground">
+                      {item.detail}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-6 max-w-[44rem] border-l-4 border-primary pl-4 text-base leading-relaxed text-foreground">
+                Leaf shape alone rarely establishes a definitive
+                identification. Use CITIA-IS to check a photo, then confirm
+                records with CENRO or a local forestry expert.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-2xl font-bold text-foreground [font-stretch:85%]">
+                Additional botanical characteristics
+              </h3>
+              <p className={`mt-3 ${bodyText}`}>
+                These details support human verification and are not directly
+                assessed by a leaf-only scan.
+              </p>
+              <dl className="mt-6 border-t border-border">
+                {additionalCharacteristics.map((item) => (
+                  <div key={item.term} className={termRow}>
+                    <dt className="text-base font-semibold text-foreground">{item.term}</dt>
+                    <dd className="m-0 text-base leading-relaxed text-muted-foreground">
+                      {item.detail}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        {/* ── D. Species reference browser ─────────────────────────────── */}
+        {/* The wrapper is the link target: the browser's own heading has
+            no offset, so linking to it would hide it under the bars. */}
+        <div id="other-species" className={anchorOffset}>
+          <SpeciesReferenceBrowser />
+        </div>
+
+        {/* ── E. Ecological Impact ─────────────────────────────────────── */}
+        <section aria-labelledby="ecological-impact-heading" className={sectionSpace}>
+          <div className={`${container} grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16`}>
+            <div>
+              {/* Heartwood, as on the landing page's "Why it matters". */}
               <h2
                 id="ecological-impact-heading"
-                className="section-title mt-3 font-bold text-foreground"
+                className={`section-title text-heartwood ${anchorOffset}`}
               >
                 Ecological Impact
               </h2>
 
-              <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+              <p className={`mt-6 ${bodyText}`}>
                 Mahogany is not native to the Philippines. It originates in
                 tropical Central and South America and was introduced here as a
                 plantation timber species. It is now found planted in urban
@@ -361,26 +359,24 @@ export default function SpeciesPage() {
                 country, including in Mindanao.
               </p>
 
-              <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+              <p className={`mt-4 ${bodyText}`}>
                 Its ecological effects are not the same everywhere. What
                 Mahogany does to a particular site depends on the local
                 environment and the planting context:
               </p>
 
-              <ul className="mt-6 space-y-4">
+              <dl className="mt-6 max-w-[48rem] border-t border-border">
                 {ecologicalFactors.map((factor) => (
-                  <li key={factor.term}>
-                    <p className="text-sm font-semibold text-foreground">
-                      {factor.term}
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  <div key={factor.term} className={termRow}>
+                    <dt className="text-base font-semibold text-foreground">{factor.term}</dt>
+                    <dd className="m-0 text-base leading-relaxed text-muted-foreground">
                       {factor.detail}
-                    </p>
-                  </li>
+                    </dd>
+                  </div>
                 ))}
-              </ul>
+              </dl>
 
-              <p className="mt-6 text-base leading-relaxed text-muted-foreground">
+              <p className={`mt-6 ${bodyText}`}>
                 Where Mahogany is dense and spreading, it can contribute to a
                 less diverse native understory and altered canopy structure,
                 and it offers fewer food and shelter resources for native
@@ -391,97 +387,79 @@ export default function SpeciesPage() {
               </p>
             </div>
 
-            <div className="relative overflow-hidden rounded-3xl border border-border bg-background">
-              <div className="relative aspect-[4/3]">
+            <figure className="m-0">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
                 <Image
                   src="/assets/images/mahogany-forest.jpg"
                   alt="Mahogany trees growing in a dense stand"
                   fill
-                  sizes="(max-width: 1024px) 100vw, 40vw"
+                  sizes="(max-width: 1023px) 100vw, 30rem"
                   className="object-cover"
                 />
               </div>
-              <div className="border-t border-border px-5 py-4">
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  How densely Mahogany is planted, and where it is planted,
-                  shapes its effect on native vegetation.
-                </p>
-              </div>
-            </div>
+              <figcaption className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                How densely Mahogany is planted, and where it is planted,
+                shapes its effect on native vegetation.
+              </figcaption>
+            </figure>
           </div>
         </section>
 
-        {/* ── D. Management Recommendations ────────────────────────────── */}
+        {/* ── F. Management Recommendations ────────────────────────────── */}
         <section
           aria-labelledby="management-recommendations-heading"
-          className="border-t border-border bg-background px-4 py-16 sm:px-6"
+          className={sectionSpace}
         >
-          <div className="mx-auto max-w-6xl">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                Guidance for the Community
-              </p>
-              <h2
-                id="management-recommendations-heading"
-                className="section-title mt-3 font-bold text-foreground"
-              >
-                Management Recommendations
-              </h2>
-            </div>
+          <div className={container}>
+            <h2
+              id="management-recommendations-heading"
+              className={`section-title text-foreground ${anchorOffset}`}
+            >
+              Management Recommendations
+            </h2>
 
             {/* Educational-vs-official boundary — stated up front */}
-            <div className="mt-8 flex items-start gap-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
-              <ShieldCheck
-                className="mt-0.5 h-5 w-5 shrink-0 text-primary"
-                aria-hidden="true"
-              />
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                The guidance below is{" "}
-                <span className="font-semibold text-foreground">
-                  informational and educational only
-                </span>
-                . It is not an official directive, and CITIA-IS does not
-                authorize tree removal or any other intervention. Assessment of
-                any specific tree, and any decision about what may be done with
-                it, rests with{" "}
-                <span className="font-semibold text-foreground">
-                  CENRO Iligan City
-                </span>{" "}
-                or the relevant environmental authority.
-              </p>
-            </div>
+            <p className="mt-6 max-w-[48rem] border-l-4 border-primary pl-4 text-base leading-relaxed text-muted-foreground">
+              The guidance below is{" "}
+              <span className="font-semibold text-foreground">
+                informational and educational only
+              </span>
+              . It is not an official directive, and CITIA-IS does not
+              authorize tree removal or any other intervention. Assessment of
+              any specific tree, and any decision about what may be done with
+              it, rests with{" "}
+              <span className="font-semibold text-foreground">
+                CENRO Iligan City
+              </span>{" "}
+              or the relevant environmental authority.
+            </p>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              {managementRecommendations.map((item, index) => (
-                <Card key={item.title} className="h-full p-6">
-                  <div className="flex items-start gap-4">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 font-mono text-xs font-semibold text-primary">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <div>
-                      <h3 className="text-base font-bold text-foreground">
-                        {item.title}
-                      </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
+            {/* The four recommendations are not steps in order, so they
+                carry no numbers. */}
+            <ul className="mt-10 grid gap-x-16 sm:grid-cols-2">
+              {managementRecommendations.map((item) => (
+                <li key={item.title} className="border-t border-border py-6">
+                  <h3 className="text-xl font-bold leading-snug text-foreground">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+                    {item.description}
+                  </p>
+                </li>
               ))}
-            </div>
+            </ul>
 
             {/* Standing caution — never imply CITIA-IS authorizes removal */}
-            <div className="mt-4 flex items-start gap-4 rounded-2xl border border-warning/30 bg-warning/10 p-5 sm:p-6">
+            <div className="mt-6 flex items-start gap-4 rounded-lg border-l-4 border-warning bg-warning/10 p-6">
               <TriangleAlert
-                className="mt-0.5 h-5 w-5 shrink-0 text-warning"
+                className="mt-1 h-6 w-6 shrink-0 text-warning"
                 aria-hidden="true"
               />
               <div>
-                <h3 className="text-base font-bold text-foreground">
+                <h3 className="text-2xl font-bold text-foreground [font-stretch:85%]">
                   Do not cut or remove a tree on your own
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                <p className="mt-2 max-w-[48rem] text-base leading-relaxed text-foreground/85">
                   Cutting, felling, or removing trees is regulated and can carry
                   legal consequences. Leave the tree in place and refer the
                   case to CENRO or the relevant environmental authority for an
@@ -492,47 +470,45 @@ export default function SpeciesPage() {
           </div>
         </section>
 
-        {/* ── E. Calls to action ───────────────────────────────────────── */}
+        {/* ── G. Calls to action ───────────────────────────────────────── */}
         <section
           aria-labelledby="species-cta-heading"
-          className="border-t border-border bg-card px-4 py-16 sm:px-6"
+          className="border-t border-border bg-surface-tint py-16 sm:py-20"
         >
-          <div className="mx-auto flex max-w-5xl flex-col items-start gap-7 rounded-2xl border border-border bg-background p-6 sm:p-10 lg:flex-row lg:items-center lg:justify-between">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-                Take the next step
-              </p>
+          <div className={`${container} grid gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-20`}>
+            <div>
               <h2
                 id="species-cta-heading"
-                className="mt-3 text-3xl font-bold tracking-tight text-foreground"
+                className="section-title max-w-[14em] text-foreground"
               >
                 Ready to check a tree or share what you found?
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <p className="mt-5 max-w-[36rem] text-lg leading-relaxed text-foreground/85">
                 Check a leaf photo with the CITIA-IS identifier, or report a
                 Mahogany sighting from your community. No account is needed for
                 these public features.
               </p>
             </div>
 
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <div className="flex w-full flex-col gap-3 lg:w-[19rem]">
               <Button
                 render={<Link href="/identify" />}
                 nativeButton={false}
-                className="min-h-11 w-full sm:w-auto"
+                size="lg"
+                className="min-h-12 w-full px-5 text-base"
               >
-                <Camera className="mr-2 h-4 w-4" aria-hidden="true" />
+                <Leaf className="mr-2 h-4 w-4" aria-hidden="true" />
                 Identify a Tree
               </Button>
               <Button
                 render={<Link href="/report" />}
                 nativeButton={false}
+                size="lg"
                 variant="outline"
-                className="min-h-11 w-full sm:w-auto"
+                className="min-h-12 w-full border-foreground/30 bg-transparent px-5 text-base"
               >
                 <MapPin className="mr-2 h-4 w-4" aria-hidden="true" />
                 Report a Sighting
-                <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
           </div>

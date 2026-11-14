@@ -1,15 +1,40 @@
+// components/species-reference-browser.tsx
+//
+// WHAT: The "Browse Species References" part of the Species Guide — a
+//   searchable comparison list of the species described in
+//   lib/species-data.ts.
+//
+// WHY A LIST: each species is one row (photo, names, description), so a
+//   visitor can read the trees against each other. The description is
+//   always visible; only the "how to read this entry" note is tucked
+//   behind a button.
+//
+// PHOTOS: a species with a photo shows it. A species without one shows
+//   a small "photo to add" square. When a photo is added to the
+//   species data, it appears here with no change to this file.
+//
+// IMPORTANT: the classifier predicts Mahogany, Non-Mahogany or
+//   Non-Tree. It does not identify the reference species one by one;
+//   the note above the list and the note in each entry say so.
+
 "use client";
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronUp, ImageIcon, Search } from "lucide-react";
+import { ChevronDown, ImagePlus, Search } from "lucide-react";
 import { getAllSpecies, type SpeciesRecord } from "@/lib/species-data";
 import { cn } from "@/lib/utils";
 
 type ReferenceFilter = "all" | "target" | "comparison";
 
+const filters: { value: ReferenceFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "target", label: "Target species" },
+  { value: "comparison", label: "Reference species" },
+];
+
 function getReferenceLabel(species: SpeciesRecord) {
-  return species.isConfirmed ? "Target Species" : "Reference Species";
+  return species.isConfirmed ? "Target species" : "Reference species";
 }
 
 export function SpeciesReferenceBrowser() {
@@ -38,32 +63,28 @@ export function SpeciesReferenceBrowser() {
   return (
     <section
       aria-labelledby="browse-species-references-heading"
-      className="border-t border-border bg-background px-4 py-16 sm:px-6"
+      className="border-t border-border bg-background py-14 sm:py-16 lg:py-20"
     >
-      <div className="mx-auto max-w-6xl">
-        <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Reference Library
-          </p>
-          <h2
-            id="browse-species-references-heading"
-            className="section-title mt-3 font-bold text-foreground"
-          >
-            Browse Species References
-          </h2>
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
-            Browse the target species reference and educational reference
-            species used to explain the CITIA-IS scope. The model predicts
-            Mahogany, Non-Mahogany, or Non-Tree; it does not identify these
-            reference species individually.
-          </p>
-        </div>
+      <div className="mx-auto max-w-[96rem] px-6 lg:px-10 xl:px-16 2xl:px-24">
+        <h2
+          id="browse-species-references-heading"
+          className="section-title text-foreground"
+        >
+          Browse Species References
+        </h2>
+        <p className="mt-5 max-w-[44rem] text-base leading-relaxed text-muted-foreground">
+          Browse the target species reference and educational reference
+          species used to explain the CITIA-IS scope. The model predicts
+          Mahogany, Non-Mahogany, or Non-Tree; it does not identify these
+          reference species individually.
+        </p>
 
-        <div className="mt-7 flex flex-col gap-3 border-y border-border py-4 sm:flex-row sm:items-center sm:justify-between">
-          <label className="relative block w-full sm:max-w-sm">
+        {/* ── Search and filters ────────────────────────────── */}
+        <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <label className="relative block w-full md:max-w-md">
             <span className="sr-only">Search species references</span>
             <Search
-              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
             />
             <input
@@ -71,147 +92,148 @@ export function SpeciesReferenceBrowser() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search common or scientific name"
-              className="h-10 w-full rounded-lg border border-input bg-card pl-9 pr-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="h-12 w-full rounded-lg border border-input bg-card pl-10 pr-3 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
           </label>
 
           <div
-            className="flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1"
+            role="group"
             aria-label="Filter species references"
+            className="flex flex-wrap gap-2"
           >
-            {([
-              ["all", "All References"],
-              ["target", "Target Species"],
-              ["comparison", "Reference Species"],
-            ] as const).map(([value, label]) => (
+            {filters.map((item) => (
               <button
-                key={value}
+                key={item.value}
                 type="button"
-                aria-pressed={filter === value}
-                onClick={() => setFilter(value)}
+                aria-pressed={filter === item.value}
+                onClick={() => setFilter(item.value)}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  filter === value
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  "focus-ring min-h-11 rounded-lg border px-4 text-sm font-medium transition-colors",
+                  filter === item.value
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-input bg-card text-foreground hover:border-primary"
                 )}
               >
-                {label}
+                {item.label}
               </button>
             ))}
           </div>
         </div>
 
+        {/* ── The list ──────────────────────────────────────── */}
         {filteredSpecies.length > 0 ? (
-          <div className="mt-7 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <ul className="mt-6 border-t border-border">
             {filteredSpecies.map((entry) => {
               const isExpanded = expandedId === entry.id;
               const image = entry.images[0];
+              const noteId = `species-note-${entry.id}`;
 
               return (
-                <article
+                <li
                   key={entry.id}
-                  className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card"
+                  className="grid grid-cols-[5rem_minmax(0,1fr)] gap-x-5 gap-y-3 border-b border-border py-6 sm:grid-cols-[7rem_minmax(0,1fr)] lg:grid-cols-[7rem_minmax(0,18rem)_minmax(0,1fr)] lg:gap-x-10"
                 >
-                  <div className="relative aspect-[4/3] bg-muted">
+                  {/* Photo, or a slot waiting for one */}
+                  <div className="relative aspect-square overflow-hidden rounded-lg bg-surface-tint lg:row-span-2">
                     {image ? (
                       <Image
                         src={image.url}
                         alt={`${entry.commonName} reference image`}
                         fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        sizes="7rem"
                         className="object-cover"
                       />
                     ) : (
-                      <div className="flex h-full flex-col items-center justify-center gap-2 px-4 text-center text-muted-foreground">
-                        <ImageIcon className="h-7 w-7" aria-hidden="true" />
-                        <p className="text-xs">No reference image on file</p>
+                      <div className="flex h-full flex-col items-center justify-center gap-1 px-1 text-center text-muted-foreground">
+                        <ImagePlus className="h-5 w-5" aria-hidden="true" />
+                        <p className="text-xs leading-tight">Photo to add</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex flex-1 flex-col p-4">
-                    <div className="flex items-start justify-between gap-2">
+                  {/* Names and what kind of entry this is */}
+                  <div className="min-w-0">
+                    <h3 className="text-xl font-bold leading-snug text-foreground">
+                      {entry.commonName}
+                    </h3>
+                    <p className="mt-0.5 text-base italic text-muted-foreground">
+                      {entry.scientificName}
+                    </p>
+                    <p className="mt-2 text-sm">
                       <span
                         className={cn(
-                          "inline-flex rounded border px-2 py-1 text-[10px] font-semibold uppercase tracking-wide",
-                          entry.isConfirmed
-                            ? "border-primary/30 bg-primary/10 text-primary"
-                            : "border-border bg-muted text-muted-foreground"
+                          "font-semibold",
+                          entry.isConfirmed ? "text-primary" : "text-foreground"
                         )}
                       >
                         {getReferenceLabel(entry)}
                       </span>
-                      <span className="text-right text-[10px] leading-tight text-muted-foreground">
+                      <span className="block text-muted-foreground">
                         {entry.referenceStatus}
                       </span>
-                    </div>
-
-                    <h3 className="mt-4 text-base font-bold text-foreground">
-                      {entry.commonName}
-                    </h3>
-                    <p className="mt-0.5 text-sm italic text-muted-foreground">
-                      {entry.scientificName}
                     </p>
-                    <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
-                      {entry.isConfirmed
-                        ? "Primary species reference for the Mahogany-focused CITIA-IS identification workflow."
-                        : "Educational reference entry representing the broad Non-Mahogany class, not an individual AI prediction."}
+                  </div>
+
+                  {/* Description, always visible */}
+                  <div className="col-span-2 min-w-0 lg:col-span-1">
+                    <p className="max-w-[44rem] text-base leading-relaxed text-muted-foreground">
+                      {entry.shortDescription}
                     </p>
 
-                    <button
-                      type="button"
-                      aria-expanded={isExpanded}
-                      onClick={() =>
-                        setExpandedId(isExpanded ? null : entry.id)
-                      }
-                      className="mt-5 inline-flex min-h-9 items-center justify-center gap-1.5 border-t border-border pt-3 text-left text-xs font-semibold text-primary transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      {entry.isConfirmed
-                        ? "View featured guide"
-                        : "View reference details"}
-                      {isExpanded ? (
-                        <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
-                      ) : (
-                        <ChevronDown
-                          className="h-3.5 w-3.5"
-                          aria-hidden="true"
-                        />
-                      )}
-                    </button>
+                    {entry.isConfirmed ? (
+                      // Links to the Overview section, not to its heading:
+                      // the section stops below the page's two fixed bars,
+                      // so the heading is not hidden under them.
+                      <a
+                        href="#profile-overview"
+                        className="focus-ring mt-2 inline-flex min-h-11 items-center rounded-md text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+                      >
+                        Go to the Mahogany guide
+                      </a>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          aria-expanded={isExpanded}
+                          aria-controls={noteId}
+                          onClick={() =>
+                            setExpandedId(isExpanded ? null : entry.id)
+                          }
+                          className="focus-ring mt-2 inline-flex min-h-11 items-center gap-1.5 rounded-md text-sm font-semibold text-primary"
+                        >
+                          About this entry
+                          <ChevronDown
+                            className={cn(
+                              "h-4 w-4 transition-transform duration-200 motion-reduce:transition-none",
+                              isExpanded && "rotate-180"
+                            )}
+                            aria-hidden="true"
+                          />
+                        </button>
 
-                    {isExpanded && (
-                      <div className="mt-3 border-t border-border pt-3 text-xs leading-relaxed text-muted-foreground">
-                        {entry.isConfirmed ? (
-                          <a
-                            href="#featured-species-heading"
-                            className="font-semibold text-primary underline-offset-4 hover:underline"
+                        {isExpanded && (
+                          <p
+                            id={noteId}
+                            className="mt-1 max-w-[44rem] border-l-4 border-border pl-4 text-base leading-relaxed text-muted-foreground"
                           >
-                            Jump to the Big-leaf Mahogany guide above.
-                          </a>
-                        ) : (
-                          <>
-                            <p>{entry.shortDescription}</p>
-                            <p className="mt-2">
-                              This entry is for human comparison and reference
-                              only. A Non-Mahogany result does not identify{" "}
-                              {entry.commonName} specifically.
-                            </p>
-                          </>
+                            This entry is for human comparison and reference
+                            only. A Non-Mahogany result does not identify{" "}
+                            {entry.commonName} specifically.
+                          </p>
                         )}
-                      </div>
+                      </>
                     )}
                   </div>
-                </article>
+                </li>
               );
             })}
-          </div>
+          </ul>
         ) : (
-          <div className="mt-7 rounded-xl border border-dashed border-border bg-card px-5 py-10 text-center">
-            <p className="text-sm font-semibold text-foreground">
+          <div className="mt-6 border-y border-border py-10">
+            <p className="text-lg font-semibold text-foreground">
               No matching species references
             </p>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-base text-muted-foreground">
               Try a different name or clear the selected filter.
             </p>
           </div>

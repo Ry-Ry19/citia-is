@@ -224,7 +224,7 @@ export function CameraScanner() {
   }
 
   return (
-    <div className="bg-card text-card-foreground border border-border rounded-xl shadow-sm p-6 md:p-8 w-full flex flex-col h-full relative group">
+    <div className="bg-card text-card-foreground border border-border rounded-lg shadow-sm p-6 md:p-8 w-full flex flex-col h-full relative group">
       {/* ── Main Scanner Viewfinder ─────────────────────────────────────────── */}
       <div
         onDragOver={handleDragOver}
@@ -236,7 +236,7 @@ export function CameraScanner() {
       >
         {/* Viewfinder Dashed Overlay */}
         <div
-          className={`absolute inset-0 border-2 border-dashed rounded-xl m-2 pointer-events-none transition-colors duration-300 z-10 ${
+          className={`absolute inset-0 border-2 border-dashed rounded-lg m-2 pointer-events-none transition-colors duration-300 z-10 ${
             isDragging
               ? "border-primary/50"
               : "border-border/40 group-hover:border-primary/30"
@@ -245,16 +245,16 @@ export function CameraScanner() {
 
         {/* Top Status Overlay */}
         <div className="absolute top-4 left-4 right-4 z-20 flex justify-between items-center pointer-events-none">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-2.5 py-1 text-[10px] font-medium text-primary backdrop-blur-md shadow-sm">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-2.5 py-1 text-xs font-medium text-primary backdrop-blur-md shadow-sm">
             <Leaf className="w-3 h-3 text-primary" />
-            <span>AI Leaf Scan</span>
+            <span>Leaf check</span>
           </div>
           {(status === "ready" || status === "scanning") && (
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-2.5 py-1 text-[10px] font-medium text-primary backdrop-blur-md shadow-sm">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card/80 px-2.5 py-1 text-xs font-medium text-primary backdrop-blur-md shadow-sm">
               <span
                 className={`w-2 h-2 rounded-full bg-primary ${status === "scanning" ? "animate-ping" : ""}`}
               />
-              <span>YOLOv8n-cls</span>
+              <span>AI model</span>
             </div>
           )}
         </div>
@@ -262,16 +262,16 @@ export function CameraScanner() {
         {/* Empty State */}
         {status === "empty" && (
           <div className="flex flex-col items-center justify-center gap-3 p-6 text-center z-10">
-            <div className="h-16 w-16 rounded-2xl bg-card border border-border flex items-center justify-center mb-2 shadow-sm transition-transform duration-300 group-hover:scale-105">
+            <div className="h-16 w-16 rounded-lg bg-card border border-border flex items-center justify-center mb-2 shadow-sm transition-transform duration-300 group-hover:scale-105">
               <Camera className="h-8 w-8 text-primary" aria-hidden="true" />
             </div>
             <div>
               <p className="text-base font-bold text-foreground tracking-tight">
-                AI Leaf Identification
+                Check a leaf
               </p>
-              <p className="text-xs text-muted-foreground mt-1.5 max-w-55 mx-auto leading-relaxed">
-                Snap a photo or upload a clear image of a leaf for instant
-                species classification.
+              <p className="text-sm text-muted-foreground mt-1.5 max-w-55 mx-auto leading-relaxed">
+                Take a photo or upload a clear image of one leaf. The AI
+                suggests whether it may be Mahogany.
               </p>
             </div>
           </div>
@@ -279,7 +279,7 @@ export function CameraScanner() {
 
         {/* Photo Preview & Laser Animation */}
         {imageUrl && status !== "empty" && (
-          <div className="absolute inset-0 z-0 m-2 rounded-xl overflow-hidden bg-[#09090b]">
+          <div className="absolute inset-0 z-0 m-2 rounded-lg overflow-hidden bg-black">
             {/* Blurred background filler (prevents ugly empty black bars) */}
             <Image
               src={imageUrl}
@@ -303,13 +303,13 @@ export function CameraScanner() {
 
             {/* The Scanning Laser Effect */}
             {status === "scanning" && (
-              <div className="absolute inset-x-0 h-0.5 bg-primary shadow-[0_0_20px_#10B981] animate-[bounce_2s_ease-in-out_infinite] top-1/2 z-10" />
+              <div className="absolute inset-x-0 h-0.5 bg-primary shadow-[0_0_20px_var(--primary)] animate-[bounce_2s_ease-in-out_infinite] top-1/2 z-10" />
             )}
 
             {/* Target Reticle (Only when ready) */}
             {status === "ready" && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                <div className="w-32 h-32 sm:w-48 sm:h-48 border-2 border-dashed border-primary/80 rounded-xl bg-primary/10" />
+                <div className="w-32 h-32 sm:w-48 sm:h-48 border-2 border-dashed border-primary/80 rounded-lg bg-primary/10" />
               </div>
             )}
           </div>
@@ -318,7 +318,7 @@ export function CameraScanner() {
 
       {/* Error Message */}
       {error && (
-        <div className="px-4 py-2 bg-destructive/10 border-y border-destructive/20 text-destructive text-xs font-semibold text-center z-10">
+        <div className="px-4 py-2 bg-destructive/10 border-y border-destructive/20 text-destructive text-sm font-semibold text-center z-10">
           {error}
         </div>
       )}
@@ -347,14 +347,14 @@ export function CameraScanner() {
             <div className="grid grid-cols-2 gap-3 w-full">
               <Button
                 onClick={() => cameraInputRef.current?.click()}
-                className="w-full bg-primary hover:bg-emerald-600 text-primary-foreground text-xs font-semibold h-11 border border-primary transition-transform active:scale-[0.98]"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold h-11 border border-primary transition-transform active:scale-[0.98]"
               >
                 <Camera className="mr-2 h-4 w-4" /> Open Camera
               </Button>
               <Button
                 variant="outline"
                 onClick={() => uploadInputRef.current?.click()}
-                className="w-full border border-primary/40 bg-card hover:border-primary hover:bg-primary/10 text-foreground text-xs font-medium h-11 transition-transform active:scale-[0.98]"
+                className="w-full border border-primary/40 bg-card hover:border-primary hover:bg-primary/10 text-foreground text-sm font-medium h-11 transition-transform active:scale-[0.98]"
               >
                 <Upload className="mr-2 h-4 w-4" /> Upload File
               </Button>
@@ -365,7 +365,7 @@ export function CameraScanner() {
             <div className="animate-in fade-in slide-in-from-bottom-2 flex flex-col gap-3">
               <Button
                 onClick={handleScan}
-                className="w-full bg-primary hover:bg-emerald-600 text-primary-foreground text-xs font-bold h-11 shadow-lg shadow-primary/20 transition-transform active:scale-[0.98]"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold h-11 shadow-lg shadow-primary/20 transition-transform active:scale-[0.98]"
               >
                 <Search className="mr-2 h-4 w-4" />{" "}
                 {analysisFailed ? "Retry Analysis" : "Analyze Leaf"}
@@ -374,7 +374,7 @@ export function CameraScanner() {
                 <Button
                   variant="outline"
                   onClick={() => uploadInputRef.current?.click()}
-                  className="w-full border border-primary/40 bg-card hover:border-primary hover:bg-primary/10 text-foreground text-xs font-medium h-11 transition-transform active:scale-[0.98]"
+                  className="w-full border border-primary/40 bg-card hover:border-primary hover:bg-primary/10 text-foreground text-sm font-medium h-11 transition-transform active:scale-[0.98]"
                 >
                   <Upload className="mr-2 h-4 w-4" /> Choose another photo
                 </Button>
@@ -386,7 +386,7 @@ export function CameraScanner() {
             <>
               <Button
                 disabled
-                className="w-full bg-muted text-muted-foreground border-border text-xs font-semibold h-11 cursor-not-allowed"
+                className="w-full bg-muted text-muted-foreground border-border text-sm font-semibold h-11 cursor-not-allowed"
               >
                 <RefreshCw className="mr-2 h-4 w-4 animate-spin text-primary" />{" "}
                 Processing via YOLOv8n-cls...
@@ -395,7 +395,7 @@ export function CameraScanner() {
               <Button
                 variant="outline"
                 onClick={() => uploadInputRef.current?.click()}
-                className="w-full border border-primary/40 bg-card hover:border-primary hover:bg-primary/10 text-foreground text-xs font-medium h-11 transition-transform active:scale-[0.98]"
+                className="w-full border border-primary/40 bg-card hover:border-primary hover:bg-primary/10 text-foreground text-sm font-medium h-11 transition-transform active:scale-[0.98]"
               >
                 <Upload className="mr-2 h-4 w-4" /> Choose another photo
               </Button>
@@ -411,7 +411,7 @@ export function CameraScanner() {
           <div className="flex items-start justify-between border-b border-border/60 pb-3 mb-3">
             <div className="flex items-center gap-3">
               <div
-                className={`p-2.5 rounded-xl ${
+                className={`p-2.5 rounded-lg ${
                   isUncertain
                     ? "bg-amber-500/10 border border-amber-500/20 text-amber-500"
                     : info.isInvasive
@@ -430,12 +430,12 @@ export function CameraScanner() {
                   {isUncertain ? "Result Uncertain" : info.headline}
                 </h3>
                 {isUncertain ? (
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className="text-sm font-medium text-muted-foreground">
                     Best guess: {result.label}
                   </p>
                 ) : (
                   info.scientificName && (
-                    <p className="text-xs font-medium italic text-muted-foreground">
+                    <p className="text-sm font-medium italic text-muted-foreground">
                       {info.scientificName}
                     </p>
                   )
@@ -456,7 +456,7 @@ export function CameraScanner() {
               >
                 {result.confidence}%
               </span>
-              <p className="text-[9px] uppercase tracking-widest font-semibold text-muted-foreground">
+              <p className="text-sm font-semibold text-muted-foreground">
                 Confidence
               </p>
             </div>
@@ -477,7 +477,7 @@ export function CameraScanner() {
           </div>
 
           {/* Preliminary-result notice (every result) */}
-          <p className="mb-3 text-[11px] leading-relaxed text-muted-foreground">
+          <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
             This is a preliminary AI result and is subject to CENRO
             verification. It is not a definitive identification.
           </p>
@@ -486,10 +486,10 @@ export function CameraScanner() {
           <div className="space-y-2.5">
             {isUncertain && (
               <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500 block mb-1">
+                <span className="text-sm font-bold text-amber-500 block mb-1">
                   Low Classification Confidence
                 </span>
-                <p className="text-xs text-foreground leading-relaxed">
+                <p className="text-sm text-foreground leading-relaxed">
                   The AI is not confident about this photo. Please retake a
                   clear, well-lit photo of a single leaf.
                 </p>
@@ -498,10 +498,10 @@ export function CameraScanner() {
 
             {!isUncertain && info.impact && (
               <div className="p-3 rounded-lg bg-background border border-border">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">
+                <span className="text-sm font-bold text-muted-foreground block mb-1">
                   Ecological Impact
                 </span>
-                <p className="text-xs text-foreground leading-relaxed">
+                <p className="text-sm text-foreground leading-relaxed">
                   {info.impact}
                 </p>
               </div>
@@ -509,10 +509,10 @@ export function CameraScanner() {
 
             {!isUncertain && info.recommendations && (
               <div className="p-3 rounded-lg bg-background border border-border">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1.5">
+                <span className="text-sm font-bold text-muted-foreground block mb-1.5">
                   Management Recommendations
                 </span>
-                <ul className="list-disc pl-4 space-y-1 text-xs text-foreground marker:text-primary">
+                <ul className="list-disc pl-4 space-y-1 text-sm text-foreground marker:text-primary">
                   {info.recommendations.map((rec, i) => (
                     <li key={i}>{rec}</li>
                   ))}
@@ -527,7 +527,7 @@ export function CameraScanner() {
               <Button
                 type="button"
                 onClick={handleReset}
-                className="w-full bg-primary hover:bg-emerald-600 text-primary-foreground text-xs font-bold h-10 px-4 rounded-lg shadow-md transition-transform active:scale-[0.98]"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold h-11 px-4 rounded-lg shadow-md transition-transform active:scale-[0.98]"
               >
                 <Camera className="mr-2 h-4 w-4" /> Retake Photo
               </Button>
@@ -537,7 +537,7 @@ export function CameraScanner() {
                   <Button
                     type="button"
                     onClick={handleReportSighting}
-                    className="w-full bg-primary hover:bg-emerald-600 text-primary-foreground text-xs font-bold h-10 px-4 rounded-lg shadow-md transition-transform active:scale-[0.98]"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold h-11 px-4 rounded-lg shadow-md transition-transform active:scale-[0.98]"
                   >
                     Report Sighting to CENRO
                   </Button>
@@ -545,7 +545,7 @@ export function CameraScanner() {
                 <Button
                   variant="outline"
                   onClick={handleReset}
-                  className="w-full sm:w-auto h-10 px-4 rounded-lg text-xs font-semibold border-border hover:bg-border transition-transform active:scale-[0.98]"
+                  className="w-full sm:w-auto h-11 px-4 rounded-lg text-sm font-semibold border-border hover:bg-border transition-transform active:scale-[0.98]"
                 >
                   Scan Another Photo
                 </Button>
