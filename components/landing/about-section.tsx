@@ -1,75 +1,117 @@
+// components/landing/about-section.tsx
+//
+// WHAT: The "Why it matters" section of the landing page — one plain
+//   statement (Mahogany is not native to the Philippines), a short
+//   explanation, and the three things its ecological effect depends on.
+//
+// WHERE THE WORDS COME FROM:
+//   The statement, the paragraph and the three factors use the same
+//   wording as the "Ecological Impact" section of the Species Guide
+//   (app/species/page.tsx), so the two pages always agree. If that
+//   wording changes, change it here too.
+//
+// COLOUR NOTE: the headline is the only place on the landing page that
+//   uses the Heartwood colour (the red-brown of Mahogany timber). It is
+//   kept for this one message so that it reads as the serious one.
+//
+// PHOTO NOTE: ecological-impact.jpg is 640 pixels wide, so it is shown
+//   no wider than that. Stretching it across the screen would blur it.
+
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, BookOpen, Leaf } from "lucide-react";
+
+const factors = [
+  {
+    term: "Where the tree grows",
+    detail:
+      "A Mahogany standing in an open urban space behaves differently from one growing inside or at the edge of a native forest patch, riparian strip, or remnant woodland.",
+  },
+  {
+    term: "How it was established",
+    detail:
+      "A managed plantation with a defined end-use is a different situation from a volunteer or self-seeded tree spreading into natural habitat.",
+  },
+  {
+    term: "What grows alongside it",
+    detail:
+      "The effect on native understory diversity depends on the density, age, and arrangement of nearby Mahogany compared with the native vegetation.",
+  },
+];
 
 export function AboutSection() {
   return (
     <section
       id="about-section"
       aria-labelledby="about-heading"
-      className="border-t border-border bg-background px-4 py-20 sm:px-6"
+      className="scroll-mt-16 border-t border-border bg-background py-16 sm:py-20 lg:py-24"
     >
-      <div className="mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14">
-        <div className="relative overflow-hidden rounded-3xl border border-border bg-card">
-          <div className="relative aspect-[4/3]">
+      <div className="mx-auto grid max-w-[96rem] gap-10 px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,34rem)] lg:gap-16 lg:px-10 xl:px-16 2xl:px-24">
+        {/* ── The statement and the explanation ─────────────── */}
+        <div className="lg:row-span-2">
+          <h2
+            id="about-heading"
+            className="section-title max-w-[14em] text-heartwood"
+          >
+            Mahogany is not native to the Philippines.
+          </h2>
+
+          <p className="mt-6 max-w-[38rem] text-lg leading-relaxed text-foreground/85">
+            It comes from tropical Central and South America and was
+            introduced here as a plantation timber species. It is now planted
+            in urban areas, commercial estates and reforestation sites across
+            the country, including in Mindanao.
+          </p>
+        </div>
+
+        {/* ── The photograph ────────────────────────────────── */}
+        <figure className="m-0 lg:col-start-2 lg:row-span-3 lg:row-start-1">
+          <div className="relative aspect-[3/2] w-full overflow-hidden rounded-lg">
             <Image
-              src="/assets/images/mahogany.jpg"
-              alt="Mahogany leaves, shown as an illustrative species reference"
+              src="/assets/images/ecological-impact.jpg"
+              alt="Rows of straight tree trunks in a plantation stand with a cleared forest floor between them."
               fill
-              sizes="(max-width: 1024px) 100vw, 45vw"
+              sizes="(max-width: 1023px) 100vw, 34rem"
               className="object-cover"
             />
           </div>
-          <div className="flex items-center gap-3 border-t border-border px-5 py-4">
-            <Leaf className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
-            <p className="text-sm text-muted-foreground">
-              Look for the tree&apos;s pinnate, compound leaves.
-            </p>
-          </div>
-        </div>
+          <figcaption className="mt-3 text-xs leading-relaxed text-muted-foreground">
+            Rows of planted trunks with a cleared floor between them. An
+            illustrative photo, not a verified local sighting.
+          </figcaption>
+        </figure>
 
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Species Guide Preview
-          </p>
-          <h2
-            id="about-heading"
-            className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl"
-          >
-            Get to Know Mahogany
-          </h2>
-          <p className="mt-5 text-base leading-relaxed text-muted-foreground">
-            Learn about Mahogany&apos;s identifying features, its potential
-            ecological effects, and guidance for responsible observation.
-          </p>
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            Mahogany (<em>Swietenia macrophylla</em>) is the species at the
-            center of CITIA-IS. Understanding its leaves and ecological context
-            can help people make more informed observations. Management
-            Recommendations are informational and do not authorize tree
-            removal.
-          </p>
+        {/* ── The three factors ─────────────────────────────── */}
+        <div className="lg:col-start-1">
+          <h3 className="text-base font-bold text-foreground">
+            What it does to a place depends on three things
+          </h3>
 
-          <div className="mt-7 rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center gap-3">
-              <BookOpen className="h-5 w-5 text-primary" aria-hidden="true" />
-              <h3 className="font-semibold text-foreground">
-                A quick leaf reference
-              </h3>
-            </div>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Mahogany leaves are compound, with several smaller leaflets
-              arranged along a central stem. Use the guide to explore more
-              identifying details and ecological information.
-            </p>
-          </div>
+          <dl className="mt-4 max-w-[44rem] border-t border-border">
+            {factors.map((factor) => (
+              <div
+                key={factor.term}
+                className="grid gap-1 border-b border-border py-4 sm:grid-cols-[12rem_minmax(0,1fr)] sm:gap-6"
+              >
+                <dt className="text-base font-semibold text-foreground">
+                  {factor.term}
+                </dt>
+                <dd className="m-0 text-base leading-relaxed text-muted-foreground">
+                  {factor.detail}
+                </dd>
+              </div>
+            ))}
+          </dl>
+
+          <p className="mt-6 max-w-[38rem] text-sm leading-relaxed text-muted-foreground">
+            Management Recommendations are informational and do not authorize
+            tree removal.
+          </p>
 
           <Link
-            href="/species"
-            className="focus-ring mt-7 inline-flex min-h-11 items-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+            href="/species#ecological-impact-heading"
+            className="focus-ring mt-4 inline-flex min-h-11 items-center rounded-md text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
           >
-            Explore Species Guide
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            Read the ecological context in the Species Guide
           </Link>
         </div>
       </div>

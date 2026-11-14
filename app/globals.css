@@ -3,10 +3,13 @@
 @import "shadcn/tailwind.css";
 
 /* =========================================================
-   CITIA-IS — LINEAR-STYLE BENTO GRID DESIGN SYSTEM
+   CITIA-IS — "LEARN THE LEAF" DESIGN SYSTEM
    =========================================================
-   High-contrast, pitch-black foundation inspired by linear.app.
-   WCAG AAA target (7:1 contrast ratio minimum).
+   Colours are taken from the Mahogany tree itself: the dark upper
+   side of the leaf (Canopy), its pale underside (Underside) and the
+   red-brown of the timber (Heartwood). Light is the daylight theme
+   for outdoor use; dark is a forest floor at dusk.
+   Body text meets WCAG AA (4.5:1) or better in both themes.
 
    ─── TABLE OF CONTENTS ───
    1.  Dark Mode Variant
@@ -25,6 +28,8 @@
   --color-foreground: var(--foreground);
   --color-surface-tint: var(--surface-tint);
   --color-hero-accent: var(--hero-accent);
+  /* Heartwood — used only for the invasive-species message */
+  --color-heartwood: var(--heartwood);
 
   /* ── Brand colors ──────────────────────────────────────── */
   --color-primary: var(--primary);
@@ -77,9 +82,10 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  /* ── Typography — native sans-serif stack (SDG 13) ───── */
-  --font-sans: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* ── Typography — Archivo (loaded in app/layout.tsx), with a
+     system fallback until the font file arrives ────────── */
+  --font-sans: var(--font-archivo, "Archivo"), "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono",
     "Courier New", monospace;
   --font-heading: var(--font-sans);
@@ -204,117 +210,122 @@
    ========================================================= */
 
 :root {
-  --primary: #10b981;
+  /* Canopy — the dark upper side of the leaf */
+  --primary: #1f4d33;
   --primary-foreground: #ffffff;
 
-  --background: #fcfdfa;
-  --foreground: #0f172a;
-  --surface-tint: #f4f6f0;
-  --hero-accent: #0f172a;
+  /* Underside — the pale back of the leaf */
+  --background: #edf2ea;
+  /* Ink */
+  --foreground: #14201a;
+  --surface-tint: #e2eadc;
+  --hero-accent: #14201a;
+  /* Heartwood — the red-brown of Mahogany timber */
+  --heartwood: #7b2d26;
 
-  --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card: #f8faf5;
+  --card-foreground: #14201a;
 
-  --popover: #ffffff;
-  --popover-foreground: #0f172a;
+  --popover: #f8faf5;
+  --popover-foreground: #14201a;
 
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
+  --secondary: #e2eadc;
+  --secondary-foreground: #14201a;
 
-  --muted: #f1f5f9;
-  --muted-foreground: #475569;
+  --muted: #e2eadc;
+  /* Bark */
+  --muted-foreground: #55615a;
 
-  --accent: #10b981;
+  --accent: #1f4d33;
   --accent-foreground: #ffffff;
 
   --destructive: oklch(0.5771 0.21516 27.325);
-  --success: #10b981;
+  --success: #1e7a46;
   --warning: oklch(0.7686 0.16466 70.08);
   --info: oklch(0.52 0.13 240);
 
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #10b981;
+  --border: #c9d5c3;
+  /* Form field outline — 3:1 against the page */
+  --input: #768872;
+  --ring: #1f4d33;
 
-  --chart-1: #10b981;
+  --chart-1: #1f4d33;
   --chart-2: oklch(0.62 0.13 180);
   --chart-3: oklch(0.55 0.1 145);
   --chart-4: oklch(0.7686 0.16466 70.08);
   --chart-5: oklch(0.52 0.13 240);
 
-  --radius: 0.75rem;
+  --radius: 0.5rem;
 
-  --sidebar: #fcfdfa;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #10b981;
+  --sidebar: #edf2ea;
+  --sidebar-foreground: #14201a;
+  --sidebar-primary: #1f4d33;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #0f172a;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #10b981;
+  --sidebar-accent: #e2eadc;
+  --sidebar-accent-foreground: #14201a;
+  --sidebar-border: #c9d5c3;
+  --sidebar-ring: #1f4d33;
 }
 
 /* =========================================================
-   SECTION 4: DARK THEME — Linear-Style Pitch Black
+   SECTION 4: DARK THEME — Forest floor at dusk
    =========================================================
-   Background: #080710 (near-black with cool undertone)
-   Card surfaces: #12111a (dark elevated surface)
-   Borders: #262433 (high-contrast structural strokes)
-   Foreground: stark white (#f5f5f7) for 7:1+ contrast
+   Background: #0f1713 (deep green-black)
+   Card surfaces: #17221c
+   Borders: #2a3a31
+   Foreground: #eef3ec (16:1 on the background)
    ========================================================= */
 
 .dark {
-  --primary: #10b981;
-  --primary-foreground: #09090b;
+  /* A leaf in low light */
+  --primary: #8fcb9b;
+  --primary-foreground: #0f1713;
 
-  /* Deep slate canvas foundation — #09090b */
-  --background: #09090b;
-  /* Crisp white text — #ffffff */
-  --foreground: #ffffff;
-  /* Surface tint matches card container for uniformity */
-  --surface-tint: #18181b;
-  --hero-accent: #09090b;
+  --background: #0f1713;
+  --foreground: #eef3ec;
+  --surface-tint: #17221c;
+  --hero-accent: #0f1713;
+  --heartwood: #e39a88;
 
-  /* Solid dark card containers — #18181b */
-  --card: #18181b;
-  --card-foreground: #ffffff;
+  --card: #17221c;
+  --card-foreground: #eef3ec;
 
-  --popover: #18181b;
-  --popover-foreground: #ffffff;
+  --popover: #17221c;
+  --popover-foreground: #eef3ec;
 
-  --secondary: #18181b;
-  --secondary-foreground: #f4f4f5;
+  --secondary: #17221c;
+  --secondary-foreground: #eef3ec;
 
-  --muted: #18181b;
-  --muted-foreground: #a1a1aa;
+  --muted: #17221c;
+  --muted-foreground: #9daea2;
 
-  --accent: #10b981;
-  --accent-foreground: #09090b;
+  --accent: #8fcb9b;
+  --accent-foreground: #0f1713;
 
   --destructive: oklch(0.62 0.2 25);
-  --success: #10b981;
+  --success: #6fcf8e;
   --warning: oklch(0.75 0.16 85);
   --info: oklch(0.62 0.13 240);
 
-  /* Clear neon-bordered structural strokes — #27272a */
-  --border: #27272a;
-  --input: #27272a;
-  --ring: #10b981;
+  --border: #2a3a31;
+  /* Form field outline — 3:1 against the page */
+  --input: #5f7567;
+  --ring: #8fcb9b;
 
-  --chart-1: #10b981;
+  --chart-1: #8fcb9b;
   --chart-2: oklch(0.68 0.13 180);
   --chart-3: oklch(0.6 0.1 145);
   --chart-4: oklch(0.78 0.16 85);
   --chart-5: oklch(0.62 0.13 240);
 
-  --sidebar: #09090b;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #10b981;
-  --sidebar-primary-foreground: #09090b;
-  --sidebar-accent: #18181b;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #27272a;
-  --sidebar-ring: #10b981;
+  --sidebar: #0f1713;
+  --sidebar-foreground: #eef3ec;
+  --sidebar-primary: #8fcb9b;
+  --sidebar-primary-foreground: #0f1713;
+  --sidebar-accent: #17221c;
+  --sidebar-accent-foreground: #eef3ec;
+  --sidebar-border: #2a3a31;
+  --sidebar-ring: #8fcb9b;
 }
 
 /* =========================================================
@@ -382,17 +393,22 @@
     @apply bg-muted relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:bg-gradient-to-r before:from-transparent before:via-muted-foreground/10 before:to-transparent before:animate-[shimmer_1.5s_infinite];
   }
 
-  /* Display title — fluid clamp scale */
+  /* Display title — narrow, heavy Archivo that stands tall and
+     straight, like the trunks in a Mahogany plantation */
   .display-title {
-    font-size: clamp(2.25rem, 5vw + 1rem, 4.5rem);
-    line-height: 1.08;
-    letter-spacing: -0.03em;
+    font-size: clamp(2.5rem, 6vw + 1rem, 5.25rem);
+    font-stretch: 75%;
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.01em;
   }
 
   .section-title {
     font-size: clamp(1.875rem, 2.5vw + 1rem, 3rem);
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    font-stretch: 80%;
+    font-weight: 750;
+    line-height: 1.05;
+    letter-spacing: -0.005em;
   }
 
   /* ── Bento Grid Card — uniform Linear-style surface ───── */
@@ -405,12 +421,11 @@
   }
 
   .neon-edge {
-    box-shadow: 0 0 0 1px #10b98155, 0 0 24px #10b98122;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 35%, transparent);
   }
 
   .nature-glow {
-    box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.15),
-      0 8px 32px rgba(16, 185, 129, 0.04);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 15%, transparent);
   }
 
   /* ── Safe area padding ─────────────────────────────────── */

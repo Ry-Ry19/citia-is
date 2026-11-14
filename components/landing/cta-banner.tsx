@@ -1,43 +1,68 @@
+// components/landing/cta-banner.tsx
+//
+// WHAT: The closing band of the landing page — one question and the
+//   two community actions, so the page ends by asking the visitor to
+//   do something.
+//
+// The two buttons use the same icons, labels and links as the buttons
+// in the hero and the top bar (leaf = identify, map pin = report), so
+// an action looks the same wherever it appears.
+//
+// There is no movement here on purpose: two sections above already
+// move, and the page should end still.
+
 import Link from "next/link";
-import { ArrowRight, Camera, MapPin } from "lucide-react";
+import { Leaf, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function CTABanner() {
   return (
     <section
+      id="get-started"
       aria-labelledby="closing-cta-heading"
-      className="border-t border-border bg-card px-4 py-12 sm:px-6 sm:py-14"
+      className="scroll-mt-16 border-t border-border bg-surface-tint py-16 sm:py-20"
     >
-      <div className="mx-auto grid max-w-6xl gap-8 rounded-xl border border-border bg-background p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-12">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary">
-            Take the next step
-          </p>
+      <div className="mx-auto grid max-w-[96rem] gap-10 px-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-20 lg:px-10 xl:px-16 2xl:px-24">
+        <div>
           <h2
             id="closing-cta-heading"
-            className="mt-2 max-w-2xl text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+            className="section-title max-w-[12em] text-foreground"
           >
-            Ready to learn or share what you found?
+            Seen a tree you are not sure about?
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mt-5 max-w-[34rem] text-lg leading-relaxed text-foreground/85">
             Check a leaf photo or report a Mahogany sighting from your
-            community. No account is needed for public features.
+            community. No account is needed.
           </p>
         </div>
-        <div className="grid w-full gap-3 sm:grid-cols-2 lg:w-[18rem] lg:grid-cols-1">
-          <Link
-            href="/identify"
-            className="focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+
+        <div className="flex w-full flex-col gap-3 lg:w-[19rem]">
+          <Button
+            render={<Link href="/identify" />}
+            nativeButton={false}
+            size="lg"
+            className="min-h-12 w-full px-5 text-base"
           >
-            <Camera className="h-4 w-4" aria-hidden="true" />
+            <Leaf className="mr-2 h-4 w-4" aria-hidden="true" />
             Identify a Tree
-          </Link>
-          <Link
-            href="/report"
-            className="focus-ring inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border px-4 text-sm font-semibold text-foreground transition-colors hover:border-primary/50 hover:text-primary"
+          </Button>
+
+          <Button
+            render={<Link href="/report" />}
+            nativeButton={false}
+            size="lg"
+            variant="outline"
+            className="min-h-12 w-full border-foreground/30 bg-transparent px-5 text-base"
           >
-            <MapPin className="h-4 w-4" aria-hidden="true" />
+            <MapPin className="mr-2 h-4 w-4" aria-hidden="true" />
             Report a Sighting
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Button>
+
+          <Link
+            href="/species"
+            className="focus-ring mt-1 inline-flex min-h-11 items-center self-start rounded-md text-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+          >
+            Or read the Species Guide first
           </Link>
         </div>
       </div>

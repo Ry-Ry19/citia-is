@@ -1,28 +1,55 @@
-"use client";
+// components/landing/marquee-strip.tsx
+//
+// WHAT: A slim band under the hero with six short facts about the
+//   service, drifting slowly from right to left.
+//
+// HOW THE SEAMLESS LOOP WORKS:
+//   Two identical tracks sit side by side. Each one slides left by its
+//   own full width (the "marquee-track" animation in globals.css). As
+//   the first track leaves, the second is already filling the same
+//   space, so the visitor never sees a jump when the animation
+//   restarts.
+//
+// WHO SEES WHAT:
+//   - Most visitors see the two moving tracks. They pause while a
+//     pointer is over the band or a finger is pressing it.
+//   - Visitors who have asked their device to reduce motion see one
+//     still, centred row instead (the list below).
+//   - Screen readers are given that same list once. The moving tracks
+//     are hidden from them, so nothing is read twice.
 
-import { Zap, MapPinned, Landmark, Sprout, Lock, Globe } from "lucide-react";
+import {
+  ClipboardCheck,
+  Gift,
+  MapPin,
+  Scale,
+  Smartphone,
+  UserRoundX,
+} from "lucide-react";
 
-const badges = [
-  { icon: Zap, label: "Instant AI Inference — YOLOv8" },
-  { icon: MapPinned, label: "GIS-Enabled Community Sighting" },
-  { icon: Landmark, label: "CENRO Iligan Decision Support" },
-  { icon: Sprout, label: "Built for Citizen Science" },
-  { icon: Lock, label: "No Account Required for Public Use" },
-  { icon: Globe, label: "Tailored for Philippine Environmental Management" },
+const facts = [
+  { icon: UserRoundX, label: "No account needed" },
+  { icon: Gift, label: "Free to use" },
+  { icon: Smartphone, label: "Works with your phone camera" },
+  { icon: ClipboardCheck, label: "Every report is reviewed by CENRO" },
+  { icon: Scale, label: "The AI suggests, CENRO decides" },
+  { icon: MapPin, label: "Made for Iligan City" },
 ];
 
-// Single row of badges — reused in both tracks
-function BadgeRow({ prefix }: { prefix: string }) {
+/** One full pass of the band, in seconds. Higher is slower. */
+const LOOP_SECONDS = 50;
+
+const factClass =
+  "inline-flex shrink-0 items-center gap-2.5 text-[0.9375rem] font-medium";
+
+// One row of facts — used once in each moving track.
+function FactRow() {
   return (
     <>
-      {badges.map((badge, index) => (
-        <span
-          key={`${prefix}-${index}`}
-          className="mx-8 inline-flex shrink-0 items-center gap-3 text-xs font-bold tracking-wide text-white/90"
-        >
-          <badge.icon className="h-6 w-6 shrink-0 text-primary" />
-          {badge.label}
-          <span className="ml-6 text-white/35">&middot;</span>
+      {facts.map((fact) => (
+        <span key={fact.label} className={`${factClass} mx-7`}>
+          <fact.icon className="h-[1.125rem] w-[1.125rem] shrink-0" />
+          {fact.label}
         </span>
       ))}
     </>
@@ -31,37 +58,39 @@ function BadgeRow({ prefix }: { prefix: string }) {
 
 export function MarqueeStrip() {
   return (
-    <div
-      className="group relative w-full overflow-hidden bg-hero-accent py-6"
-      aria-hidden="true"
+    <section
+      aria-label="About this service"
+      className="group overflow-hidden bg-primary py-3.5 text-primary-foreground"
     >
-      {/*
-        HOW SEAMLESS LOOP WORKS WITH TWO DIVS:
- 
-        Both Track1 and Track2 are identical.
-        They sit side by side inside a flex container.
-        Track1 animates from 0 to -100% of its own width.
-        As Track1 exits left, Track2 is already filling
-        the exact same space from the right.
-        When Track1 resets to 0, it snaps back behind Track2
-        which has taken its place — user never sees the jump.
- 
-        This is more reliable than -50% on one long div
-        because each track is self-contained and the
-        browser measures each independently.
-      */}
-      <div className="flex w-max">
-        {/* Track 1 — animates left. group-hover pauses BOTH tracks
-            together since they share the parent's `group` class. */}
-        <div className="inline-flex flex-shrink-0 animate-marquee-track whitespace-nowrap group-hover:[animation-play-state:paused]">
-          <BadgeRow prefix="track1" />
-        </div>
+      {/* The still list: read by screen readers always, and shown to
+          everyone who has asked for reduced motion. */}
+      <ul className="sr-only m-0 list-none flex-wrap items-center justify-center gap-x-10 gap-y-2 px-6 motion-reduce:not-sr-only motion-reduce:flex">
+        {facts.map((fact) => (
+          <li key={fact.label} className={factClass}>
+            <fact.icon
+              className="h-[1.125rem] w-[1.125rem] shrink-0"
+              aria-hidden="true"
+            />
+            {fact.label}
+          </li>
+        ))}
+      </ul>
 
-        {/* Track 2 — identical clone, creates seamless fill */}
-        <div className="inline-flex flex-shrink-0 animate-marquee-track whitespace-nowrap group-hover:[animation-play-state:paused]">
-          <BadgeRow prefix="track2" />
-        </div>
+      {/* The moving band. The mask fades the facts out at both edges. */}
+      <div
+        aria-hidden="true"
+        className="flex w-max [mask-image:linear-gradient(to_right,transparent,black_6rem,black_calc(100%-6rem),transparent)] motion-reduce:hidden"
+      >
+        {[0, 1].map((track) => (
+          <div
+            key={track}
+            style={{ animationDuration: `${LOOP_SECONDS}s` }}
+            className="inline-flex shrink-0 animate-marquee-track whitespace-nowrap group-hover:[animation-play-state:paused] group-active:[animation-play-state:paused]"
+          >
+            <FactRow />
+          </div>
+        ))}
       </div>
-    </div>
+    </section>
   );
 }
