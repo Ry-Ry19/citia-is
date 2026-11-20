@@ -17,21 +17,24 @@ checks (`GET /staff/me`) at sign-in and on every staff page.
 2. **Authentication → URL Configuration:**
    - Site URL: `http://localhost:3000` (the production address later).
    - Redirect URLs: add `http://localhost:3000/auth/confirm`.
-3. **Reset password email:** nothing to change while the default email
-   service is used (templates cannot be edited until custom SMTP is set
-   up). The default link returns to `/auth/confirm` with a one-time code,
-   which **only works in the same browser that requested the reset**.
+3. **Email sending (custom SMTP):** set up on 20 November 2026, using a
+   Gmail account created for CITIA-IS and a Google app password
+   (**Authentication → Emails → SMTP Settings**: host `smtp.gmail.com`,
+   port `465`, sender name `CITIA-IS · CENRO Iligan City`). Delivery of a
+   reset email was confirmed the same day. To move to another account
+   later (for example when CENRO takes over), change only these fields
+   and revoke the old app password.
 
-   After custom SMTP is configured, you may change **Authentication →
-   Emails → Templates → Reset password** so the link works in any browser:
+4. **Reset password template** (**Authentication → Emails → Templates →
+   Reset password**) uses this link, so a reset works in any browser:
 
    ```html
    <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/admin/update-password">Reset your password</a>
    ```
 
-> **Email limits:** without custom SMTP, Supabase sends about 2 emails an
-> hour and only to the project team's own addresses. Configure SMTP
-> (Authentication → Emails → SMTP Settings) before relying on resets.
+> **Email limits:** Gmail allows about 500 emails a day. Supabase's own
+> limit is set under Authentication → Rate Limits. A reset link expires
+> after one hour and works once; an unused link does nothing.
 
 ## 2. Environment file
 
@@ -119,7 +122,7 @@ reset request also gets the same reply either way.
 
 ## Known limitations
 
-1. **Email delivery** depends on custom SMTP (see step 1).
+1. **Email delivery** depends on the Gmail account in step 1 staying active.
 2. **Rate limiting** of sign-in attempts is Supabase Auth's built-in
    limit; CITIA-IS adds none of its own.
 3. **An issued access token stays valid until it expires** (1 hour).
