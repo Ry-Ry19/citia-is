@@ -3,10 +3,13 @@
 @import "shadcn/tailwind.css";
 
 /* =========================================================
-   CITIA-IS GLOBAL DESIGN SYSTEM
+   CITIA-IS — "LEARN THE LEAF" DESIGN SYSTEM
    =========================================================
-   Community-Driven Invasive Tree Identification
-   and Recommendation Information System
+   Colours are taken from the Mahogany tree itself: the dark upper
+   side of the leaf (Canopy), its pale underside (Underside) and the
+   red-brown of the timber (Heartwood). Light is the daylight theme
+   for outdoor use; dark is a forest floor at dusk.
+   Body text meets WCAG AA (4.5:1) or better in both themes.
 
    ─── TABLE OF CONTENTS ───
    1.  Dark Mode Variant
@@ -14,54 +17,19 @@
    3.  Light Theme (root)
    4.  Dark Theme (.dark)
    5.  Global Base Styles (@layer base)
-   6.  Utility Extensions (optional layer)
-   ========================================================= */
-
-/* =========================================================
-   SECTION 1: DARK MODE VARIANT
-   =========================================================
-   LEARN: @custom-variant creates a Tailwind variant that
-   conditionally applies styles when a parent element has
-   the .dark class.
-
-   HOW IT WORKS:
-   - When .dark is on <html> or <body>, classes like
-     dark:bg-primary become active.
-   - This enables per-component dark mode overrides.
-   - The `*` wildcard means "any element that is .dark or
-     has a .dark ancestor".
-
-   WHY: This pattern keeps dark mode styles colocated with
-   component styles rather than in a separate file.
+   6.  Utility Extensions
    ========================================================= */
 
 @custom-variant dark (&:is(.dark *));
-
-/* =========================================================
-   SECTION 2: THEME CONFIGURATION
-   =========================================================
-   LEARN: @theme inline maps CSS custom properties (variables)
-   to Tailwind utility classes.
-
-   HOW IT WORKS:
-   --color-primary: var(--primary) tells Tailwind:
-   "When I write bg-primary, look up --primary CSS variable."
-
-   WHY THIS MATTERS:
-   - CSS variables can change at runtime (dark mode, themes).
-   - Tailwind classes become dynamic, not hard-coded.
-   - One source of truth for all colors.
-
-   BEST PRACTICE:
-   - Every color used in the UI should be a CSS variable.
-   - Never hard-code color values in components.
-   - Use semantic names (primary, background) not literal names (green-700).
-   ========================================================= */
 
 @theme inline {
   /* ── General colors ───────────────────────────────────── */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface-tint: var(--surface-tint);
+  --color-hero-accent: var(--hero-accent);
+  /* Heartwood — used only for the invasive-species message */
+  --color-heartwood: var(--heartwood);
 
   /* ── Brand colors ──────────────────────────────────────── */
   --color-primary: var(--primary);
@@ -114,21 +82,15 @@
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
 
-  /* ── Typography ────────────────────────────────────────── */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* ── Typography — Archivo (loaded in app/layout.tsx), with a
+     system fallback until the font file arrives ────────── */
+  --font-sans: var(--font-archivo, "Archivo"), "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono",
+    "Courier New", monospace;
   --font-heading: var(--font-sans);
 
-  /* ── Border radius ────────────────────────────────────────
-     LEARN: These derive from a single --radius variable.
-     This ensures consistent curvature across all components.
-
-     The multipliers (0.6, 0.8, 1.4, etc.) create a harmonious
-     scale. If --radius changes, all radii scale proportionally.
-
-     WHY: A single source of truth for shape. Change one
-     variable → update the whole app.
-     ──────────────────────────────────────────────────────── */
+  /* ── Border radius ────────────────────────────────────── */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -137,78 +99,58 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-full: 9999px;
 
-  /* ── Spacing scale ────────────────────────────────────────
-     LEARN: A consistent spacing scale creates visual rhythm.
-     These map to Tailwind's spacing utilities (p-*, m-*, gap-*).
-
-     The scale follows a geometric progression (roughly 1.5×)
-     which is more pleasing than arbitrary values.
-
-     WHY: Consistent spacing = consistent design. Users
-     develop an intuitive feel for the layout.
-     ──────────────────────────────────────────────────────── */
-  --spacing: 0.25rem; /* 4px base unit */
+  /* ── Spacing scale ────────────────────────────────────── */
+  --spacing: 0.25rem;
   --spacing-0: 0;
   --spacing-px: 1px;
-  --spacing-0-5: calc(var(--spacing) * 0.5); /* 2px */
-  --spacing-1: var(--spacing); /* 4px */
-  --spacing-1-5: calc(var(--spacing) * 1.5); /* 6px */
-  --spacing-2: calc(var(--spacing) * 2); /* 8px */
-  --spacing-2-5: calc(var(--spacing) * 2.5); /* 10px */
-  --spacing-3: calc(var(--spacing) * 3); /* 12px */
-  --spacing-3-5: calc(var(--spacing) * 3.5); /* 14px */
-  --spacing-4: calc(var(--spacing) * 4); /* 16px */
-  --spacing-5: calc(var(--spacing) * 5); /* 20px */
-  --spacing-6: calc(var(--spacing) * 6); /* 24px */
-  --spacing-7: calc(var(--spacing) * 7); /* 28px */
-  --spacing-8: calc(var(--spacing) * 8); /* 32px */
-  --spacing-9: calc(var(--spacing) * 9); /* 36px */
-  --spacing-10: calc(var(--spacing) * 10); /* 40px */
-  --spacing-11: calc(var(--spacing) * 11); /* 44px */
-  --spacing-12: calc(var(--spacing) * 12); /* 48px */
-  --spacing-14: calc(var(--spacing) * 14); /* 56px */
-  --spacing-16: calc(var(--spacing) * 16); /* 64px */
-  --spacing-20: calc(var(--spacing) * 20); /* 80px */
-  --spacing-24: calc(var(--spacing) * 24); /* 96px */
-  --spacing-28: calc(var(--spacing) * 28); /* 112px */
-  --spacing-32: calc(var(--spacing) * 32); /* 128px */
-  --spacing-36: calc(var(--spacing) * 36); /* 144px */
-  --spacing-40: calc(var(--spacing) * 40); /* 160px */
-  --spacing-44: calc(var(--spacing) * 44); /* 176px */
-  --spacing-48: calc(var(--spacing) * 48); /* 192px */
-  --spacing-52: calc(var(--spacing) * 52); /* 208px */
-  --spacing-56: calc(var(--spacing) * 56); /* 224px */
-  --spacing-60: calc(var(--spacing) * 60); /* 240px */
-  --spacing-64: calc(var(--spacing) * 64); /* 256px */
-  --spacing-72: calc(var(--spacing) * 72); /* 288px */
-  --spacing-80: calc(var(--spacing) * 80); /* 320px */
-  --spacing-96: calc(var(--spacing) * 96); /* 384px */
+  --spacing-0-5: calc(var(--spacing) * 0.5);
+  --spacing-1: var(--spacing);
+  --spacing-1-5: calc(var(--spacing) * 1.5);
+  --spacing-2: calc(var(--spacing) * 2);
+  --spacing-2-5: calc(var(--spacing) * 2.5);
+  --spacing-3: calc(var(--spacing) * 3);
+  --spacing-3-5: calc(var(--spacing) * 3.5);
+  --spacing-4: calc(var(--spacing) * 4);
+  --spacing-5: calc(var(--spacing) * 5);
+  --spacing-6: calc(var(--spacing) * 6);
+  --spacing-7: calc(var(--spacing) * 7);
+  --spacing-8: calc(var(--spacing) * 8);
+  --spacing-9: calc(var(--spacing) * 9);
+  --spacing-10: calc(var(--spacing) * 10);
+  --spacing-11: calc(var(--spacing) * 11);
+  --spacing-12: calc(var(--spacing) * 12);
+  --spacing-14: calc(var(--spacing) * 14);
+  --spacing-16: calc(var(--spacing) * 16);
+  --spacing-20: calc(var(--spacing) * 20);
+  --spacing-24: calc(var(--spacing) * 24);
+  --spacing-28: calc(var(--spacing) * 28);
+  --spacing-32: calc(var(--spacing) * 32);
+  --spacing-36: calc(var(--spacing) * 36);
+  --spacing-40: calc(var(--spacing) * 40);
+  --spacing-44: calc(var(--spacing) * 44);
+  --spacing-48: calc(var(--spacing) * 48);
+  --spacing-52: calc(var(--spacing) * 52);
+  --spacing-56: calc(var(--spacing) * 56);
+  --spacing-60: calc(var(--spacing) * 60);
+  --spacing-64: calc(var(--spacing) * 64);
+  --spacing-72: calc(var(--spacing) * 72);
+  --spacing-80: calc(var(--spacing) * 80);
+  --spacing-96: calc(var(--spacing) * 96);
 
-  /* ── Font sizes ───────────────────────────────────────────
-     LEARN: A modular typography scale ensures text sizes
-     are harmonious and readable at every level.
-
-     WHY: Users need to read content comfortably on any
-     device. A well-designed scale improves readability
-     and visual hierarchy.
-
-     BEST PRACTICE: Use relative units (rem) for accessibility.
-     Users who adjust their browser's font size will see
-     your text scale appropriately.
-     ──────────────────────────────────────────────────────── */
-  --font-size-xs: 0.75rem; /* 12px */
-  --font-size-sm: 0.875rem; /* 14px */
-  --font-size-base: 1rem; /* 16px */
-  --font-size-lg: 1.125rem; /* 18px */
-  --font-size-xl: 1.25rem; /* 20px */
-  --font-size-2xl: 1.5rem; /* 24px */
-  --font-size-3xl: 1.875rem; /* 30px */
-  --font-size-4xl: 2.25rem; /* 36px */
-  --font-size-5xl: 3rem; /* 48px */
-  --font-size-6xl: 3.75rem; /* 60px */
-  --font-size-7xl: 4.5rem; /* 72px */
-  --font-size-8xl: 6rem; /* 96px */
-  --font-size-9xl: 8rem; /* 128px */
+  /* ── Font sizes ───────────────────────────────────────── */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+  --font-size-6xl: 3.75rem;
+  --font-size-7xl: 4.5rem;
+  --font-size-8xl: 6rem;
+  --font-size-9xl: 8rem;
 
   /* ── Font weights ───────────────────────────────────────── */
   --font-weight-thin: 100;
@@ -221,14 +163,7 @@
   --font-weight-extrabold: 800;
   --font-weight-black: 900;
 
-  /* ── Line heights ─────────────────────────────────────────
-     LEARN: Line height affects readability. Too tight =
-     cramped text. Too loose = text feels disconnected.
-
-     The 1.5× font size is a good default for body text.
-     Headings can be tighter (1.2×) because they're larger
-     and naturally more readable.
-     ──────────────────────────────────────────────────────── */
+  /* ── Line heights ─────────────────────────────────────── */
   --line-height-none: 1;
   --line-height-tight: 1.25;
   --line-height-snug: 1.375;
@@ -236,34 +171,16 @@
   --line-height-relaxed: 1.625;
   --line-height-loose: 2;
 
-  /* ── Shadows ──────────────────────────────────────────────
-     LEARN: Shadows create depth and hierarchy. They help
-     users understand what's interactive and what's not.
+  /* ── Shadows — subtle on dark surfaces ────────────────── */
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.2);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.3), 0 1px 2px rgb(0 0 0 / 0.2);
+  --shadow-md: 0 4px 6px rgb(0 0 0 / 0.25), 0 2px 4px rgb(0 0 0 / 0.2);
+  --shadow-lg: 0 10px 15px rgb(0 0 0 / 0.3), 0 4px 6px rgb(0 0 0 / 0.2);
+  --shadow-xl: 0 20px 25px rgb(0 0 0 / 0.3), 0 10px 10px rgb(0 0 0 / 0.15);
+  --shadow-2xl: 0 25px 50px rgb(0 0 0 / 0.4);
+  --shadow-inner: inset 0 2px 4px rgb(0 0 0 / 0.15);
 
-     WHY: Well-designed shadows improve usability by
-     providing visual cues about elevation and interaction
-     states (hover, active, focus).
-     ──────────────────────────────────────────────────────── */
-  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.05);
-  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.1), 0 1px 2px rgb(0 0 0 / 0.06);
-  --shadow-md: 0 4px 6px rgb(0 0 0 / 0.07), 0 2px 4px rgb(0 0 0 / 0.06);
-  --shadow-lg: 0 10px 15px rgb(0 0 0 / 0.08), 0 4px 6px rgb(0 0 0 / 0.05);
-  --shadow-xl: 0 20px 25px rgb(0 0 0 / 0.08), 0 10px 10px rgb(0 0 0 / 0.04);
-  --shadow-2xl: 0 25px 50px rgb(0 0 0 / 0.12);
-  --shadow-inner: inset 0 2px 4px rgb(0 0 0 / 0.04);
-
-  /* ── Transitions ──────────────────────────────────────────
-     LEARN: Consistent transition timing creates a polished
-     feel. Users expect smooth, predictable animations.
-
-     WHY: Fast feedback (buttons changing color on hover,
-     loading states) makes the app feel responsive and
-     well-crafted.
-
-     BEST PRACTICE: Use the same duration for similar
-     interactions. 200ms is fast enough to feel instant
-     but slow enough to be perceived.
-     ──────────────────────────────────────────────────────── */
+  /* ── Transitions ──────────────────────────────────────── */
   --transition-duration-75: 75ms;
   --transition-duration-100: 100ms;
   --transition-duration-150: 150ms;
@@ -278,13 +195,7 @@
   --transition-timing-out: cubic-bezier(0, 0, 0.2, 1);
   --transition-timing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* ── Z-index ──────────────────────────────────────────────
-     LEARN: A z-index scale prevents stacking conflicts.
-     Instead of guessing numbers, use semantic layers.
-
-     WHY: Predictable stacking = fewer bugs with overlapping
-     elements (modals, dropdowns, tooltips).
-     ──────────────────────────────────────────────────────── */
+  /* ── Z-index ──────────────────────────────────────────── */
   --z-index-0: 0;
   --z-index-10: 10;
   --z-index-20: 20;
@@ -296,404 +207,163 @@
 
 /* =========================================================
    SECTION 3: LIGHT THEME
-   =========================================================
-   LEARN: :root is the global scope. Variables defined here
-   are available everywhere in the document.
-
-   HOW IT WORKS:
-   - These are the default values.
-   - When .dark is applied, the dark theme variables override
-     these values.
-   - The browser re-renders with the new values automatically.
-
-   DESIGN CHOICES — CITIA-IS OFFICIAL PALETTE:
-   - Primary Green  #10B981  → --primary (exact brand hex, converted to OKLCH)
-   - Deep Forest    #0F382C  → --foreground / --primary-foreground (brand dark)
-   - Light Green    #E8F5EE  → --secondary / --muted / --accent base
-   - Background     #F8FAFC  → --background
-   - Surface        #FFFFFF  → --card / --popover
-   - Secondary Text #64748B  → --muted-foreground
-   - Border         #E2E8F0  → --border / --input
-   - Danger         #DC2626  → --destructive
-   - Warning        #F59E0B  → --warning
-
-   ACCESSIBILITY NOTE (IMPORTANT):
-   White text on the raw Primary Green (#10B981) button only
-   measures 2.54:1 contrast — that FAILS WCAG AA (needs 4.5:1).
-   Rather than darken the brand green itself (which would drift
-   from the official hex the thesis specifies), --primary stays
-   the exact brand color and --primary-foreground is set to Deep
-   Forest instead of white. Deep Forest on Primary Green measures
-   5.10:1 — passes AA. This means primary buttons render as
-   dark-green text on a bright-green fill, not white-on-green.
    ========================================================= */
 
 :root {
-  /* ── Brand colors ──────────────────────────────────────────
-     LEARN: Primary is the main action color. It appears on
-     buttons, links, and active states. This is the exact
-     CITIA-IS Primary Green (#10B981) converted to OKLCH.
-     ──────────────────────────────────────────────────────── */
-  --primary: oklch(0.6959 0.14907 162.48);
-  --primary-foreground: oklch(0.3082 0.05047 170.223);
+  /* Canopy — the dark upper side of the leaf */
+  --primary: #1f4d33;
+  --primary-foreground: #ffffff;
 
-  /* ── Background & foreground ──────────────────────────────
-     LEARN: These are the main surface and text colors.
-     Background = official #F8FAFC. Foreground uses Deep Forest
-     (#0F382C) instead of a generic near-black — this keeps
-     body text on-brand while still hitting 12.4:1 contrast.
-     ──────────────────────────────────────────────────────── */
-  --background: oklch(0.9842 0.00341 247.858);
-  --foreground: oklch(0.3082 0.05047 170.223);
+  /* Underside — the pale back of the leaf */
+  --background: #edf2ea;
+  /* Ink */
+  --foreground: #14201a;
+  --surface-tint: #e2eadc;
+  --hero-accent: #14201a;
+  /* Heartwood — the red-brown of Mahogany timber */
+  --heartwood: #7b2d26;
 
-  /* ── Surfaces ──────────────────────────────────────────────
-     LEARN: Cards and popovers are elevated surfaces that
-     appear above the background. Official Surface = #FFFFFF.
-     ──────────────────────────────────────────────────────── */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.3082 0.05047 170.223);
+  --card: #f8faf5;
+  --card-foreground: #14201a;
 
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.3082 0.05047 170.223);
+  --popover: #f8faf5;
+  --popover-foreground: #14201a;
 
-  /* ── Secondary ─────────────────────────────────────────────
-     LEARN: Secondary is a softer version of primary.
-     Used for less prominent actions (secondary buttons,
-     highlighted sections, badges). This is the official
-     Light Green (#E8F5EE).
-     ──────────────────────────────────────────────────────── */
-  --secondary: oklch(0.9585 0.01655 162.749);
-  --secondary-foreground: oklch(0.3082 0.05047 170.223);
+  --secondary: #e2eadc;
+  --secondary-foreground: #14201a;
 
-  /* ── Muted ──────────────────────────────────────────────────
-     LEARN: Muted is for low-importance information.
-     Used for secondary text, disabled states, metadata.
-     Muted-foreground is the official Secondary Text (#64748B).
-   ───────────────────────────────────────────────────── */
-  --muted: oklch(0.9585 0.01655 162.749);
-  --muted-foreground: oklch(0.5544 0.04072 257.417);
+  --muted: #e2eadc;
+  /* Bark */
+  --muted-foreground: #55615a;
 
-  /* ── Accent ──────────────────────────────────────────────────
-     LEARN: Accent draws attention. Used for hover states,
-     selected items, and subtle emphasis.
+  --accent: #1f4d33;
+  --accent-foreground: #ffffff;
 
-     A touch more saturated than secondary/muted so hover
-     states are visibly distinct, while staying in the brand
-     green family.
-     ──────────────────────────────────────────────────────── */
-  --accent: oklch(0.88 0.05 162.48);
-  --accent-foreground: oklch(0.3082 0.05047 170.223);
-
-  /* ── Feedback colors ────────────────────────────────────────
-     LEARN: These communicate status and urgency to users.
-
-     DESTRUCTIVE: Official Danger #DC2626.
-     SUCCESS: Reuses Primary Green — no separate success color
-       was specified in the brand palette.
-     WARNING: Official Warning #F59E0B.
-     INFO: Not part of the brand palette — kept as a neutral
-       blue for a 4th, distinct status color (e.g. "pending
-       review" in the CENRO dashboard). Revisit if you'd rather
-       collapse this into warning/muted.
-     ──────────────────────────────────────────────────────── */
   --destructive: oklch(0.5771 0.21516 27.325);
-  --success: oklch(0.6959 0.14907 162.48);
+  --success: #1e7a46;
   --warning: oklch(0.7686 0.16466 70.08);
   --info: oklch(0.52 0.13 240);
 
-  /* ── Borders & Inputs ──────────────────────────────────────
-     LEARN: Borders define the edges of interactive elements.
-     They should be visible but not distracting.
+  --border: #c9d5c3;
+  /* Form field outline — 3:1 against the page */
+  --input: #768872;
+  --ring: #1f4d33;
 
-     BORDER / INPUT: Official Border #E2E8F0.
-     RING: Focus ring color matches Primary Green for brand
-     consistency.
-     ──────────────────────────────────────────────────────── */
-  --border: oklch(0.9288 0.01262 255.508);
-  --input: oklch(0.9288 0.01262 255.508);
-  --ring: oklch(0.6959 0.14907 162.48);
-
-  /* ── Charts ──────────────────────────────────────────────────
-     LEARN: Chart colors are distinct and color-blind friendly.
-     They use different hues across the spectrum for clear
-     differentiation, anchored to the brand green plus the
-     warning/info accents already in the palette.
-
-     WHY: Charts need to be readable by everyone, including
-     users with color vision deficiencies.
-     ──────────────────────────────────────────────────────── */
-  --chart-1: oklch(0.6959 0.14907 162.48);
+  --chart-1: #1f4d33;
   --chart-2: oklch(0.62 0.13 180);
   --chart-3: oklch(0.55 0.1 145);
   --chart-4: oklch(0.7686 0.16466 70.08);
   --chart-5: oklch(0.52 0.13 240);
 
-  /* ── Shape ──────────────────────────────────────────────────
-     LEARN: A single radius value for consistent curvature.
-     0.75rem (12px) is friendly and modern without being
-     overly playful.
+  --radius: 0.5rem;
 
-     WHY: Consistent shape = consistent design language.
-     ──────────────────────────────────────────────────────── */
-  --radius: 0.75rem;
-
-  /* ── Sidebar ──────────────────────────────────────────────────
-     LEARN: Sidebar is a dedicated navigation surface — used by
-     the CENRO/admin dashboard. A subtle brand-green wash (rather
-     than plain gray) gives the admin area a distinct, "official"
-     feel that separates it visually from the public/community
-     pages, without breaking the light, civic aesthetic.
-     ──────────────────────────────────────────────────────── */
-  --sidebar: oklch(0.975 0.01 162.48);
-  --sidebar-foreground: oklch(0.3082 0.05047 170.223);
-  --sidebar-primary: oklch(0.6959 0.14907 162.48);
-  --sidebar-primary-foreground: oklch(0.3082 0.05047 170.223);
-  --sidebar-accent: oklch(0.9585 0.01655 162.749);
-  --sidebar-accent-foreground: oklch(0.3082 0.05047 170.223);
-  --sidebar-border: oklch(0.9 0.02 162.48);
-  --sidebar-ring: oklch(0.6959 0.14907 162.48);
+  --sidebar: #edf2ea;
+  --sidebar-foreground: #14201a;
+  --sidebar-primary: #1f4d33;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e2eadc;
+  --sidebar-accent-foreground: #14201a;
+  --sidebar-border: #c9d5c3;
+  --sidebar-ring: #1f4d33;
 }
 
 /* =========================================================
-   SECTION 4: DARK THEME
+   SECTION 4: DARK THEME — Forest floor at dusk
    =========================================================
-   LEARN: The .dark class overrides the :root variables.
-
-   HOW IT WORKS:
-   1. User toggles dark mode → .dark is added to <html>.
-   2. CSS variables with the same names are redefined.
-   3. Everything using these variables updates automatically.
-
-   DESIGN CHOICES:
-   - Dark background retinted to the brand's green-forest hue
-     family (H≈166, between Primary Green's H=162.5 and Deep
-     Forest's H=170.2) instead of the old generic hue.
-   - Primary becomes brighter (L=0.72 vs L=0.70 in light mode)
-     for visibility on dark backgrounds, still same brand hue.
-   - Borders use opacity (10%) for a subtle glow effect.
-
-   ACCESSIBILITY NOTE:
-   Dark foreground on dark background: 16.4:1.
-   Dark primary-foreground on dark primary: 8.1:1.
-   Both comfortably clear WCAG AA.
+   Background: #0f1713 (deep green-black)
+   Card surfaces: #17221c
+   Borders: #2a3a31
+   Foreground: #eef3ec (16:1 on the background)
    ========================================================= */
 
 .dark {
-  /* ── Brand colors ──────────────────────────────────────────
-     LEARN: Primary is brighter in dark mode (L=0.72 vs 0.70)
-     to ensure sufficient contrast on dark backgrounds.
+  /* A leaf in low light */
+  --primary: #8fcb9b;
+  --primary-foreground: #0f1713;
 
-     PRIMARY-FOREGROUND is a near-black deep forest so text on
-     primary buttons/badges stays readable (8.1:1 contrast).
-     ──────────────────────────────────────────────────────── */
-  --primary: oklch(0.72 0.15 162.48);
-  --primary-foreground: oklch(0.18 0.03 170.22);
+  --background: #0f1713;
+  --foreground: #eef3ec;
+  --surface-tint: #17221c;
+  --hero-accent: #0f1713;
+  --heartwood: #e39a88;
 
-  /* ── Background & foreground ──────────────────────────────
-     LEARN: Background is a dark green-gray instead of pure
-     black — easier on the eyes and fits the brand hue.
+  --card: #17221c;
+  --card-foreground: #eef3ec;
 
-     FOREGROUND is near-white for maximum readability.
-     ──────────────────────────────────────────────────────── */
-  --background: oklch(0.19 0.02 166);
-  --foreground: oklch(0.96 0.01 166);
+  --popover: #17221c;
+  --popover-foreground: #eef3ec;
 
-  /* ── Surfaces ──────────────────────────────────────────────
-     LEARN: Cards and popovers are slightly lighter than the
-     background to create depth and visual hierarchy.
-     ──────────────────────────────────────────────────────── */
-  --card: oklch(0.23 0.025 166);
-  --card-foreground: oklch(0.96 0.01 166);
+  --secondary: #17221c;
+  --secondary-foreground: #eef3ec;
 
-  --popover: oklch(0.23 0.025 166);
-  --popover-foreground: oklch(0.96 0.01 166);
+  --muted: #17221c;
+  --muted-foreground: #9daea2;
 
-  /* ── Secondary ─────────────────────────────────────────────
-     LEARN: Secondary is darker in dark mode but still
-     distinct from the background.
-     ──────────────────────────────────────────────────────── */
-  --secondary: oklch(0.28 0.03 166);
-  --secondary-foreground: oklch(0.92 0.01 166);
+  --accent: #8fcb9b;
+  --accent-foreground: #0f1713;
 
-  /* ── Muted ──────────────────────────────────────────────────
-     LEARN: Muted foreground is lighter in dark mode
-     to remain readable against the dark background.
-     ──────────────────────────────────────────────────────── */
-  --muted: oklch(0.27 0.02 166);
-  --muted-foreground: oklch(0.7 0.02 166);
-
-  /* ── Accent ────────────────────────────────────────────────── */
-  --accent: oklch(0.3 0.035 162.48);
-  --accent-foreground: oklch(0.95 0.01 162.48);
-
-  /* ── Feedback colors ────────────────────────────────────────
-     LEARN: Feedback colors are brighter in dark mode to
-     maintain visibility and emotional impact.
-     ──────────────────────────────────────────────────────── */
   --destructive: oklch(0.62 0.2 25);
-  --success: oklch(0.72 0.15 162.48);
+  --success: #6fcf8e;
   --warning: oklch(0.75 0.16 85);
   --info: oklch(0.62 0.13 240);
 
-  /* ── Borders & Inputs ──────────────────────────────────────
-     LEARN: Borders use opacity with white (oklch(1 0 0 / 10%))
-     which creates a subtle glow effect on dark backgrounds.
+  --border: #2a3a31;
+  /* Form field outline — 3:1 against the page */
+  --input: #5f7567;
+  --ring: #8fcb9b;
 
-     This is more visually appealing than using a solid color
-     which can look harsh.
-     ──────────────────────────────────────────────────────── */
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.72 0.15 162.48);
-
-  /* ── Charts ──────────────────────────────────────────────────
-     LEARN: Chart colors are slightly brighter in dark mode
-     to ensure they pop against the dark background.
-     ──────────────────────────────────────────────────────── */
-  --chart-1: oklch(0.72 0.15 162.48);
+  --chart-1: #8fcb9b;
   --chart-2: oklch(0.68 0.13 180);
   --chart-3: oklch(0.6 0.1 145);
   --chart-4: oklch(0.78 0.16 85);
   --chart-5: oklch(0.62 0.13 240);
 
-  /* ── Sidebar ──────────────────────────────────────────────────
-     LEARN: Sidebar in dark mode is slightly different from
-     the main background to create depth.
-     ──────────────────────────────────────────────────────── */
-  --sidebar: oklch(0.21 0.025 166);
-  --sidebar-foreground: oklch(0.95 0.01 166);
-  --sidebar-primary: oklch(0.72 0.15 162.48);
-  --sidebar-primary-foreground: oklch(0.18 0.03 170.22);
-  --sidebar-accent: oklch(0.3 0.035 162.48);
-  --sidebar-accent-foreground: oklch(0.95 0.01 162.48);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.72 0.15 162.48);
+  --sidebar: #0f1713;
+  --sidebar-foreground: #eef3ec;
+  --sidebar-primary: #8fcb9b;
+  --sidebar-primary-foreground: #0f1713;
+  --sidebar-accent: #17221c;
+  --sidebar-accent-foreground: #eef3ec;
+  --sidebar-border: #2a3a31;
+  --sidebar-ring: #8fcb9b;
 }
 
 /* =========================================================
    SECTION 5: GLOBAL BASE STYLES
-   =========================================================
-   LEARN: @layer base contains styles that apply to raw
-   HTML elements. These are the foundation of the UI.
-
-   WHY USE @layer base?
-   - Tailwind's layer system ensures proper specificity.
-   - Base styles come before component and utility styles.
-   - It keeps the CSS organized and predictable.
-
-   BEST PRACTICE:
-   - Only style raw HTML elements here (html, body, *, etc.).
-   - Don't style components here (use component files).
-   - Keep it minimal — let Tailwind utilities do the heavy lifting.
    ========================================================= */
 
 @layer base {
-  /* ── Border defaults ──────────────────────────────────────
-     LEARN: The * selector applies to every element.
-
-     border-border sets the default border color to the
-     --border CSS variable.
-
-     outline-ring/50 sets the focus outline color to half
-     opacity of the --ring variable.
-
-     WHY: This ensures all borders use the same color by
-     default. Focus states are consistent and accessible.
-     ──────────────────────────────────────────────────────── */
   * {
     @apply border-border outline-ring/50;
   }
 
-  /* ── HTML ──────────────────────────────────────────────────
-     LEARN: Sets the default font for the entire document.
-
-     font-sans maps to --font-sans which is typically set
-     in your Tailwind config or via @font-face imports.
-
-     WHY: Consistent typography across the entire app.
-     ──────────────────────────────────────────────────────── */
   html {
     @apply font-sans;
   }
 
-  /* ── Body ──────────────────────────────────────────────────
-     LEARN: Body receives the global background and text color.
-
-     bg-background → --background CSS variable
-     text-foreground → --foreground CSS variable
-
-     antialiased smooths text rendering. This is especially
-     important on macOS and Windows for readability.
-
-     WHY: The body is the root of all visible content.
-     Setting these here ensures every page inherits the
-     correct colors and rendering.
-     ──────────────────────────────────────────────────────── */
   body {
     @apply bg-background text-foreground antialiased;
   }
 
-  /* ── Selection styles ─────────────────────────────────────
-     LEARN: ::selection styles what happens when users
-     highlight text with their cursor.
-
-     This is a small detail that makes the app feel polished
-     and intentional.
-
-     WHY: Branded selection colors reinforce the design
-     system and improve the user experience.
-     ──────────────────────────────────────────────────────── */
   ::selection {
     @apply bg-primary/20 text-foreground;
   }
 
-  /* ── Focus-visible ────────────────────────────────────────
-     LEARN: :focus-visible applies only when the user
-     is navigating with keyboard (not mouse/touch).
-
-     This is a crucial accessibility feature. Keyboard users
-     need clear focus indicators to navigate effectively.
-
-     WHY: Inclusive design. Everyone should be able to use
-     the app regardless of how they interact with it.
-     ──────────────────────────────────────────────────────── */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
   }
 
-  /* ── Scrollbar styling ────────────────────────────────────
-     LEARN: Custom scrollbars can improve the visual
-     consistency of the app.
-
-     This is a progressive enhancement. Users who don't
-     see custom scrollbars will see the browser default.
-
-     WHY: Small details like this make the app feel more
-     polished and cohesive.
-     ──────────────────────────────────────────────────────── */
   ::-webkit-scrollbar {
-    @apply w-2 h-2;
+    @apply w-1.5 h-1.5;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-muted rounded-full;
+    @apply bg-transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full hover:bg-muted-foreground/50 transition-colors duration-200;
+    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors duration-200;
   }
-
-  /* ── Reduced motion ────────────────────────────────────────
-     LEARN: prefers-reduced-motion respects user preferences
-     for reduced animation.
-
-     Some users experience dizziness or discomfort from
-     motion effects. This media query disables animations
-     for those users.
-
-     WHY: Accessibility is not optional. Every user deserves
-     a comfortable experience.
-     ──────────────────────────────────────────────────────── */
 
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -708,81 +378,57 @@
 
 /* =========================================================
    SECTION 6: UTILITY EXTENSIONS
-   =========================================================
-   LEARN: @layer utilities extends Tailwind with custom
-   utility classes.
-
-   This is where you add project-specific utilities that
-   aren't available in Tailwind by default.
-
-   WHY: Keep the code organized and maintainable by putting
-   custom utilities in their own layer.
    ========================================================= */
 
 @layer utilities {
-  /* ── Focus ring for interactive elements ──────────────────
-     LEARN: A consistent focus ring for all interactive
-     elements (buttons, inputs, links).
-
-     This ensures keyboard users can always see what's
-     currently focused.
-
-     WHY: Accessibility and consistency.
-     ──────────────────────────────────────────────────────── */
   .focus-ring {
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
-  /* ── Link styles ───────────────────────────────────────────
-     LEARN: A consistent link style that works in both
-     light and dark modes.
-
-     Uses the primary color and an underline on hover
-     for clear affordance.
-
-     WHY: Users should always know what's clickable.
-     ──────────────────────────────────────────────────────── */
   .link {
     @apply text-primary hover:underline hover:text-primary/80 transition-colors duration-200;
   }
 
-  /* ── Loading shimmer ──────────────────────────────────────
-     LEARN: A skeleton loading animation that indicates
-     content is loading.
-
-     This provides fast feedback to users — they know
-     something is happening.
-
-     WHY: Perceived performance matters. Users are more
-     patient when they see loading indicators.
-     ──────────────────────────────────────────────────────── */
   .shimmer {
     @apply bg-muted relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:bg-gradient-to-r before:from-transparent before:via-muted-foreground/10 before:to-transparent before:animate-[shimmer_1.5s_infinite];
   }
 
-  /* ── Glass effect ──────────────────────────────────────────
-     LEARN: A glass-morphism effect for modern, layered UIs.
-
-     Uses backdrop-blur for the frosted glass look.
-
-     WHY: Creates depth and visual interest without
-     overwhelming the content.
-     ──────────────────────────────────────────────────────── */
-  .glass {
-    @apply bg-background/80 backdrop-blur-sm border border-border/50;
+  /* Display title — narrow, heavy Archivo that stands tall and
+     straight, like the trunks in a Mahogany plantation */
+  .display-title {
+    font-size: clamp(2.5rem, 6vw + 1rem, 5.25rem);
+    font-stretch: 75%;
+    font-weight: 800;
+    line-height: 0.98;
+    letter-spacing: -0.01em;
   }
 
-  /* ── Safe area padding ─────────────────────────────────────
-     LEARN: Safe area padding ensures content isn't hidden
-     behind notches, home indicators, or rounded corners
-     on modern devices.
+  .section-title {
+    font-size: clamp(1.875rem, 2.5vw + 1rem, 3rem);
+    font-stretch: 80%;
+    font-weight: 750;
+    line-height: 1.05;
+    letter-spacing: -0.005em;
+  }
 
-     env(safe-area-inset-*) is a CSS environment variable
-     provided by the browser.
+  /* ── Bento Grid Card — uniform Linear-style surface ───── */
+  .bento-card {
+    @apply rounded-xl border-0 bg-transparent p-8 transition-colors duration-200 md:p-10;
+  }
 
-     WHY: Mobile-first design. The app should work well
-     on any device.
-     ──────────────────────────────────────────────────────── */
+  .bento-card:hover {
+    background-color: transparent;
+  }
+
+  .neon-edge {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 35%, transparent);
+  }
+
+  .nature-glow {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary) 15%, transparent);
+  }
+
+  /* ── Safe area padding ─────────────────────────────────── */
   .safe-top {
     padding-top: env(safe-area-inset-top);
   }
@@ -799,14 +445,6 @@
     padding-right: env(safe-area-inset-right);
   }
 
-  /* ── Responsive container ──────────────────────────────────
-     LEARN: A max-width container with responsive padding.
-
-     This ensures content doesn't stretch too wide on
-     large screens and has proper padding on small screens.
-
-     WHY: Readability. Lines of text shouldn't be too long.
-     ──────────────────────────────────────────────────────── */
   .container-narrow {
     @apply max-w-3xl mx-auto px-4 sm:px-6 lg:px-8;
   }
@@ -819,9 +457,30 @@
     animation: marquee 10s linear infinite;
   }
 
-  /* Add this INSIDE your existing @layer utilities block */
   .animate-marquee-track {
     animation: marquee-track 30s linear infinite;
+  }
+
+  /* ── Feature plate motion ─────────────────────────────────
+     The four plates on the landing page each carry a small mark
+     drawn over their photograph. These are the three movements
+     those marks need. */
+
+  /* A line that sweeps down the targeting frame on the "Identify"
+     plate, the same idea as the camera scanner. */
+  .plate-scan {
+    animation: plate-scan 4.5s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+
+  /* Rings that expand out of the pin on the "Report" plate. */
+  .plate-ping {
+    animation: plate-ping 3.4s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
+  }
+
+  /* A band of soft light that glides across the "Free and easy to
+     use" plate. */
+  .plate-sheen {
+    animation: plate-sheen 9s ease-in-out infinite;
   }
 
   .animate-marquee:hover {
@@ -838,7 +497,8 @@
   }
 }
 
-/* Keyframe outside @layer — correct */
+/* ── Keyframes ─────────────────────────────────────────── */
+
 @keyframes marquee {
   from {
     transform: translateX(0);
@@ -889,135 +549,44 @@
   }
 }
 
-/* =========================================================
-   END OF GLOBALS.CSS
-   =========================================================
+/* ── Feature plate keyframes ─────────────────────────────── */
 
-   ─── QUICK REFERENCE ───
+@keyframes plate-scan {
+  0% {
+    top: 8%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    top: 88%;
+    opacity: 0;
+  }
+}
 
-   ── Colors ──
-   bg-primary         → Main action color
-   bg-secondary       → Soft alternative
-   bg-background      → Page background
-   bg-card            → Card surface
-   bg-muted           → Low-importance areas
-   bg-destructive     → Error/danger
+@keyframes plate-ping {
+  0% {
+    transform: scale(0.3);
+    opacity: 0.85;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
 
-   ── Text ──
-   text-foreground    → Default text
-   text-primary       → Brand text (links, active)
-   text-muted-foreground → Secondary text
-   text-destructive   → Error text
-
-   ── Borders ──
-   border-border      → Default border color
-
-   ── Radius ──
-   rounded-sm         → Small corners
-   rounded-md         → Medium corners
-   rounded-lg         → Large corners (default)
-   rounded-xl         → Extra large
-   rounded-full       → Perfect circle
-
-   ── Spacing ──
-   p-4, m-4, gap-4    → 16px (using spacing scale)
-   p-8, m-8, gap-8    → 32px
-
-   ── Typography ──
-   text-sm            → 14px
-   text-base          → 16px
-   text-lg            → 18px
-   text-xl            → 20px
-   text-2xl           → 24px
-
-   ── Shadows ──
-   shadow-sm          → Subtle elevation
-   shadow-md          → Medium elevation
-   shadow-lg          → High elevation
-   shadow-xl          → Highest elevation
-
-   ── Transitions ──
-   transition-colors  → Color changes only
-   transition-all     → All properties
-   duration-200       → 200ms (default for interactions)
-
-   ── Z-index ──
-   z-10, z-20, z-30   → Stacking layers
-
-   ────────────────────────────────────────────────────────── */
-
-/* =========================================================
-   APPENDIX: LEARNING NOTES SUMMARY
-   =========================================================
-
-   1. CSS VARIABLES (Custom Properties)
-      ──────────────────────────────────
-      - Store reusable values with --name: value
-      - Access with var(--name)
-      - Change at runtime (themes, dark mode)
-      - One source of truth
-
-   2. DESIGN TOKENS
-      ──────────────────────────────────
-      - Semantic names (primary, background, border)
-      - Abstract values from implementation
-      - Enable consistent theming
-      - Make the design system scalable
-
-   3. OKLCH COLOR SPACE
-      ──────────────────────────────────
-      - L = Lightness (0-1, higher = lighter)
-      - C = Chroma (color intensity)
-      - H = Hue (0-360, color angle)
-      - More perceptually uniform than RGB
-      - Better for accessibility
-
-   4. DARK MODE PATTERN
-      ──────────────────────────────────
-      - :root = light theme (default)
-      - .dark = dark theme (override)
-      - Use @custom-variant for Tailwind
-      - Variables update automatically
-
-   5. TAILWIND @theme INLINE
-      ──────────────────────────────────
-      - Maps CSS variables to Tailwind classes
-      - Enables dynamic theming with utilities
-      - Keeps CSS and Tailwind in sync
-
-   6. @layer BASE
-      ──────────────────────────────────
-      - Styles raw HTML elements
-      - Foundation of the UI
-      - Low specificity (easy to override)
-
-   7. @layer UTILITIES
-      ──────────────────────────────────
-      - Custom utility classes
-      - High specificity
-      - Project-specific helpers
-
-   8. ACCESSIBILITY (a11y)
-      ──────────────────────────────────
-      - WCAG AA contrast ratios
-      - Focus-visible for keyboard users
-      - Reduced motion media query
-      - Safe area padding for devices
-      - Semantic color names
-
-   9. PERFORMANCE
-      ──────────────────────────────────
-      - CSS variables are fast
-      - Only one stylesheet for all themes
-      - No duplicate styles for dark mode
-      - @apply for common patterns
-
-   10. MAINTAINABILITY
-      ──────────────────────────────────
-      - Clear comments and organization
-      - Semantic naming
-      - Single source of truth
-      - Consistent patterns
-      - Modular layers
-
-   ────────────────────────────────────────────────────────── */
+@keyframes plate-sheen {
+  0% {
+    transform: translateX(-140%);
+  }
+  100% {
+    transform: translateX(460%);
+  }
+}
