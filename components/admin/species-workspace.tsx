@@ -1,71 +1,135 @@
 // components/admin/species-workspace.tsx
 //
-// WHAT: Compact, practical Species Reference Table and Management Guidance
-//   tool for authenticated CENRO officers (/admin/species).
+// WHAT: The Species & Management Recommendations page for CENRO staff
+//   (/admin/species) — a searchable list of the reference species, each
+//   opening to its Management Recommendations and botanical details.
 //
-// THESIS RESEARCH ALIGNMENT:
-//   - Aligned with CITIA-IS YOLOv8n-cls classification architecture (3 classes:
-//     Mahogany, Non-Mahogany, Non-Tree).
-//   - The table accurately reflects that the model predicts "Non-Mahogany" as a
-//     broad negative class and does not classify Molave, Narra, or Yemane individually.
-//   - Distinguishes confirmed thesis reference (Mahogany) from demonstration baselines.
-//   - Informational guidance only: never presents AI results as tree-cutting authorization.
+// HOW IT IS LAID OUT:
+//   - Each species is one row. Selecting the row opens it in place.
+//   - Inside an open species, Management Recommendations come first, as
+//     a two-column grid. Each recommendation shows its title and purpose;
+//     the guidance and on-site verification open on request.
+//   - The longer reference text (leaf characteristics, other botanical
+//     characteristics, source and scope) sits in sections that open on
+//     request, so an officer can scan the titles first.
+//   The sections that open and close are native <details> elements, so
+//   they work with a keyboard and a screen reader without extra code.
 //
-// DESIGN & RESPONSIVENESS:
-//   - Aligned with CITIA-IS design system in app/globals.css.
-//   - Compact 4-column table: Species | Classification | Reference status | Action.
-//   - Expandable inline details without horizontal scroll or text container collisions.
+// WHAT THE AI DOES AND DOES NOT DO:
+//   The model predicts three classes: Mahogany, Non-Mahogany, Non-Tree.
+//   "Non-Mahogany" is one broad class; the model never names Molave,
+//   Narra or Yemane. Nothing on this page authorizes tree cutting.
+//
+// DATA: everything shown comes from lib/species-data.ts, unchanged. Two
+//   labels are reworded for display only (see REFERENCE_LABEL below).
 
 "use client";
 
-import { useState, useMemo, Fragment } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   ChevronDown,
-  ChevronUp,
   ExternalLink,
-  FileText,
-  ImageIcon,
-  Info,
-  Layers,
+  ImagePlus,
   MapPin,
   RotateCcw,
   Search,
-  ShieldCheck,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   getAllSpecies,
   type ReferenceStatus,
   type SpeciesClassification,
+  type SpeciesRecord,
 } from "@/lib/species-data";
 import { cn } from "@/lib/utils";
+
+/**
+ * How a species' reference status is worded on this page. The values in
+ * the data file are unchanged; only the label shown to staff differs.
+ */
+const REFERENCE_LABEL: Record<ReferenceStatus, string> = {
+  "Confirmed thesis reference": "Target species",
+  Demonstration: "Comparison species",
+};
+
+/** The "source and scope" text without its leading status sentence. */
+function scopeText(text: string) {
+  return text.replace(/^(Confirmed thesis reference|Demonstration baseline)\.\s*/, "");
+}
+
+const selectClass =
+  "focus-ring h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground";
+
+/** A section that opens and closes. Closed unless `defaultOpen` is set. */
+function Disclosure({
+  title,
+  hint,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <details open={defaultOpen} className="group/d border-t border-border">
+      <summary className="focus-ring flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-sm py-3 [&::-webkit-details-marker]:hidden">
+        <span>
+          <span className="block text-base font-semibold text-foreground">
+            {title}
+          </span>
+          {hint && (
+            <span className="block text-sm text-muted-foreground">{hint}</span>
+          )}
+        </span>
+        <ChevronDown
+          className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open/d:rotate-180 motion-reduce:transition-none"
+          aria-hidden="true"
+        />
+      </summary>
+      <div className="pb-5">{children}</div>
+    </details>
+  );
+}
+
+/** A "term / detail" list, the same pattern as the public Species Guide. */
+function FactList({ items }: { items: [string, string | undefined][] }) {
+  return (
+    <dl className="border-t border-border">
+      {items.map(([term, detail]) => (
+        <div
+          key={term}
+          className="grid gap-1 border-b border-border py-3 sm:grid-cols-[12rem_minmax(0,1fr)] sm:gap-6"
+        >
+          <dt className="text-sm font-semibold text-foreground">{term}</dt>
+          <dd className="m-0 text-sm leading-relaxed text-muted-foreground">
+            {detail ?? "Not recorded."}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
 
 export function SpeciesWorkspace() {
   const allSpecies = useMemo(() => getAllSpecies(), []);
 
-  // UI state
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedClassification, setSelectedClassification] = useState<SpeciesClassification | "All">("All");
+  const [selectedClassification, setSelectedClassification] = useState<
+    SpeciesClassification | "All"
+  >("All");
   const [selectedStatus, setSelectedStatus] = useState<ReferenceStatus | "All">("All");
 
-  // Inline expansion state: Default to Mahogany expanded for immediate reference
+  // Which species are open. Mahogany starts open: it is the one staff
+  // need most often.
   const [expandedIds, setExpandedIds] = useState<Set<string>>(
     () => new Set(["sp-mahogany"])
   );
-
-  // Active image map for multi-image records
+  // Which photo is showing for a species that has several.
   const [activeImageMap, setActiveImageMap] = useState<Record<string, number>>({});
 
   const toggleExpand = (id: string) => {
@@ -80,16 +144,8 @@ export function SpeciesWorkspace() {
     });
   };
 
-  const expandAll = () => {
-    setExpandedIds(new Set(allSpecies.map((s) => s.id)));
-  };
-
-  const collapseAll = () => {
-    setExpandedIds(new Set());
-  };
-
-  // Filtered list
   const filteredSpecies = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
     return allSpecies.filter((sp) => {
       if (selectedClassification !== "All" && sp.classification !== selectedClassification) {
         return false;
@@ -97,25 +153,19 @@ export function SpeciesWorkspace() {
       if (selectedStatus !== "All" && sp.referenceStatus !== selectedStatus) {
         return false;
       }
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        const matchesName =
-          sp.commonName.toLowerCase().includes(query) ||
-          sp.scientificName.toLowerCase().includes(query);
-        const matchesFamily = sp.family.toLowerCase().includes(query);
-        const matchesDesc = sp.shortDescription.toLowerCase().includes(query);
-        const matchesRec = sp.managementRecommendations.some(
+      if (!query) return true;
+      return (
+        sp.commonName.toLowerCase().includes(query) ||
+        sp.scientificName.toLowerCase().includes(query) ||
+        sp.family.toLowerCase().includes(query) ||
+        sp.shortDescription.toLowerCase().includes(query) ||
+        sp.managementRecommendations.some(
           (r) =>
             r.title.toLowerCase().includes(query) ||
             r.purpose.toLowerCase().includes(query) ||
             r.guidance.toLowerCase().includes(query)
-        );
-
-        if (!matchesName && !matchesFamily && !matchesDesc && !matchesRec) {
-          return false;
-        }
-      }
-      return true;
+        )
+      );
     });
   }, [allSpecies, selectedClassification, selectedStatus, searchQuery]);
 
@@ -124,625 +174,437 @@ export function SpeciesWorkspace() {
     selectedClassification !== "All" ||
     selectedStatus !== "All";
 
-  const handleResetFilters = () => {
+  const resetFilters = () => {
     setSearchQuery("");
     setSelectedClassification("All");
     setSelectedStatus("All");
   };
 
+  const allOpen =
+    filteredSpecies.length > 0 &&
+    filteredSpecies.every((sp) => expandedIds.has(sp.id));
+
   return (
-    <div className="w-full max-w-full space-y-6 overflow-hidden">
-      {/* ── Page Header ────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-6">
+      {/* ── Page header ───────────────────────────────────────── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-primary">
-            CENRO Reference Information System
-          </p>
-          <h1 className="mt-1 section-title text-foreground">
+          <h1 className="section-title text-foreground">
             Species &amp; Management Recommendations
           </h1>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:text-sm">
-            Compact botanical reference and informational management guidance for CITIA-IS study areas in Iligan City.
+          <p className="mt-2 max-w-[44rem] text-base leading-relaxed text-muted-foreground">
+            Reference profiles and Management Recommendations for screening
+            and field review. They are informational: AI results do not
+            authorize tree cutting, pruning or removal, which need a CENRO
+            assessment and DENR permits under Presidential Decree No. 705.
           </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
-          <Link
-            href="/species"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "text-sm text-muted-foreground hover:text-foreground"
-            )}
-          >
-            Public Species Guide
-            <ExternalLink className="ml-1.5 h-3.5 w-3.5" aria-hidden="true" />
-          </Link>
-        </div>
+        <Link
+          href="/species"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "h-10 shrink-0 px-4 text-sm"
+          )}
+        >
+          Public Species Guide
+          <ExternalLink className="ml-2 h-3.5 w-3.5" aria-hidden="true" />
+          <span className="sr-only"> (opens in a new tab)</span>
+        </Link>
       </div>
 
-      {/* ── Grounded Legal & Regulatory Disclaimer ──────────────────── */}
-      <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-3.5 w-full max-w-full">
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-        <div className="space-y-1 text-sm leading-relaxed text-muted-foreground min-w-0 flex-1">
-          <p className="whitespace-normal break-words">
-            <strong className="text-foreground font-semibold">
-              Informational Decision-Support Tool.
-            </strong>{" "}
-            Species reference profiles and Management Recommendations assist CENRO officers during
-            preliminary screening and field review. AI classifications (Mahogany, Non-Mahogany, Non-Tree)
-            do <strong>NOT</strong> authorize tree cutting, pruning, or removal. All physical actions
-            remain subject to on-site CENRO evaluation and official DENR permits under Presidential Decree No. 705.
-          </p>
-          <p className="text-sm text-muted-foreground/80 whitespace-normal break-words">
-            The YOLOv8n-cls model classifies leaf images into three broad classes. Non-Mahogany entries
-            illustrate negative-sample baselines and are not individually predicted by the AI model.
-          </p>
-        </div>
-      </div>
-
-      {/* ── Search & Filter Bar ────────────────────────────────────── */}
-      <Card className="rounded-lg border border-border bg-card p-3.5 sm:p-4 w-full max-w-full">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          {/* Search box */}
-          <div className="relative flex-1 w-full md:max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+      {/* ── Search and filters ────────────────────────────────── */}
+      <div className="flex flex-col gap-3 border-y border-border py-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-1 flex-wrap items-center gap-2">
+          <label className="relative block w-full sm:w-80">
+            <span className="sr-only">Search species or guidance</span>
+            <Search
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
             <Input
               type="search"
-              placeholder="Search species name, family, or guidance…"
+              placeholder="Search species or guidance"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 pl-9 text-sm rounded-md w-full"
+              className="h-10 w-full border-input bg-card pl-9 text-sm"
             />
-          </div>
+          </label>
 
-          {/* Filters & Expand toggles */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Classification select */}
-            <select
-              aria-label="Filter by Classification"
-              value={selectedClassification}
-              onChange={(e) =>
-                setSelectedClassification(e.target.value as SpeciesClassification | "All")
-              }
-              className="h-8 rounded-md border border-border bg-card px-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
+          <select
+            aria-label="Filter by AI class"
+            value={selectedClassification}
+            onChange={(e) =>
+              setSelectedClassification(e.target.value as SpeciesClassification | "All")
+            }
+            className={selectClass}
+          >
+            <option value="All">All AI classes</option>
+            <option value="Mahogany">Mahogany</option>
+            <option value="Non-Mahogany">Non-Mahogany</option>
+          </select>
+
+          <select
+            aria-label="Filter by reference type"
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value as ReferenceStatus | "All")}
+            className={selectClass}
+          >
+            <option value="All">All reference types</option>
+            {(Object.keys(REFERENCE_LABEL) as ReferenceStatus[]).map((status) => (
+              <option key={status} value={status}>
+                {REFERENCE_LABEL[status]}
+              </option>
+            ))}
+          </select>
+
+          {isFiltered && (
+            <Button
+              variant="ghost"
+              onClick={resetFilters}
+              className="h-10 px-3 text-sm text-muted-foreground hover:text-foreground"
             >
-              <option value="All">All Classifications</option>
-              <option value="Mahogany">Mahogany</option>
-              <option value="Non-Mahogany">Non-Mahogany</option>
-            </select>
-
-            {/* Status select */}
-            <select
-              aria-label="Filter by Reference Status"
-              value={selectedStatus}
-              onChange={(e) =>
-                setSelectedStatus(e.target.value as ReferenceStatus | "All")
-              }
-              className="h-8 rounded-md border border-border bg-card px-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="All">All Reference Statuses</option>
-              <option value="Confirmed thesis reference">Confirmed thesis reference</option>
-              <option value="Demonstration">Demonstration</option>
-            </select>
-
-            {isFiltered && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleResetFilters}
-                className="h-8 px-2 text-sm text-muted-foreground hover:text-foreground"
-              >
-                <RotateCcw className="mr-1 h-3 w-3" />
-                Reset
-              </Button>
-            )}
-
-            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-border/60">
-              <button
-                type="button"
-                onClick={expandAll}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
-              >
-                Expand all
-              </button>
-              <span className="text-border">|</span>
-              <button
-                type="button"
-                onClick={collapseAll}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
-              >
-                Collapse all
-              </button>
-            </div>
-          </div>
+              <RotateCcw className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+              Reset
+            </Button>
+          )}
         </div>
 
-        <div className="mt-2.5 flex items-center justify-between text-sm text-muted-foreground pt-2 border-t border-border/60">
-          <span>
-            Showing <strong className="text-foreground">{filteredSpecies.length}</strong> of{" "}
-            <strong className="text-foreground">{allSpecies.length}</strong> reference entries
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <span aria-live="polite">
+            <strong className="font-semibold text-foreground">
+              {filteredSpecies.length}
+            </strong>{" "}
+            of {allSpecies.length} species
           </span>
-          <span className="text-sm text-muted-foreground">
-            Select &ldquo;View details&rdquo; to expand characteristics and recommendations
-          </span>
+          {filteredSpecies.length > 0 && (
+            <button
+              type="button"
+              onClick={() =>
+                setExpandedIds(
+                  allOpen ? new Set() : new Set(filteredSpecies.map((s) => s.id))
+                )
+              }
+              className="focus-ring min-h-10 rounded-sm font-semibold text-primary underline decoration-primary/40 underline-offset-4 hover:decoration-primary"
+            >
+              {allOpen ? "Close all" : "Open all"}
+            </button>
+          )}
         </div>
-      </Card>
+      </div>
 
-      {/* ── 4-Column Practical Reference Table ──────────────────────── */}
-      <Card className="rounded-lg border border-border bg-card p-0 overflow-hidden w-full max-w-full">
-        <div className="border-b border-border bg-muted/20 px-4 py-3">
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            These are reference entries, not additional AI species classes.
-            Molave, Narra, and Yemane are examples within the broad{" "}
-            <strong className="font-semibold text-foreground">Non-Mahogany</strong>{" "}
-            class; <strong className="font-semibold text-foreground">Non-Tree</strong>{" "}
-            is not a species entry.
+      {/* ── Species list ──────────────────────────────────────── */}
+      {filteredSpecies.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-border px-6 py-12 text-center">
+          <p className="text-base font-semibold text-foreground">
+            No species match
           </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Try a different name, or clear the filters.
+          </p>
+          <Button variant="outline" onClick={resetFilters} className="mt-4 h-10 text-sm">
+            Clear filters
+          </Button>
         </div>
-        <Table className="w-full">
-          <TableHeader>
-            <TableRow className="border-border hover:bg-transparent">
-              <TableHead className="text-sm pl-4 min-w-[200px]">Species</TableHead>
-              <TableHead className="text-sm min-w-[140px]">Classification</TableHead>
-              <TableHead className="text-sm min-w-[160px]">Reference status</TableHead>
-              <TableHead className="text-right text-sm pr-4 w-28">Action</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredSpecies.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="py-12 text-center text-muted-foreground whitespace-normal">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <Search className="h-6 w-6 text-muted-foreground/60" />
-                    <p className="text-sm font-semibold text-foreground">
-                      No matching species found
-                    </p>
-                    <p className="text-sm text-muted-foreground max-w-sm">
-                      No reference entry matches &ldquo;{searchQuery}&rdquo; and active filters.
-                    </p>
-                    {isFiltered && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleResetFilters}
-                        className="mt-2 text-sm h-8"
-                      >
-                        Reset filters
-                      </Button>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredSpecies.map((sp) => {
-                const isExpanded = expandedIds.has(sp.id);
-                const hasImages = sp.images.length > 0;
-                const activeImgIndex = activeImageMap[sp.id] ?? 0;
-                const currentImage = hasImages
-                  ? sp.images[activeImgIndex] ?? sp.images[0]
-                  : null;
+      ) : (
+        <ul className="m-0 list-none space-y-3 p-0">
+          {filteredSpecies.map((sp) => (
+            <SpeciesEntry
+              key={sp.id}
+              species={sp}
+              isOpen={expandedIds.has(sp.id)}
+              onToggle={() => toggleExpand(sp.id)}
+              activeImage={activeImageMap[sp.id] ?? 0}
+              onPickImage={(index) =>
+                setActiveImageMap((prev) => ({ ...prev, [sp.id]: index }))
+              }
+            />
+          ))}
+        </ul>
+      )}
 
-                return (
-                  <Fragment key={sp.id}>
-                    {/* Main Row */}
-                    <TableRow
-                      onClick={() => toggleExpand(sp.id)}
-                      className={cn(
-                        "cursor-pointer border-border transition-colors hover:bg-muted/40",
-                        isExpanded && "bg-muted/20"
-                      )}
-                      tabIndex={0}
-                      aria-expanded={isExpanded}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          toggleExpand(sp.id);
-                        }
-                      }}
-                    >
-                      {/* Column 1: Species (Common name + Scientific name) */}
-                      <TableCell className="pl-4 py-3.5 align-middle whitespace-normal">
-                        <div className="space-y-0.5">
-                          <p className="font-semibold text-foreground text-sm leading-tight">
-                            {sp.commonName}{" "}
-                            <span className="font-normal italic text-muted-foreground">
-                              ({sp.scientificName})
-                            </span>
-                          </p>
-                          <p className="text-sm tabular-nums text-muted-foreground/80">
-                            Family: {sp.family}
-                          </p>
-                        </div>
-                      </TableCell>
-
-                      {/* Column 2: Broad model-aligned classification */}
-                      <TableCell className="py-3.5 align-middle whitespace-nowrap">
-                        <div className="space-y-1">
-                          <span
-                            className={cn(
-                              "inline-flex items-center rounded px-2.5 py-0.5 text-sm font-semibold border",
-                              sp.classification === "Mahogany"
-                                ? "bg-destructive/10 text-destructive border-destructive/30"
-                                : "bg-primary/10 text-primary border-primary/30"
-                            )}
-                          >
-                            {sp.classification}
-                          </span>
-                          {sp.classification === "Non-Mahogany" && (
-                            <span className="block text-sm text-muted-foreground">
-                              Broad model class
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-
-                      {/* Column 3: Reference status */}
-                      <TableCell className="py-3.5 align-middle whitespace-nowrap">
-                        {sp.isConfirmed ? (
-                          <span className="inline-flex items-center gap-1.5 rounded bg-primary/10 border border-primary/30 px-2.5 py-0.5 text-sm font-medium text-primary">
-                            <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0" />
-                            {sp.referenceStatus}
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded bg-muted border border-border px-2.5 py-0.5 text-sm font-medium text-muted-foreground">
-                            {sp.referenceStatus}
-                          </span>
-                        )}
-                      </TableCell>
-
-                      {/* Column 4: Action */}
-                      <TableCell className="pr-4 py-3.5 align-middle text-right whitespace-nowrap w-28">
-                        <button
-                          type="button"
-                          className={cn(
-                            buttonVariants({ variant: "ghost", size: "sm" }),
-                            "h-8 px-2 text-sm font-medium text-muted-foreground hover:text-foreground"
-                          )}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleExpand(sp.id);
-                          }}
-                        >
-                          {isExpanded ? "Hide details" : "View details"}
-                          {isExpanded ? (
-                            <ChevronUp className="ml-1 h-3.5 w-3.5 shrink-0" />
-                          ) : (
-                            <ChevronDown className="ml-1 h-3.5 w-3.5 shrink-0" />
-                          )}
-                        </button>
-                      </TableCell>
-                    </TableRow>
-
-                    {/* Inline Expanded Detail Section */}
-                    {isExpanded && (
-                      <TableRow className="border-b border-border bg-card/90 hover:bg-card/90">
-                        <TableCell colSpan={4} className="p-3 sm:p-5 whitespace-normal break-words max-w-full">
-                          <div className="w-full max-w-full overflow-hidden space-y-5 rounded-lg border border-border bg-background/70 p-4 sm:p-5 whitespace-normal break-words">
-                            {/* Overview & Source / Scope Status Card */}
-                            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between border-b border-border pb-4 w-full min-w-0">
-                              <div className="space-y-1 flex-1 min-w-0">
-                                <h2 className="text-sm font-bold text-foreground">
-                                  {sp.commonName} <em>({sp.scientificName})</em>
-                                </h2>
-                                <p className="text-sm leading-relaxed text-muted-foreground whitespace-normal break-words">
-                                  {sp.shortDescription}
-                                </p>
-                                {sp.studyLocations && sp.studyLocations.length > 0 && (
-                                  <div className="pt-1 flex flex-wrap items-center gap-1.5 text-sm">
-                                    <span className="text-sm font-medium text-muted-foreground">
-                                      Study Areas:
-                                    </span>
-                                    {sp.studyLocations.map((loc) => (
-                                      <span
-                                        key={loc}
-                                        className="inline-flex items-center gap-1 rounded bg-muted/70 px-2 py-0.5 text-sm text-muted-foreground"
-                                      >
-                                        <MapPin className="h-2.5 w-2.5 text-primary shrink-0" />
-                                        {loc}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="w-full lg:w-80 shrink-0 rounded-lg border border-border/80 bg-muted/40 p-3 space-y-1">
-                                <span className="text-sm text-muted-foreground block">
-                                  Source &amp; Scope Verification
-                                </span>
-                                <span
-                                  className={cn(
-                                    "inline-block rounded px-2 py-0.5 text-sm font-medium border",
-                                    sp.isConfirmed
-                                      ? "border-primary/30 bg-primary/10 text-primary"
-                                      : "border-border bg-muted text-muted-foreground"
-                                  )}
-                                >
-                                  {sp.referenceStatus}
-                                </span>
-                                <p className="text-sm leading-relaxed text-muted-foreground whitespace-normal break-words mt-1">
-                                  {sp.sourceAndScope}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Identification Characteristics & Reference Imagery Split */}
-                            <div className="grid gap-5 lg:grid-cols-12 w-full min-w-0">
-                              {/* Left: Available Identification Characteristics (8 cols on lg) */}
-                              <div className="space-y-3 lg:col-span-8 min-w-0">
-                                <div>
-                                  <span className="text-sm font-bold text-muted-foreground block">
-                                    Leaf Characteristics
-                                  </span>
-                                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                                    Relevant to the scanner. These are botanical reference traits, not proof that the trained model explicitly learned or checks each feature.
-                                  </p>
-                                </div>
-
-                                <dl className="grid gap-3 text-sm w-full min-w-0">
-                                  <div className="rounded border border-primary/30 bg-primary/5 p-3 space-y-1 min-w-0">
-                                    <dt className="text-sm font-bold text-primary">
-                                      Leaf Structure
-                                    </dt>
-                                    <dd className="text-foreground leading-relaxed whitespace-normal break-words">
-                                      {sp.botanicalFeatures.leafStructure ?? sp.botanicalFeatures.leaves}
-                                    </dd>
-                                  </div>
-
-                                  <div className="grid gap-3 sm:grid-cols-2">
-                                    <div className="rounded border border-primary/30 bg-primary/5 p-3 space-y-1 min-w-0">
-                                      <dt className="text-sm font-bold text-primary">
-                                        Leaflet Shape
-                                      </dt>
-                                      <dd className="text-foreground leading-relaxed whitespace-normal break-words">
-                                        {sp.botanicalFeatures.leafletShape ?? (
-                                          <span className="italic text-muted-foreground">
-                                            Not separately recorded in the current dataset.
-                                          </span>
-                                        )}
-                                      </dd>
-                                    </div>
-
-                                    <div className="rounded border border-primary/30 bg-primary/5 p-3 space-y-1 min-w-0">
-                                      <dt className="text-sm font-bold text-primary">
-                                        Leaf Color &amp; Surface
-                                      </dt>
-                                      <dd className="text-foreground leading-relaxed whitespace-normal break-words">
-                                        {sp.botanicalFeatures.leafColorSurface ?? (
-                                          <span className="italic text-muted-foreground">
-                                            Not separately recorded in the current dataset.
-                                          </span>
-                                        )}
-                                      </dd>
-                                    </div>
-                                  </div>
-                                </dl>
-
-                                <div className="space-y-3 pt-2">
-                                  <div>
-                                    <span className="text-sm font-bold text-muted-foreground block">
-                                      Additional Botanical Characteristics
-                                    </span>
-                                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                                      Reference only for human verification; these characteristics are not directly assessed by a leaf-only scan.
-                                    </p>
-                                  </div>
-
-                                  <dl className="grid gap-3 sm:grid-cols-3 text-sm w-full min-w-0">
-                                    {[
-                                      ["Growth Habit & Form", sp.botanicalFeatures.habit],
-                                      ["Fruit & Seed", sp.botanicalFeatures.fruitAndSeed],
-                                      ["Bark & Trunk", sp.botanicalFeatures.barkAndForm],
-                                    ].map(([label, value]) => (
-                                      <div key={label} className="rounded border border-border bg-card p-3 space-y-1 min-w-0">
-                                        <dt className="text-sm font-bold text-primary">
-                                          {label}
-                                        </dt>
-                                        <dd className="text-foreground leading-relaxed whitespace-normal break-words">
-                                          {value ?? (
-                                            <span className="italic text-muted-foreground">
-                                              Unrecorded in current dataset.
-                                            </span>
-                                          )}
-                                        </dd>
-                                      </div>
-                                    ))}
-                                  </dl>
-                                </div>
-                              </div>
-
-                              {/* Right: Reference Imagery (4 cols on lg) */}
-                              <div className="space-y-2.5 lg:col-span-4 min-w-0">
-                                <span className="text-sm font-bold text-muted-foreground block">
-                                  Reference Imagery
-                                </span>
-
-                                {hasImages && currentImage ? (
-                                  <div className="space-y-2">
-                                    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-md border border-border bg-card">
-                                      <Image
-                                        src={currentImage.url}
-                                        alt={currentImage.caption}
-                                        fill
-                                        sizes="(max-width: 1024px) 100vw, 320px"
-                                        className="object-cover"
-                                      />
-                                      <div className="absolute inset-x-0 bottom-0 bg-black/80 p-2 text-sm text-white">
-                                        <p className="line-clamp-2 leading-tight">
-                                          {currentImage.caption}
-                                        </p>
-                                      </div>
-                                    </div>
-
-                                    {/* Thumbnail picker if multiple images */}
-                                    {sp.images.length > 1 && (
-                                      <div className="flex gap-1.5 overflow-x-auto pb-1">
-                                        {sp.images.map((img, idx) => (
-                                          <button
-                                            key={img.id}
-                                            type="button"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              setActiveImageMap((prev) => ({
-                                                ...prev,
-                                                [sp.id]: idx,
-                                              }));
-                                            }}
-                                            className={cn(
-                                              "relative h-12 w-16 shrink-0 overflow-hidden rounded border text-left transition-all",
-                                              activeImgIndex === idx
-                                                ? "border-primary ring-1 ring-primary"
-                                                : "border-border opacity-70 hover:opacity-100"
-                                            )}
-                                            aria-label={`View photo ${idx + 1}`}
-                                          >
-                                            <Image
-                                              src={img.url}
-                                              alt={img.caption}
-                                              fill
-                                              sizes="64px"
-                                              className="object-cover"
-                                            />
-                                          </button>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <div className="flex flex-col items-center justify-center rounded-md border border-dashed border-border bg-muted/30 p-6 text-center">
-                                    <ImageIcon className="h-6 w-6 text-muted-foreground/60 mb-1.5" />
-                                    <p className="text-sm font-semibold text-foreground">
-                                      No Image on File
-                                    </p>
-                                    <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed whitespace-normal break-words">
-                                      Representative entry for the Non-Mahogany negative training class.
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Supported Management Guidance */}
-                            <div className="space-y-3 pt-3 border-t border-border w-full min-w-0">
-                              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                <div>
-                                  <span className="text-sm font-bold text-primary block">
-                                    Operational Guidance
-                                  </span>
-                                  <h3 className="text-sm font-bold text-foreground">
-                                    Supported Management Recommendations ({sp.managementRecommendations.length})
-                                  </h3>
-                                </div>
-
-                                {sp.isConfirmed && (
-                                  <Link
-                                    href="/admin/reports"
-                                    className={cn(
-                                      buttonVariants({ variant: "outline", size: "sm" }),
-                                      "h-8 text-sm text-muted-foreground hover:text-foreground shrink-0 w-fit"
-                                    )}
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <FileText className="mr-1.5 h-3.5 w-3.5 text-primary shrink-0" />
-                                    Review Sighting Reports
-                                  </Link>
-                                )}
-                              </div>
-
-                              <div className="space-y-3 w-full min-w-0">
-                                {sp.managementRecommendations.map((rec, rIdx) => (
-                                  <div
-                                    key={rec.id}
-                                    className="rounded-lg border border-border bg-card p-4 space-y-2.5 text-sm w-full min-w-0"
-                                  >
-                                    <div className="flex items-start gap-2 border-b border-border pb-2">
-                                      <span className="tabular-nums text-sm font-bold text-primary shrink-0 mt-0.5">
-                                        [{rIdx + 1}]
-                                      </span>
-                                      <h4 className="font-semibold text-foreground text-sm leading-snug break-words">
-                                        {rec.title}
-                                      </h4>
-                                    </div>
-
-                                    <div className="space-y-1.5 leading-relaxed">
-                                      <p className="whitespace-normal break-words">
-                                        <strong className="text-foreground font-semibold">Purpose: </strong>
-                                        <span className="text-muted-foreground">{rec.purpose}</span>
-                                      </p>
-                                      <p className="whitespace-normal break-words">
-                                        <strong className="text-foreground font-semibold">Guidance: </strong>
-                                        <span className="text-muted-foreground">{rec.guidance}</span>
-                                      </p>
-                                    </div>
-
-                                    <div className="rounded bg-muted/40 p-2.5 border border-border/60">
-                                      <span className="font-semibold text-foreground block text-sm">
-                                        On-Site Verification Requirements:
-                                      </span>
-                                      <p className="text-sm text-muted-foreground leading-relaxed whitespace-normal break-words mt-0.5">
-                                        {rec.verificationRequirements}
-                                      </p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </Fragment>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </Card>
-
-      {/* ── Thesis AI Architecture Scope Reference Card ──────────────── */}
-      <Card className="rounded-lg border border-border bg-card p-4 space-y-3 w-full max-w-full">
-        <div className="flex items-center gap-2 border-b border-border pb-2">
-          <Layers className="h-4 w-4 text-primary shrink-0" />
-          <h2 className="text-sm font-bold text-foreground">
-            CITIA-IS Classification Scope Note (YOLOv8n-cls)
-          </h2>
-        </div>
-
-        <p className="text-sm text-muted-foreground leading-relaxed whitespace-normal break-words">
-          The CITIA-IS model operates exclusively in <strong className="text-foreground">image classification mode</strong> using
-          a lightweight YOLOv8n-cls model trained on three classes. Understanding this boundary ensures CENRO officers correctly interpret predictions:
-        </p>
-
-        <div className="grid gap-3 sm:grid-cols-3 text-sm w-full min-w-0">
-          <div className="rounded-md border border-destructive/30 bg-muted/20 p-3 space-y-1 min-w-0">
-            <span className="tabular-nums text-sm font-bold text-destructive block">
-              Class 0: Mahogany
-            </span>
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-normal break-words">
-              <em>Swietenia macrophylla</em>. Primary research target. Sighting report workflow active for community documentation.
-            </p>
-          </div>
-
-          <div className="rounded-md border border-primary/30 bg-muted/20 p-3 space-y-1 min-w-0">
-            <span className="tabular-nums text-sm font-bold text-primary block">
-              Class 1: Non-Mahogany
-            </span>
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-normal break-words">
-              Broad negative flora class (native/introduced trees and plants). The model does not predict individual non-target species names.
-            </p>
-          </div>
-
-          <div className="rounded-md border border-border bg-muted/20 p-3 space-y-1 min-w-0">
-            <span className="tabular-nums text-sm font-bold text-muted-foreground block">
-              Class 2: Non-Tree
-            </span>
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-normal break-words">
-              Broad negative non-leaf/background class. Prompts the user to capture a clear, well-lit leaf photograph.
-            </p>
-          </div>
-        </div>
-      </Card>
+      {/* ── What the AI classifies ────────────────────────────── */}
+      <section className="rounded-lg border border-border bg-card px-5">
+        <Disclosure
+          title="How the AI classifies a leaf photo"
+          hint="Three broad classes. It does not name individual species."
+        >
+          <FactList
+            items={[
+              [
+                "Mahogany",
+                "Swietenia macrophylla. The target species. A report of it goes to CENRO for review.",
+              ],
+              [
+                "Non-Mahogany",
+                "Any other tree or plant, native or introduced. The model does not say which species it is, so Molave, Narra and Yemane all fall here.",
+              ],
+              [
+                "Non-Tree",
+                "A photo with no clear leaf in it. The reporter is asked for a clearer, well-lit leaf photo.",
+              ],
+            ]}
+          />
+        </Disclosure>
+      </section>
     </div>
+  );
+}
+
+function SpeciesEntry({
+  species: sp,
+  isOpen,
+  onToggle,
+  activeImage,
+  onPickImage,
+}: {
+  species: SpeciesRecord;
+  isOpen: boolean;
+  onToggle: () => void;
+  activeImage: number;
+  onPickImage: (index: number) => void;
+}) {
+  const panelId = `species-panel-${sp.id}`;
+  const image = sp.images[activeImage] ?? sp.images[0] ?? null;
+  const isTarget = sp.classification === "Mahogany";
+
+  return (
+    <li
+      className={cn(
+        "overflow-hidden rounded-lg border bg-card transition-colors",
+        isOpen ? "border-foreground/30" : "border-border"
+      )}
+    >
+      {/* ── Row: the whole row opens and closes the species ──── */}
+      <h2 className="m-0">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls={panelId}
+          onClick={onToggle}
+          className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 px-5 py-4 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring md:grid-cols-[minmax(0,1fr)_11rem_11rem_auto]"
+        >
+          <span className="min-w-0">
+            <span className="block text-lg font-bold leading-snug text-foreground">
+              {sp.commonName}
+            </span>
+            <span className="block text-sm text-muted-foreground">
+              <em>{sp.scientificName}</em>, {sp.family}
+            </span>
+          </span>
+
+          {/* The AI class. Heartwood marks the target species, as on
+              the public pages. */}
+          <span className="col-start-1 row-start-2 text-sm md:col-start-2 md:row-start-1">
+            <span className="block text-xs text-muted-foreground">AI class</span>
+            <span
+              className={cn(
+                "font-semibold",
+                isTarget ? "text-heartwood" : "text-foreground"
+              )}
+            >
+              {sp.classification}
+            </span>
+          </span>
+
+          <span className="hidden text-sm md:block">
+            <span className="block text-xs text-muted-foreground">Reference type</span>
+            <span className="font-semibold text-foreground">
+              {REFERENCE_LABEL[sp.referenceStatus]}
+            </span>
+          </span>
+
+          <ChevronDown
+            className={cn(
+              "col-start-2 row-span-2 row-start-1 h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200 motion-reduce:transition-none md:col-start-4 md:row-span-1",
+              isOpen && "rotate-180"
+            )}
+            aria-hidden="true"
+          />
+        </button>
+      </h2>
+
+      {/* ── Details ──────────────────────────────────────────── */}
+      {isOpen && (
+        <div id={panelId} className="border-t border-border px-5 pb-2 pt-5">
+          {/* Summary: description, study areas and the photo */}
+          <div className="grid gap-6 pb-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+            <div>
+              <p className="max-w-[44rem] text-base leading-relaxed text-foreground">
+                {sp.shortDescription}
+              </p>
+              {sp.studyLocations && sp.studyLocations.length > 0 && (
+                <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">Study areas</span>
+                  {sp.studyLocations.map((loc) => (
+                    <span key={loc} className="inline-flex items-center gap-1">
+                      <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+                      {loc}
+                    </span>
+                  ))}
+                </p>
+              )}
+              {isTarget && (
+                <Link
+                  href="/admin/reports"
+                  className={cn(buttonVariants(), "mt-5 h-10 px-4 text-sm font-semibold")}
+                >
+                  Review sighting reports
+                </Link>
+              )}
+            </div>
+
+            <figure className="m-0">
+              {image ? (
+                <>
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-surface-tint">
+                    <Image
+                      src={image.url}
+                      alt={image.caption}
+                      fill
+                      sizes="(max-width: 1023px) 100vw, 20rem"
+                      className="object-cover"
+                    />
+                  </div>
+                  <figcaption className="mt-2 text-sm leading-snug text-muted-foreground">
+                    {image.caption}
+                  </figcaption>
+                  {sp.images.length > 1 && (
+                    <div className="mt-2 flex gap-2">
+                      {sp.images.map((img, index) => (
+                        <button
+                          key={img.id}
+                          type="button"
+                          aria-label={`Show photo ${index + 1} of ${sp.images.length}`}
+                          aria-pressed={activeImage === index}
+                          onClick={() => onPickImage(index)}
+                          className={cn(
+                            "focus-ring relative h-12 w-16 shrink-0 overflow-hidden rounded border-2 transition-opacity",
+                            activeImage === index
+                              ? "border-primary"
+                              : "border-transparent opacity-70 hover:opacity-100"
+                          )}
+                        >
+                          <Image
+                            src={img.url}
+                            alt=""
+                            fill
+                            sizes="64px"
+                            className="object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex aspect-[4/3] flex-col items-center justify-center gap-1 rounded-md bg-surface-tint text-center text-sm text-muted-foreground">
+                  <ImagePlus className="h-5 w-5" aria-hidden="true" />
+                  No photo on file
+                </div>
+              )}
+            </figure>
+          </div>
+
+          {/* Management Recommendations: open first, two columns */}
+          <Disclosure
+            title={`Management Recommendations (${sp.managementRecommendations.length})`}
+            hint="Open a recommendation for its guidance and on-site checks."
+            defaultOpen
+          >
+            {sp.managementRecommendations.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No Management Recommendations are recorded for this species.
+              </p>
+            ) : (
+              <ol className="m-0 grid list-none grid-cols-1 items-start gap-4 p-0 md:grid-cols-2">
+                {sp.managementRecommendations.map((rec, index) => (
+                  <li key={rec.id}>
+                    <details className="group/r rounded-lg border border-border bg-background open:border-foreground/30">
+                      <summary className="focus-ring flex cursor-pointer list-none items-start gap-3 rounded-lg p-4 [&::-webkit-details-marker]:hidden">
+                        <span
+                          aria-hidden="true"
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground"
+                        >
+                          {index + 1}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-base font-semibold leading-snug text-foreground">
+                            {rec.title}
+                          </span>
+                          <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">
+                            {rec.purpose}
+                          </span>
+                        </span>
+                        <ChevronDown
+                          className="mt-1 h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-open/r:rotate-180 motion-reduce:transition-none"
+                          aria-hidden="true"
+                        />
+                      </summary>
+                      <dl className="m-0 space-y-3 border-t border-border px-4 py-4 text-sm leading-relaxed">
+                        <div>
+                          <dt className="font-semibold text-foreground">Guidance</dt>
+                          <dd className="m-0 mt-0.5 text-muted-foreground">
+                            {rec.guidance}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="font-semibold text-foreground">
+                            On-site verification
+                          </dt>
+                          <dd className="m-0 mt-0.5 text-muted-foreground">
+                            {rec.verificationRequirements}
+                          </dd>
+                        </div>
+                      </dl>
+                    </details>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Disclosure>
+
+          <Disclosure
+            title="Leaf characteristics"
+            hint="Reference traits a leaf photo may show. Not proof of what the model checks."
+          >
+            <FactList
+              items={[
+                [
+                  "Leaf structure",
+                  sp.botanicalFeatures.leafStructure ?? sp.botanicalFeatures.leaves,
+                ],
+                ["Leaflet shape", sp.botanicalFeatures.leafletShape],
+                ["Leaf colour and surface", sp.botanicalFeatures.leafColorSurface],
+              ]}
+            />
+          </Disclosure>
+
+          <Disclosure
+            title="Other botanical characteristics"
+            hint="For field verification. A leaf photo cannot show these."
+          >
+            <FactList
+              items={[
+                ["Growth habit and form", sp.botanicalFeatures.habit],
+                ["Fruit and seed", sp.botanicalFeatures.fruitAndSeed],
+                ["Bark and trunk", sp.botanicalFeatures.barkAndForm],
+              ]}
+            />
+          </Disclosure>
+
+          <Disclosure title="Source and scope">
+            <p className="max-w-[44rem] text-sm leading-relaxed text-muted-foreground">
+              <span className="font-semibold text-foreground">
+                {REFERENCE_LABEL[sp.referenceStatus]}.
+              </span>{" "}
+              {scopeText(sp.sourceAndScope)}
+            </p>
+          </Disclosure>
+        </div>
+      )}
+    </li>
   );
 }
