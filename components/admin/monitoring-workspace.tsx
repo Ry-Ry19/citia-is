@@ -1,455 +1,467 @@
 // components/admin/monitoring-workspace.tsx
 //
-// WHAT: Interactive Environmental Monitoring Workspace for CENRO officers.
+// WHAT: The Environmental Monitoring page for CENRO staff — a map of
+//   sighting reports beside the list of the same reports.
 //
-// FEATURES:
-//   - Synchronized split layout: Map view (left) and Report List (right)
-//   - Filterable by focal study area (Palao Medical, Dalipuga, NPC Area)
-//   - Filterable by review status (All, Pending, Verified, Rejected)
-//   - Dynamic client loading of Leaflet map (SSR safe)
-//   - Interactive marker and list item synchronization
-//   - Honest empty states for unmapped reports and missing coordinates
-//   - Deep linking to Report Details (/admin/reports/[id])
+// ONE SELECTION, SHARED BY EVERYTHING:
+//   `selectedReportId` is the single source of truth.
+//   - Clicking a pin on the map sets it. The list highlights that report
+//     and scrolls it into view, and the preview panel shows it.
+//   - Clicking a report in the list sets it. The map flies to its pin and
+//     pulses it.
+//
+// ONE FILTERED LIST, SHARED BY EVERYTHING:
+//   The study-area and status filters produce `filteredReports`. The map
+//   and the list are both given that same list, so a filter always
+//   changes the pins and the rows together. If a filter hides the
+//   selected report, the selection moves to the first report still
+//   shown.
+//
+// DATA: the reports come from the CITIA-IS API, loaded on the server by
+//   app/admin/monitoring/page.tsx. Reports without coordinates stay in
+//   the list and are marked; they are never given an invented position
+//   on the map.
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import Image from "next/image";
 import {
-  AlertCircle,
-  ExternalLink,
   ImageIcon,
-  Info,
   ListFilter,
   Loader2,
   MapPin,
+  MapPinOff,
   Map as MapIcon,
   Navigation,
   RotateCcw,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { StatusBadge } from "@/components/common/status-badge";
-import {
-  getStoredReports,
-  type ReportStatus,
-  type SightingReport,
-} from "@/lib/reports-data";
+import { statusVariant, type AdminReport, type ReportStatus } from "@/lib/admin-reports";
 import { cn } from "@/lib/utils";
 
-// Dynamically load the Leaflet map with SSR disabled to prevent window object errors
+// Leaflet needs the browser's `window`, so the map is loaded only in the
+// browser (ssr: false).
 const DynamicMonitoringMap = dynamic(
   () =>
     import("@/components/admin/monitoring-map").then((mod) => mod.MonitoringMap),
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full min-h-[450px] w-full items-center justify-center rounded-lg border border-border bg-neutral-950 text-sm text-muted-foreground">
-        <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" />
-        Loading environmental monitoring map…
+      <div className="flex h-full min-h-[inherit] w-full items-center justify-center rounded-lg border border-border bg-surface-tint text-sm text-muted-foreground">
+        <Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" aria-hidden="true" />
+        Loading the map…
       </div>
     ),
   }
 );
 
-const STUDY_AREAS = [
-  "All Study Areas",
-  "Palao Medical",
-  "Dalipuga",
-  "NPC Area",
-] as const;
+const ALL_AREAS = "All Study Areas";
+const STUDY_AREAS = [ALL_AREAS, "Palao Medical", "Dalipuga", "NPC Area"] as const;
 
 const STATUS_FILTERS: { label: string; value: ReportStatus | "All" }[] = [
-  { label: "All Statuses", value: "All" },
+  { label: "All", value: "All" },
   { label: "Pending", value: "Pending" },
   { label: "Verified", value: "Verified" },
   { label: "Rejected", value: "Rejected" },
 ];
 
-export function MonitoringWorkspace() {
-  const [reports] = useState<SightingReport[]>(() => getStoredReports());
-  const [selectedArea, setSelectedArea] = useState<string>("All Study Areas");
+/** The dot colour and symbol for each review status (theme colours). */
+const STATUS_DOT: Record<ReportStatus, { className: string; symbol: string }> = {
+  Verified: { className: "bg-success text-background", symbol: "✓" },
+  Pending: { className: "bg-warning text-black", symbol: "!" },
+  Rejected: { className: "bg-destructive text-white", symbol: "✕" },
+};
+
+function applyFilters(
+  reports: AdminReport[],
+  area: string,
+  status: ReportStatus | "All"
+) {
+  return reports.filter(
+    (r) =>
+      (area === ALL_AREAS || r.studyArea === area) &&
+      (status === "All" || r.reviewStatus === status)
+  );
+}
+
+export function MonitoringWorkspace({ reports }: { reports: AdminReport[] }) {
+  const [selectedArea, setSelectedArea] = useState<string>(ALL_AREAS);
   const [selectedStatus, setSelectedStatus] = useState<ReportStatus | "All">("All");
-  const [selectedReportId, setSelectedReportId] = useState<string | null>(() => {
-    const data = getStoredReports();
-    return data.find((r) => r.coordinates)?.id ?? null;
-  });
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(
+    () => reports.find((r) => r.coordinates)?.id ?? reports[0]?.id ?? null
+  );
   const [mobileView, setMobileView] = useState<"map" | "list">("map");
+  const listRef = useRef<HTMLDivElement>(null);
 
-  const filteredReports = useMemo(() => {
-    return reports.filter((r) => {
-      if (selectedArea !== "All Study Areas" && r.studyArea !== selectedArea) {
-        return false;
-      }
-      if (selectedStatus !== "All" && r.reviewStatus !== selectedStatus) {
-        return false;
-      }
-      return true;
-    });
-  }, [reports, selectedArea, selectedStatus]);
-
-  const reportsWithCoords = useMemo(
-    () => filteredReports.filter((r) => r.coordinates),
-    [filteredReports]
+  const filteredReports = useMemo(
+    () => applyFilters(reports, selectedArea, selectedStatus),
+    [reports, selectedArea, selectedStatus]
   );
+  const mappedCount = filteredReports.filter((r) => r.coordinates).length;
+  const unmappedCount = filteredReports.length - mappedCount;
+  const selectedReport =
+    filteredReports.find((r) => r.id === selectedReportId) ?? null;
+  const isFiltered = selectedArea !== ALL_AREAS || selectedStatus !== "All";
 
-  const reportsWithoutCoords = useMemo(
-    () => filteredReports.filter((r) => !r.coordinates),
-    [filteredReports]
-  );
+  // Changing a filter keeps the selection if that report is still shown;
+  // otherwise it moves to the first report that is (a mapped one first).
+  function changeFilters(area: string, status: ReportStatus | "All") {
+    setSelectedArea(area);
+    setSelectedStatus(status);
+    const next = applyFilters(reports, area, status);
+    if (!next.some((r) => r.id === selectedReportId)) {
+      setSelectedReportId(
+        (next.find((r) => r.coordinates) ?? next[0])?.id ?? null
+      );
+    }
+  }
 
-  const selectedReport = useMemo(() => {
-    return reports.find((r) => r.id === selectedReportId) || null;
-  }, [reports, selectedReportId]);
-
-  const resetFilters = () => {
-    setSelectedArea("All Study Areas");
-    setSelectedStatus("All");
-  };
-
-  const isFiltered =
-    selectedArea !== "All Study Areas" || selectedStatus !== "All";
+  // Keep the selected row visible inside the scrolling list. Only the
+  // list scrolls, never the page.
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || !selectedReportId) return;
+    const row = list.querySelector<HTMLElement>(
+      `[data-report-id="${CSS.escape(selectedReportId)}"]`
+    );
+    if (!row) return;
+    const top = row.offsetTop;
+    const bottom = top + row.offsetHeight;
+    if (top < list.scrollTop) {
+      list.scrollTo({ top, behavior: "smooth" });
+    } else if (bottom > list.scrollTop + list.clientHeight) {
+      list.scrollTo({ top: bottom - list.clientHeight, behavior: "smooth" });
+    }
+  }, [selectedReportId]);
 
   return (
     <div className="space-y-6">
-      {/* ── 1. Page Header ────────────────────────────────────── */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      {/* ── Page header ───────────────────────────────────────── */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold text-primary">
-            CENRO Iligan City · Spatial Analysis
-          </p>
-          <h1 className="mt-1 section-title text-foreground">
+          <h1 className="section-title text-foreground">
             Environmental Monitoring
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground sm:text-sm">
-            Geographic distribution of community Mahogany sightings across focal study areas.
+          <p className="mt-2 max-w-[44rem] text-base leading-relaxed text-muted-foreground">
+            Where community Mahogany sightings have been reported across the
+            study areas. A pin marks a report; it does not authorize tree
+            cutting or removal.
           </p>
         </div>
 
-        {/* Mobile View Toggle */}
-        <div className="flex items-center rounded-lg border border-border bg-muted/60 p-1 lg:hidden">
-          <button
-            type="button"
-            onClick={() => setMobileView("map")}
-            className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium transition-colors",
-              mobileView === "map"
-                ? "bg-card text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <MapIcon className="h-3.5 w-3.5" /> Map View
-          </button>
-          <button
-            type="button"
-            onClick={() => setMobileView("list")}
-            className={cn(
-              "flex items-center gap-1.5 rounded-md px-3 py-1 text-sm font-medium transition-colors",
-              mobileView === "list"
-                ? "bg-card text-foreground shadow-xs font-semibold"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <ListFilter className="h-3.5 w-3.5" /> Report List ({filteredReports.length})
-          </button>
+        {/* Phones show the map or the list, one at a time. */}
+        <div
+          role="group"
+          aria-label="Choose map or list"
+          className="flex shrink-0 gap-1 rounded-lg border border-border bg-muted p-1 lg:hidden"
+        >
+          {(
+            [
+              { value: "map", label: "Map", icon: MapIcon },
+              { value: "list", label: `List (${filteredReports.length})`, icon: ListFilter },
+            ] as const
+          ).map((view) => (
+            <button
+              key={view.value}
+              type="button"
+              aria-pressed={mobileView === view.value}
+              onClick={() => setMobileView(view.value)}
+              className={cn(
+                "focus-ring flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors",
+                mobileView === view.value
+                  ? "bg-card font-semibold text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <view.icon className="h-4 w-4" aria-hidden="true" />
+              {view.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* ── 2. Data Honesty & Environmental Disclaimer ───────── */}
-      <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-3.5">
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          <span className="font-semibold text-foreground">
-            Demonstration Spatial Workspace.
-          </span>{" "}
-          Plotted pins reflect simulated community records across Palao Medical,
-          Dalipuga, and NPC Area. Only observations with verified GPS
-          coordinates are placed on the map. Sighting markers do{" "}
-          <strong className="text-foreground">NOT</strong> authorize tree
-          cutting or removal; all actions remain subject to CENRO assessment.
+      {/* ── Filters and counts ────────────────────────────────── */}
+      <div className="flex flex-col gap-3 border-y border-border py-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            <span className="sr-only">Study area</span>
+            <select
+              value={selectedArea}
+              onChange={(e) => changeFilters(e.target.value, selectedStatus)}
+              className="focus-ring h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground"
+            >
+              {STUDY_AREAS.map((area) => (
+                <option key={area} value={area}>
+                  {area}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div
+            role="group"
+            aria-label="Filter by review status"
+            className="flex gap-1 rounded-md border border-border bg-muted p-1"
+          >
+            {STATUS_FILTERS.map((s) => (
+              <button
+                key={s.value}
+                type="button"
+                aria-pressed={selectedStatus === s.value}
+                onClick={() => changeFilters(selectedArea, s.value)}
+                className={cn(
+                  "focus-ring min-h-8 rounded px-3 text-sm font-medium transition-colors",
+                  selectedStatus === s.value
+                    ? "bg-card font-semibold text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          {isFiltered && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => changeFilters(ALL_AREAS, "All")}
+              className="h-10 px-3 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+              Reset
+            </Button>
+          )}
+        </div>
+
+        <p className="text-sm text-muted-foreground" aria-live="polite">
+          <strong className="font-semibold text-foreground">{filteredReports.length}</strong>{" "}
+          {filteredReports.length === 1 ? "report" : "reports"},{" "}
+          <strong className="font-semibold text-foreground">{mappedCount}</strong> on the map
+          {unmappedCount > 0 && (
+            <>
+              , <strong className="font-semibold text-foreground">{unmappedCount}</strong>{" "}
+              without coordinates
+            </>
+          )}
         </p>
       </div>
 
-      {/* ── 3. Filter Bar & Location Summary ─────────────────── */}
-      <Card className="rounded-lg border border-border bg-card p-4 space-y-3">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Study Area Dropdown */}
-            <div className="flex items-center gap-1.5">
-              <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-              <select
-                aria-label="Filter by focal study area"
-                value={selectedArea}
-                onChange={(e) => setSelectedArea(e.target.value)}
-                className="h-8 rounded-md border border-border bg-card px-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
-              >
-                {STUDY_AREAS.map((area) => (
-                  <option key={area} value={area}>
-                    {area}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status Pills */}
-            <div className="flex items-center gap-1 rounded-md border border-border bg-muted/60 p-0.5">
-              {STATUS_FILTERS.map((s) => (
-                <button
-                  key={s.value}
-                  type="button"
-                  onClick={() => setSelectedStatus(s.value)}
-                  className={cn(
-                    "rounded px-2.5 py-1 text-sm font-medium transition-colors",
-                    selectedStatus === s.value
-                      ? "bg-card text-foreground shadow-xs font-semibold"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {s.label}
-                </button>
-              ))}
-            </div>
-
-            {isFiltered && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={resetFilters}
-                className="h-8 px-2 text-sm text-muted-foreground hover:text-foreground"
-              >
-                <RotateCcw className="mr-1 h-3 w-3" />
-                Reset
-              </Button>
-            )}
-          </div>
-
-          {/* Counts metrics */}
-          <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-            <span>
-              Total: <strong className="text-foreground">{filteredReports.length}</strong>
-            </span>
-            <span>&middot;</span>
-            <span>
-              Mapped: <strong className="text-primary">{reportsWithCoords.length}</strong>
-            </span>
-            {reportsWithoutCoords.length > 0 && (
-              <>
-                <span>&middot;</span>
-                <span className="text-amber-400">
-                  No GPS: <strong>{reportsWithoutCoords.length}</strong>
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-      </Card>
-
-      {/* ── 4. Split Layout (Map & Synchronized List) ────────── */}
-      <div className="grid gap-6 lg:grid-cols-12 min-h-[580px]">
-        {/* Map Panel (7 cols on lg, or shown when mobileView === 'map') */}
+      {/* ── Map and list ──────────────────────────────────────── */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        {/* Map */}
         <div
           className={cn(
-            "lg:col-span-7 flex flex-col min-h-[480px] lg:min-h-[580px]",
-            mobileView === "list" && "hidden lg:flex"
+            "min-h-[26rem] lg:col-span-7 lg:min-h-[40rem] xl:col-span-8",
+            mobileView === "list" && "hidden lg:block"
           )}
         >
-          {reportsWithCoords.length === 0 ? (
-            <Card className="flex flex-1 flex-col items-center justify-center p-8 text-center border-dashed">
-              <AlertCircle className="h-10 w-10 text-muted-foreground/50 mb-3" />
-              <h3 className="text-sm font-semibold text-foreground">
-                No Geographic Coordinates Plotted
-              </h3>
-              <p className="mt-1 text-sm text-muted-foreground max-w-sm">
-                None of the {filteredReports.length} reports in the current filter
-                contain verified latitude and longitude values. Unmapped reports
-                remain accessible in the list.
+          {mappedCount === 0 ? (
+            <div className="flex h-full min-h-[inherit] flex-col items-center justify-center rounded-lg border border-dashed border-border p-8 text-center">
+              <MapPinOff className="mb-3 h-9 w-9 text-muted-foreground" aria-hidden="true" />
+              <h2 className="text-base font-semibold text-foreground">
+                Nothing to show on the map
+              </h2>
+              <p className="mt-1 max-w-sm text-sm leading-relaxed text-muted-foreground">
+                {filteredReports.length === 0
+                  ? "No reports match these filters."
+                  : "The reports that match these filters have no coordinates. They are still in the list."}
               </p>
               {isFiltered && (
                 <Button
                   variant="outline"
-                  size="sm"
-                  onClick={resetFilters}
-                  className="mt-3 text-sm h-8"
+                  onClick={() => changeFilters(ALL_AREAS, "All")}
+                  className="mt-4 h-10 text-sm"
                 >
-                  Clear Filters
+                  Clear filters
                 </Button>
               )}
-            </Card>
+            </div>
           ) : (
             <DynamicMonitoringMap
               reports={filteredReports}
-              selectedReportId={selectedReportId}
+              selectedReportId={selectedReport?.id ?? null}
               onSelectReport={setSelectedReportId}
               selectedArea={selectedArea}
             />
           )}
         </div>
 
-        {/* Synchronized List & Preview Panel (5 cols on lg) */}
+        {/* Preview and list */}
         <div
           className={cn(
-            "lg:col-span-5 flex flex-col gap-4",
+            "flex flex-col gap-4 lg:col-span-5 xl:col-span-4",
             mobileView === "map" && "hidden lg:flex"
           )}
         >
-          {/* Active Sighting Preview Card */}
-          {selectedReport && (
-            <Card className="rounded-lg border border-border bg-card p-4 space-y-3">
-              <div className="flex items-start justify-between gap-2 pb-2 border-b border-border">
-                <div>
-                  <span className="tabular-nums text-sm font-bold text-primary">
+          {/* The selected report */}
+          {selectedReport ? (
+            <section
+              aria-label="Selected report"
+              className="rounded-lg border border-border bg-card p-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-base font-bold tabular-nums text-foreground">
                     {selectedReport.referenceNumber}
-                  </span>
-                  <h3 className="text-sm font-semibold text-foreground">
-                    {selectedReport.studyArea}
-                  </h3>
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedReport.studyArea} · {selectedReport.displayDate}
+                  </p>
                 </div>
                 <StatusBadge
                   label={selectedReport.reviewStatus}
-                  variant={
-                    selectedReport.reviewStatus === "Verified"
-                      ? "success"
-                      : selectedReport.reviewStatus === "Rejected"
-                        ? "destructive"
-                        : "warning"
-                  }
+                  variant={statusVariant(selectedReport.reviewStatus)}
                 />
               </div>
 
-              <div className="flex gap-3">
-                {/* Thumbnail */}
-                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded border border-border bg-muted flex items-center justify-center">
-                  {selectedReport.photos[0] ? (
-                    <Image
-                      src={selectedReport.photos[0].url}
-                      alt={selectedReport.photos[0].caption}
-                      fill
-                      sizes="64px"
-                      className="object-cover"
+              <div className="mt-3 flex gap-3">
+                <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-tint">
+                  {selectedReport.photoUrl ? (
+                    // A plain <img>: the photo comes from a private, staff-only route.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={selectedReport.photoUrl}
+                      alt={`Leaf photo for report ${selectedReport.referenceNumber}`}
+                      className="h-full w-full object-cover"
                     />
                   ) : (
-                    <ImageIcon className="h-6 w-6 text-muted-foreground/40" />
+                    <ImageIcon className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
                   )}
                 </div>
 
-                <div className="space-y-1 min-w-0 flex-1 text-sm">
-                  <p className="text-muted-foreground truncate" title={selectedReport.specificLocation}>
+                <div className="min-w-0 flex-1 space-y-1 text-sm">
+                  <p className="leading-snug text-foreground">
                     {selectedReport.specificLocation}
                   </p>
-                  <p className="text-sm text-foreground">
-                    AI: <strong>{selectedReport.aiClassification.label}</strong>{" "}
-                    ({Math.round(selectedReport.aiClassification.confidence * 100)}%)
+                  <p className="text-muted-foreground">
+                    AI suggestion:{" "}
+                    {selectedReport.aiClassification ? (
+                      <>
+                        <strong className="font-semibold text-foreground">
+                          {selectedReport.aiClassification.label}
+                        </strong>
+                        {selectedReport.aiClassification.confidence != null &&
+                          ` (${Math.round(selectedReport.aiClassification.confidence * 100)}%)`}
+                      </>
+                    ) : (
+                      "not classified"
+                    )}
                   </p>
                   {selectedReport.coordinates ? (
-                    <p className="text-sm tabular-nums text-muted-foreground flex items-center gap-1">
-                      <Navigation className="h-3 w-3 text-primary" />
+                    <p className="flex items-center gap-1.5 tabular-nums text-muted-foreground">
+                      <Navigation className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
                       {selectedReport.coordinates.lat.toFixed(4)}° N,{" "}
                       {selectedReport.coordinates.lng.toFixed(4)}° E
                     </p>
                   ) : (
-                    <p className="text-sm text-amber-400 italic">
+                    <p className="flex items-center gap-1.5 text-muted-foreground">
+                      <MapPinOff className="h-3.5 w-3.5" aria-hidden="true" />
                       No coordinates supplied
                     </p>
                   )}
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-border flex justify-end">
-                <Link
-                  href={`/admin/reports/${selectedReport.id}`}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
-                    "h-8 text-sm font-medium"
-                  )}
-                >
-                  Open Full Report
-                  <ExternalLink className="ml-1.5 h-3 w-3" />
-                </Link>
-              </div>
-            </Card>
+              <Link
+                href={`/admin/reports/${selectedReport.id}`}
+                className={cn(buttonVariants(), "mt-4 h-10 w-full text-sm font-semibold")}
+              >
+                Open report
+              </Link>
+            </section>
+          ) : (
+            <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
+              Select a pin or a report to see its details.
+            </p>
           )}
 
-          {/* Filtered Reports List */}
-          <Card className="rounded-lg border border-border bg-card p-0 flex-1 flex flex-col overflow-hidden max-h-[500px]">
-            <div className="p-3 border-b border-border bg-muted/30 flex items-center justify-between">
-              <span className="text-sm font-semibold text-foreground">
-                Sighting Submissions ({filteredReports.length})
-              </span>
-              <span className="text-sm text-muted-foreground">
-                Click to inspect &amp; locate
-              </span>
-            </div>
+          {/* The list */}
+          <section
+            aria-label="Sighting reports"
+            className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-border bg-card"
+          >
+            <h2 className="border-b border-border px-4 py-3 text-sm font-semibold text-foreground">
+              Sighting reports ({filteredReports.length})
+            </h2>
 
-            <div className="overflow-y-auto divide-y divide-border/60">
+            <div
+              ref={listRef}
+              className="relative max-h-[26rem] divide-y divide-border overflow-y-auto"
+            >
               {filteredReports.length === 0 ? (
                 <div className="p-6 text-center text-sm text-muted-foreground">
-                  No reports match the selected filters.
+                  <p>No reports match these filters.</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => changeFilters(ALL_AREAS, "All")}
+                    className="mt-3 h-10 text-sm"
+                  >
+                    Clear filters
+                  </Button>
                 </div>
               ) : (
                 filteredReports.map((report) => {
-                  const isSelected = report.id === selectedReportId;
-                  const hasCoords = Boolean(report.coordinates);
+                  const isSelected = report.id === selectedReport?.id;
+                  const dot = STATUS_DOT[report.reviewStatus];
 
                   return (
                     <button
                       key={report.id}
                       type="button"
+                      data-report-id={report.id}
+                      aria-pressed={isSelected}
                       onClick={() => setSelectedReportId(report.id)}
                       className={cn(
-                        "w-full text-left p-3 transition-colors flex items-start gap-3",
+                        "flex w-full items-start gap-3 border-l-4 px-3 py-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                         isSelected
-                          ? "bg-primary/10 border-l-[3px] border-primary"
-                          : "hover:bg-muted/40 border-l-[3px] border-transparent"
+                          ? "border-primary bg-primary/10"
+                          : "border-transparent hover:bg-muted"
                       )}
                     >
-                      {/* Status indicator icon */}
                       <span
-                        className={cn(
-                          "mt-0.5 h-5 w-5 shrink-0 rounded-full flex items-center justify-center text-sm font-bold text-white",
-                          report.reviewStatus === "Verified" && "bg-[#1f4d33]",
-                          report.reviewStatus === "Rejected" && "bg-red-500",
-                          report.reviewStatus === "Pending" && "bg-amber-500 text-black"
-                        )}
                         aria-hidden="true"
+                        className={cn(
+                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold",
+                          dot.className
+                        )}
                       >
-                        {report.reviewStatus === "Verified"
-                          ? "✓"
-                          : report.reviewStatus === "Rejected"
-                            ? "✕"
-                            : "!"}
+                        {dot.symbol}
                       </span>
 
-                      <div className="min-w-0 flex-1 space-y-0.5">
-                        <div className="flex items-center justify-between gap-1">
-                          <span className="tabular-nums text-sm font-semibold text-foreground">
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-baseline justify-between gap-2">
+                          <span className="text-sm font-semibold tabular-nums text-foreground">
                             {report.referenceNumber}
                           </span>
-                          <span className="text-sm text-muted-foreground whitespace-nowrap">
+                          <span className="whitespace-nowrap text-xs text-muted-foreground">
                             {report.displayDate}
                           </span>
-                        </div>
-
-                        <p className="text-sm text-foreground font-medium truncate">
+                        </span>
+                        <span className="block truncate text-sm text-foreground">
                           {report.studyArea}
-                        </p>
-                        <p className="text-sm text-muted-foreground truncate">
+                          <span className="sr-only">, {report.reviewStatus}</span>
+                        </span>
+                        <span className="block truncate text-sm text-muted-foreground">
                           {report.specificLocation}
-                        </p>
-
-                        {!hasCoords && (
-                          <span className="inline-block mt-1 text-sm text-amber-400/90 font-medium bg-amber-500/10 px-1.5 py-0.2 rounded">
-                            No coordinates
+                        </span>
+                        {!report.coordinates && (
+                          <span className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                            <MapPinOff className="h-3 w-3" aria-hidden="true" />
+                            Not on the map: no coordinates
                           </span>
                         )}
-                      </div>
+                      </span>
                     </button>
                   );
                 })
               )}
             </div>
-          </Card>
+          </section>
         </div>
       </div>
     </div>

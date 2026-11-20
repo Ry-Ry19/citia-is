@@ -65,6 +65,13 @@ export interface StaffSession {
   role: "administrator" | "cenro_staff";
   /** End of the 8-hour session, as seconds since the epoch. */
   expiresAt: number;
+  /**
+   * The staff member's Supabase access token, for calling the CITIA-IS
+   * API from the server. SERVER ONLY: never pass it to a client
+   * component, a URL or a log. Pages pass only email, fullName and role
+   * to the screens.
+   */
+  accessToken: string;
 }
 
 /** State returned by the sign-in, reset and new-password actions. */
@@ -158,5 +165,6 @@ export async function getCurrentStaffSession(): Promise<StaffSession | null> {
     fullName: staff.profile.fullName,
     role: staff.profile.role,
     expiresAt: signIn.expiresAt,
+    accessToken,
   };
 }

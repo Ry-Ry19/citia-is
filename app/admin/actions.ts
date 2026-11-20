@@ -16,10 +16,13 @@
 
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { isAuthRetryableFetchError } from "@supabase/supabase-js";
 import {
   createSignInToken,
+  getCurrentStaffSession,
   getSessionSecret,
+  StaffPortalUnavailableError,
   LEGACY_SESSION_COOKIE,
   SESSION_TTL_SECONDS,
   SIGN_IN_COOKIE,
@@ -27,6 +30,7 @@ import {
   type LoginState,
 } from "@/lib/admin-session";
 import { checkStaff } from "@/lib/staff-api";
+import { addReview } from "@/lib/staff-reports-api";
 import { createSupabaseServerClient } from "@/lib/supabase-server";
 
 const GENERIC_ERROR = "That email address and password combination was not recognised.";
@@ -163,4 +167,66 @@ export async function updatePassword(
   cookieStore.delete(SIGN_IN_COOKIE);
 
   redirect("/admin/login?notice=password-updated");
+}
+
+// ── Recording a review decision ────────────────────────────────────────────
+
+export interface ReviewState {
+  /** Set when the decision could not be recorded. */
+  error?: string;
+  /** Set when it was recorded: "verified" or "rejected". */
+  saved?: "verified" | "rejected";
+}
+
+const REVIEW_UNAVAILABLE = "The decision could not be saved right now. Please try again.";
+
+/**
+ * Records a CENRO review decision on a report. Who made the decision is
+ * NOT taken from the form: the API takes it from the signed-in staff
+ * member's token. A decision is added to the report's history; earlier
+ * decisions are kept.
+ */
+export async function recordReview(
+  _previous: ReviewState,
+  formData: FormData
+): Promise<ReviewState> {
+  let session;
+  try {
+    session = await getCurrentStaffSession();
+  } catch (error) {
+    if (error instanceof StaffPortalUnavailableError) return { error: REVIEW_UNAVAILABLE };
+    throw error;
+  }
+  if (!session) redirect("/admin/login?notice=expired");
+
+  const reference = String(formData.get("reference") ?? "");
+  const decision = formData.get("decision");
+  if (decision !== "verified" && decision !== "rejected") {
+    return { error: "Choose Verify or Reject." };
+  }
+  const reason = String(formData.get("rejectionReason") ?? "").trim();
+  const notes = String(formData.get("staffNotes") ?? "").trim();
+  if (decision === "rejected" && !reason) {
+    return { error: "Choose a reason for the rejection." };
+  }
+  if (reason.length > 1000 || notes.length > 2000) {
+    return { error: "The reason or the notes are too long." };
+  }
+
+  const result = await addReview(session.accessToken, reference, {
+    decision,
+    rejectionReason: decision === "rejected" ? reason : null,
+    staffNotes: notes || null,
+  });
+
+  if (!result.ok) {
+    if (result.problem === "refused") redirect("/admin/login?notice=expired");
+    if (result.problem === "not_found") return { error: "This report no longer exists." };
+    if (result.problem === "invalid") return { error: result.message ?? "The decision was not accepted." };
+    return { error: result.message ?? REVIEW_UNAVAILABLE };
+  }
+
+  // Every screen that shows this report's status reads it fresh.
+  revalidatePath("/admin", "layout");
+  return { saved: decision };
 }

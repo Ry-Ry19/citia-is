@@ -1,31 +1,26 @@
 // components/admin/reports-queue.tsx
 //
-// WHAT: Interactive CENRO Reports Queue for reviewing community submissions.
+// WHAT: The CENRO Reports Queue (/admin/reports): every sighting report,
+//   newest first, with filters, search and pages.
 //
-// FEATURES:
-//   - Search by reference, location, and notes
-//   - Filter by review status (All, Pending, Verified, Rejected)
-//   - Filter by study area (Palao Medical, Dalipuga, NPC Area)
-//   - Image thumbnail preview with graceful fallback
-//   - Row navigation to individual Report Detail view
-//   - Empty states and live demo state synchronization
+// HOW FILTERING WORKS: the filters live in the page address
+//   (?status=pending_review&area=palao&q=purok&page=2). Changing one
+//   loads that address, and the server asks the CITIA-IS API for exactly
+//   that page. So the list is always the database's answer, a filtered
+//   view can be bookmarked or shared with a colleague, and the Back button
+//   works.
+//
+// The list holds no reporter names or contacts; those are only on the
+// review page of each report.
 
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import {
-  Filter,
-  ImageIcon,
-  Info,
-  MapPin,
-  RotateCcw,
-  Search,
-} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ImageIcon, Loader2, MapPin, RotateCcw, Search } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -36,337 +31,300 @@ import {
 } from "@/components/ui/table";
 import { StatusBadge } from "@/components/common/status-badge";
 import {
-  getStoredReports,
-  type ReportStatus,
-  type SightingReport,
-} from "@/lib/reports-data";
+  STUDY_AREA_LABEL,
+  statusVariant,
+  type ReportPage,
+  type StatusCode,
+  type StudyAreaCode,
+} from "@/lib/admin-reports";
 import { cn } from "@/lib/utils";
 
-const STATUS_OPTIONS: { label: string; value: ReportStatus | "All" }[] = [
-  { label: "All Statuses", value: "All" },
-  { label: "Pending", value: "Pending" },
-  { label: "Verified", value: "Verified" },
-  { label: "Rejected", value: "Rejected" },
+export interface QueueFilters {
+  status: StatusCode | null;
+  area: StudyAreaCode | null;
+  q: string;
+  page: number;
+}
+
+const STATUS_OPTIONS: { label: string; value: StatusCode | null }[] = [
+  { label: "All", value: null },
+  { label: "Pending", value: "pending_review" },
+  { label: "Verified", value: "verified" },
+  { label: "Rejected", value: "rejected" },
 ];
 
-const STUDY_AREAS = [
-  "All Study Areas",
-  "Palao Medical",
-  "Dalipuga",
-  "NPC Area",
-] as const;
+export function ReportsQueue({
+  page,
+  filters,
+}: {
+  page: ReportPage;
+  filters: QueueFilters;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+  const [search, setSearch] = useState(filters.q);
 
-export function ReportsQueue() {
-  const [reports] = useState<SightingReport[]>(() => getStoredReports());
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<ReportStatus | "All">("All");
-  const [selectedArea, setSelectedArea] = useState<string>("All Study Areas");
+  // Loads the queue for a new set of filters. Any change other than the
+  // page number starts again from page 1.
+  function go(changes: Partial<QueueFilters>) {
+    const next = { ...filters, page: 1, ...changes };
+    const params = new URLSearchParams();
+    if (next.status) params.set("status", next.status);
+    if (next.area) params.set("area", next.area);
+    if (next.q.trim()) params.set("q", next.q.trim());
+    if (next.page > 1) params.set("page", String(next.page));
+    const query = params.toString();
+    startTransition(() => router.push(query ? `${pathname}?${query}` : pathname));
+  }
 
-  const filteredReports = useMemo(() => {
-    return reports.filter((report) => {
-      // Status filter
-      if (selectedStatus !== "All" && report.reviewStatus !== selectedStatus) {
-        return false;
-      }
+  function submitSearch(event: FormEvent) {
+    event.preventDefault();
+    go({ q: search });
+  }
 
-      // Study Area filter
-      if (
-        selectedArea !== "All Study Areas" &&
-        report.studyArea !== selectedArea
-      ) {
-        return false;
-      }
-
-      // Text search
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase().trim();
-        const matchesRef = report.referenceNumber.toLowerCase().includes(query);
-        const matchesLoc =
-          report.studyArea.toLowerCase().includes(query) ||
-          report.specificLocation.toLowerCase().includes(query);
-        const matchesNotes = report.communityNotes.toLowerCase().includes(query);
-        const matchesAi = report.aiClassification.label.toLowerCase().includes(query);
-
-        if (!matchesRef && !matchesLoc && !matchesNotes && !matchesAi) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [reports, selectedStatus, selectedArea, searchQuery]);
-
-  const resetFilters = () => {
-    setSearchQuery("");
-    setSelectedStatus("All");
-    setSelectedArea("All Study Areas");
-  };
-
-  const isFiltered =
-    searchQuery !== "" ||
-    selectedStatus !== "All" ||
-    selectedArea !== "All Study Areas";
+  const isFiltered = Boolean(filters.status || filters.area || filters.q);
+  const first = page.total === 0 ? 0 : page.offset + 1;
+  const last = page.offset + page.items.length;
+  const pages = Math.max(1, Math.ceil(page.total / page.limit));
 
   return (
     <div className="space-y-6">
-      {/* ── Page Header & Notice ───────────────────────────────────── */}
       <div>
-        <p className="text-sm font-semibold text-primary">
-          CENRO Environmental Monitoring
-        </p>
-        <h1 className="mt-2 section-title text-foreground">
-          Reports Queue
-        </h1>
-        <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:text-sm">
-          Review, verify, and document community-submitted tree observations
-          across Iligan City study areas.
+        <h1 className="section-title text-foreground">Reports Queue</h1>
+        <p className="mt-2 max-w-[44rem] text-base leading-relaxed text-muted-foreground">
+          Every community sighting report, newest first. Open a report to look at the
+          photo and record a decision.
         </p>
       </div>
 
-      {/* Demo Mode Banner */}
-      <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-3.5">
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          <span className="font-semibold text-foreground">
-            Demonstration Mode.
-          </span>{" "}
-          Review decisions made during this session are stored locally in your
-          browser session for preview testing. Live PostgreSQL database
-          synchronization will connect in subsequent backend phases.
-        </p>
-      </div>
-
-      {/* ── Search & Filter Bar ────────────────────────────────────── */}
-      <Card className="rounded-lg border border-border bg-card p-4">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          {/* Search box */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+      {/* ── Filters ───────────────────────────────────────────── */}
+      <div className="flex flex-col gap-3 border-y border-border py-3 lg:flex-row lg:items-center lg:justify-between">
+        <form onSubmit={submitSearch} role="search" className="flex w-full gap-2 lg:max-w-md">
+          <label className="relative block flex-1">
+            <span className="sr-only">Search by reference, barangay or landmark</span>
+            <Search
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
             <Input
               type="search"
-              placeholder="Search reference, location, or notes…"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 pl-9 text-sm rounded-md"
+              value={search}
+              maxLength={100}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Reference, barangay or landmark"
+              className="h-10 border-input bg-card pl-9 text-sm"
             />
+          </label>
+          <Button type="submit" variant="outline" className="h-10 px-4 text-sm">
+            Search
+          </Button>
+        </form>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div
+            role="group"
+            aria-label="Filter by review status"
+            className="flex gap-1 rounded-md border border-border bg-muted p-1"
+          >
+            {STATUS_OPTIONS.map((option) => (
+              <button
+                key={option.label}
+                type="button"
+                aria-pressed={filters.status === option.value}
+                onClick={() => go({ status: option.value })}
+                className={cn(
+                  "focus-ring min-h-8 rounded px-3 text-sm font-medium transition-colors",
+                  filters.status === option.value
+                    ? "bg-card font-semibold text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
 
-          {/* Filter dropdowns */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Status pills */}
-            <div className="flex items-center gap-1 rounded-md border border-border bg-muted/60 p-0.5">
-              {STATUS_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setSelectedStatus(opt.value)}
-                  className={cn(
-                    "rounded px-2.5 py-1 text-sm font-medium transition-colors",
-                    selectedStatus === opt.value
-                      ? "bg-card text-foreground shadow-xs font-semibold"
-                      : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
+          <select
+            aria-label="Filter by study area"
+            value={filters.area ?? ""}
+            onChange={(event) => go({ area: (event.target.value || null) as StudyAreaCode | null })}
+            className="focus-ring h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground"
+          >
+            <option value="">All study areas</option>
+            {(Object.keys(STUDY_AREA_LABEL) as StudyAreaCode[]).map((code) => (
+              <option key={code} value={code}>
+                {STUDY_AREA_LABEL[code]}
+              </option>
+            ))}
+          </select>
 
-            {/* Study Area Select */}
-            <div className="relative">
-              <select
-                aria-label="Filter by study area"
-                value={selectedArea}
-                onChange={(e) => setSelectedArea(e.target.value)}
-                className="h-8 rounded-md border border-border bg-card px-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
-              >
-                {STUDY_AREAS.map((area) => (
-                  <option key={area} value={area}>
-                    {area}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Reset button if filtered */}
-            {isFiltered && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={resetFilters}
-                className="h-8 px-2 text-sm text-muted-foreground hover:text-foreground"
-              >
-                <RotateCcw className="mr-1 h-3 w-3" />
-                Reset
-              </Button>
-            )}
-          </div>
+          {isFiltered && (
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setSearch("");
+                go({ status: null, area: null, q: "" });
+              }}
+              className="h-10 px-3 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <RotateCcw className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+              Reset
+            </Button>
+          )}
         </div>
-      </Card>
+      </div>
 
-      {/* ── Reports Table ─────────────────────────────────────────── */}
-      <Card className="rounded-lg border border-border bg-card p-0 overflow-hidden">
+      {/* ── The list ──────────────────────────────────────────── */}
+      <div
+        className={cn(
+          "overflow-hidden rounded-lg border border-border bg-card transition-opacity",
+          isPending && "opacity-60"
+        )}
+        aria-busy={isPending}
+      >
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="w-16 text-sm pl-4">Photo</TableHead>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="w-16 pl-4 text-sm">
+                  <span className="sr-only">Photo</span>
+                </TableHead>
                 <TableHead className="text-sm">Reference</TableHead>
-                <TableHead className="hidden text-sm md:table-cell">
-                  Date Submitted
+                <TableHead className="hidden text-sm md:table-cell">Submitted</TableHead>
+                <TableHead className="text-sm">Study area and location</TableHead>
+                <TableHead className="hidden text-sm sm:table-cell">AI suggestion</TableHead>
+                <TableHead className="text-sm">Review status</TableHead>
+                <TableHead className="pr-4 text-right text-sm">
+                  <span className="sr-only">Action</span>
                 </TableHead>
-                <TableHead className="text-sm">Study Area &amp; Location</TableHead>
-                <TableHead className="hidden text-sm sm:table-cell">
-                  AI Classification
-                </TableHead>
-                <TableHead className="text-sm">Review Status</TableHead>
-                <TableHead className="text-right text-sm pr-4">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredReports.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={7}
-                    className="py-12 text-center text-muted-foreground"
-                  >
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <Filter className="h-6 w-6 text-muted-foreground/60" />
-                      <p className="text-sm font-semibold text-foreground">
-                        No reports match these filters
-                      </p>
-                      <p className="text-sm text-muted-foreground max-w-sm">
-                        Try clearing your search query or adjusting status and
-                        study area selections.
-                      </p>
-                      {isFiltered && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={resetFilters}
-                          className="mt-2 text-sm h-8"
-                        >
-                          Clear all filters
-                        </Button>
-                      )}
-                    </div>
+              {page.items.length === 0 ? (
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={7} className="py-14 text-center">
+                    <p className="text-base font-semibold text-foreground">
+                      {isFiltered ? "No reports match these filters" : "No reports yet"}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {isFiltered
+                        ? "Try another search, or reset the filters."
+                        : "Reports sent from the Report a Sighting page will appear here."}
+                    </p>
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredReports.map((report) => {
-                  const hasPhoto = report.photos.length > 0;
-                  const firstPhoto = hasPhoto ? report.photos[0] : null;
-
-                  const statusVariant =
-                    report.reviewStatus === "Verified"
-                      ? "success"
-                      : report.reviewStatus === "Rejected"
-                        ? "destructive"
-                        : "warning";
-
-                  return (
-                    <TableRow
-                      key={report.id}
-                      className="border-border hover:bg-muted/40 transition-colors"
-                    >
-                      {/* Photo Thumbnail */}
-                      <TableCell className="pl-4 py-3">
-                        <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded border border-border bg-muted flex items-center justify-center">
-                          {firstPhoto ? (
-                            <Image
-                              src={firstPhoto.url}
-                              alt={firstPhoto.caption || "Report thumbnail"}
-                              fill
-                              sizes="40px"
-                              className="object-cover"
-                            />
-                          ) : (
-                            <ImageIcon
-                              className="h-4 w-4 text-muted-foreground/50"
-                              aria-hidden="true"
-                            />
-                          )}
-                        </div>
-                      </TableCell>
-
-                      {/* Reference Number */}
-                      <TableCell className="tabular-nums text-sm font-semibold text-foreground py-3">
-                        <Link
-                          href={`/admin/reports/${report.id}`}
-                          className="hover:text-primary transition-colors hover:underline focus-ring rounded"
-                        >
-                          {report.referenceNumber}
-                        </Link>
-                      </TableCell>
-
-                      {/* Date Submitted */}
-                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground py-3 whitespace-nowrap">
-                        {report.displayDate}
-                      </TableCell>
-
-                      {/* Study Area & Location */}
-                      <TableCell className="text-sm py-3 max-w-[220px]">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-foreground flex items-center gap-1">
-                            <MapPin className="h-3 w-3 text-primary shrink-0" />
-                            {report.studyArea}
-                          </span>
-                          <span className="text-sm text-muted-foreground truncate" title={report.specificLocation}>
-                            {report.specificLocation}
-                          </span>
-                        </div>
-                      </TableCell>
-
-                      {/* AI Classification */}
-                      <TableCell className="hidden sm:table-cell text-sm py-3">
-                        <div className="flex flex-col">
-                          <span className="font-medium text-foreground">
+                page.items.map((report) => (
+                  <TableRow key={report.id}>
+                    <TableCell className="py-3 pl-4">
+                      <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-md bg-surface-tint">
+                        {report.photoUrl ? (
+                          // A plain <img>: the photo comes from a private, staff-only route.
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={report.photoUrl}
+                            alt=""
+                            loading="lazy"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <ImageIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-3 text-sm font-semibold tabular-nums text-foreground">
+                      <Link
+                        href={`/admin/reports/${report.id}`}
+                        className="focus-ring rounded-sm hover:underline"
+                      >
+                        {report.referenceNumber}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="hidden whitespace-nowrap py-3 text-sm text-muted-foreground md:table-cell">
+                      {report.displayDate}
+                    </TableCell>
+                    <TableCell className="max-w-[16rem] py-3 text-sm">
+                      <span className="flex items-center gap-1 font-medium text-foreground">
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                        {report.studyArea}
+                      </span>
+                      <span className="block truncate text-muted-foreground" title={report.specificLocation}>
+                        {report.specificLocation}
+                      </span>
+                    </TableCell>
+                    <TableCell className="hidden py-3 text-sm sm:table-cell">
+                      {report.aiClassification ? (
+                        <>
+                          <span className="block font-medium text-foreground">
                             {report.aiClassification.label}
                           </span>
-                          <span className="text-sm text-muted-foreground">
-                            {(report.aiClassification.confidence * 100).toFixed(1)}% confidence
-                          </span>
-                        </div>
-                      </TableCell>
-
-                      {/* CENRO Review Status */}
-                      <TableCell className="py-3">
-                        <StatusBadge
-                          label={report.reviewStatus}
-                          variant={statusVariant}
-                        />
-                      </TableCell>
-
-                      {/* Action */}
-                      <TableCell className="text-right pr-4 py-3">
-                        <Link
-                          href={`/admin/reports/${report.id}`}
-                          className={cn(
-                            buttonVariants({ variant: "outline", size: "sm" }),
-                            "h-8 rounded-md px-3 text-sm"
+                          {report.aiClassification.confidence != null && (
+                            <span className="text-muted-foreground">
+                              {(report.aiClassification.confidence * 100).toFixed(1)}% confidence
+                            </span>
                           )}
-                        >
-                          Review
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
+                        </>
+                      ) : (
+                        <span className="text-muted-foreground">Not classified</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <StatusBadge label={report.reviewStatus} variant={statusVariant(report.reviewStatus)} />
+                    </TableCell>
+                    <TableCell className="py-3 pr-4 text-right">
+                      <Link
+                        href={`/admin/reports/${report.id}`}
+                        className={cn(
+                          buttonVariants({
+                            variant: report.reviewStatus === "Pending" ? "default" : "outline",
+                            size: "sm",
+                          }),
+                          "h-9 px-3 text-sm"
+                        )}
+                      >
+                        {report.reviewStatus === "Pending" ? "Review" : "Open"}
+                        <span className="sr-only"> report {report.referenceNumber}</span>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))
               )}
             </TableBody>
           </Table>
         </div>
 
-        {/* Footer info */}
-        <div className="flex items-center justify-between border-t border-border px-4 py-3 text-sm text-muted-foreground">
-          <span>
-            Showing {filteredReports.length} of {reports.length} demonstration reports
+        {/* ── Paging ────────────────────────────────────────────── */}
+        <div className="flex flex-col gap-2 border-t border-border px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <span aria-live="polite" className="flex items-center gap-2">
+            {isPending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+            Showing {first}–{last} of {page.total} {page.total === 1 ? "report" : "reports"}
           </span>
-          <span className="text-sm">
-            {filteredReports.filter((r) => r.reviewStatus === "Pending").length} pending review
-          </span>
+          {pages > 1 && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={filters.page <= 1 || isPending}
+                onClick={() => go({ page: filters.page - 1 })}
+                className="h-9 px-3 text-sm"
+              >
+                Previous
+              </Button>
+              <span>
+                Page {filters.page} of {pages}
+              </span>
+              <Button
+                variant="outline"
+                disabled={filters.page >= pages || isPending}
+                onClick={() => go({ page: filters.page + 1 })}
+                className="h-9 px-3 text-sm"
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

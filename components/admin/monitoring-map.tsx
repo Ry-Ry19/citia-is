@@ -1,22 +1,35 @@
 // components/admin/monitoring-map.tsx
 //
-// WHAT: Interactive Leaflet map visualizing community-submitted Mahogany sightings.
+// WHAT: The Leaflet map on the Environmental Monitoring page. It plots
+//   every sighting report that has coordinates.
 //
-// ACCESSIBILITY & DATA INTEGRITY:
-//   - Only plots reports with verified valid latitude & longitude coordinates.
-//   - Color-coded accessible divIcon markers (Verified = Green, Pending = Amber, Rejected = Red).
-//   - Synchronized with active selection in the report list.
-//   - Dark Matter map tiles (CartoDB/OpenStreetMap) matching CITIA-IS dark theme.
+// HOW IT STAYS IN STEP WITH THE LIST:
+//   - Clicking a pin tells the page which report is selected
+//     (onSelectReport). The page then highlights that report in the list
+//     and in the preview panel.
+//   - When the page selects a report (from the list), the map flies to
+//     its pin, opens its popup and gives the pin a pulsing halo.
+//   - The page passes in only the reports that match its filters, so
+//     changing a filter changes the pins as well as the list.
+//
+// TILES: OpenStreetMap's standard tiles. They need no API key, and the
+//   credit line their usage policy requires is shown. In the dark theme
+//   the tiles are dimmed so the map does not glare.
+//
+// COLOURS: pins, popups, buttons and the legend use the site's theme
+//   colours (success / warning / destructive), never fixed colour codes.
+//   Leaflet draws its own controls and popups, so those are styled from
+//   the wrapper below (MAP_CHROME).
 
 "use client";
 
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import type { ReportStatus, SightingReport } from "@/lib/reports-data";
+import type { AdminReport, ReportStatus } from "@/lib/admin-reports";
 
 interface MonitoringMapProps {
-  reports: SightingReport[];
+  reports: AdminReport[];
   selectedReportId: string | null;
   onSelectReport: (id: string) => void;
   selectedArea: string;
@@ -26,37 +39,92 @@ const STUDY_AREA_CENTERS: Record<string, { lat: number; lng: number; zoom: numbe
   "Palao Medical": { lat: 8.2215, lng: 124.2482, zoom: 15 },
   Dalipuga: { lat: 8.3185, lng: 124.2611, zoom: 15 },
   "NPC Area": { lat: 8.2095, lng: 124.2815, zoom: 15 },
-  "All Study Areas": { lat: 8.255, lng: 124.26, zoom: 12 },
+  "All Study Areas": { lat: 8.262, lng: 124.262, zoom: 12 },
 };
 
+/** How each review status is drawn: its colour classes and its symbol. */
+const STATUS_STYLE: Record<ReportStatus, { pin: string; symbol: string; label: string }> = {
+  Verified: { pin: "bg-success text-background", symbol: "✓", label: "Verified" },
+  Pending: { pin: "bg-warning text-black", symbol: "!", label: "Pending review" },
+  Rejected: { pin: "bg-destructive text-white", symbol: "✕", label: "Rejected" },
+};
+
+// Styles for the parts Leaflet draws itself. Each entry reads "inside
+// this map, style that part". The "!" makes a rule win over Leaflet's
+// built-in stylesheet.
+const MAP_CHROME = [
+  "[&_.leaflet-tile-pane]:[filter:saturate(0.82)]",
+  "dark:[&_.leaflet-tile-pane]:[filter:saturate(0.7)_brightness(0.72)_contrast(1.08)]",
+  "[&_.leaflet-bar]:overflow-hidden [&_.leaflet-bar]:rounded-lg! [&_.leaflet-bar]:border-0! [&_.leaflet-bar]:shadow-md!",
+  "[&_.leaflet-bar_a]:flex! [&_.leaflet-bar_a]:h-10! [&_.leaflet-bar_a]:w-10! [&_.leaflet-bar_a]:items-center [&_.leaflet-bar_a]:justify-center",
+  "[&_.leaflet-bar_a]:border-border! [&_.leaflet-bar_a]:bg-card! [&_.leaflet-bar_a]:text-xl! [&_.leaflet-bar_a]:text-foreground!",
+  "[&_.leaflet-bar_a:hover]:bg-muted!",
+  "[&_.leaflet-control-scale-line]:border-foreground! [&_.leaflet-control-scale-line]:bg-card/85! [&_.leaflet-control-scale-line]:text-foreground!",
+  "[&_.leaflet-control-attribution]:bg-card/90! [&_.leaflet-control-attribution]:text-muted-foreground! [&_.leaflet-control-attribution_a]:text-primary!",
+  // Popups take the card surface in both themes.
+  "[&_.leaflet-popup-content-wrapper]:rounded-lg! [&_.leaflet-popup-content-wrapper]:border [&_.leaflet-popup-content-wrapper]:border-border [&_.leaflet-popup-content-wrapper]:bg-card! [&_.leaflet-popup-content-wrapper]:text-foreground! [&_.leaflet-popup-content-wrapper]:shadow-lg!",
+  "[&_.leaflet-popup-content]:m-3! [&_.leaflet-popup-tip]:bg-card!",
+  "[&_.leaflet-popup-close-button]:text-muted-foreground!",
+].join(" ");
+
 function createMarkerIcon(status: ReportStatus, isSelected: boolean) {
-  const bgClass =
-    status === "Verified"
-      ? "bg-[#1f4d33] border-white text-white"
-      : status === "Rejected"
-        ? "bg-red-500 border-white text-white"
-        : "bg-amber-500 border-white text-black";
-
-  const selectedRing = isSelected
-    ? "ring-4 ring-primary scale-125 z-50 shadow-xl"
-    : "hover:scale-110 shadow-md";
-
-  const symbol =
-    status === "Verified" ? "✓" : status === "Rejected" ? "✕" : "!";
+  const style = STATUS_STYLE[status];
+  // The selected pin is larger and sits on a pulsing halo.
+  const halo = isSelected
+    ? `<span class="absolute inline-flex h-9 w-9 animate-ping rounded-full bg-primary/50 motion-reduce:animate-none"></span>`
+    : "";
+  const size = isSelected
+    ? "h-8 w-8 text-sm ring-4 ring-primary/70"
+    : "h-6 w-6 text-xs";
 
   return L.divIcon({
     className: "citia-map-marker",
     html: `
-      <div style="display:flex;align-items:center;justify-content:center;cursor:pointer;">
-        <div class="h-6 w-6 rounded-full border-2 ${bgClass} ${selectedRing} flex items-center justify-center font-bold text-xs transition-all">
-          ${symbol}
-        </div>
-      </div>
-    `,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -14],
+      <div class="relative flex h-9 w-9 cursor-pointer items-center justify-center">
+        ${halo}
+        <span class="relative flex ${size} items-center justify-center rounded-full border-2 border-white font-bold shadow-md ${style.pin}">
+          ${style.symbol}
+        </span>
+      </div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+    popupAnchor: [0, -18],
   });
+}
+
+/** Text placed inside a popup must not be read as HTML. */
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function popupHtml(report: AdminReport) {
+  const style = STATUS_STYLE[report.reviewStatus];
+  const ai = report.aiClassification;
+  const aiText = ai
+    ? `AI suggestion: <strong class="text-foreground">${escapeHtml(ai.label)}</strong>${
+        ai.confidence != null ? ` (${Math.round(ai.confidence * 100)}%)` : ""
+      }`
+    : "AI suggestion: not classified";
+  return `
+    <div class="min-w-52 space-y-1.5 font-sans text-sm">
+      <div class="flex items-center justify-between gap-3">
+        <span class="font-bold tabular-nums text-foreground">${escapeHtml(report.referenceNumber)}</span>
+        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
+          <span class="h-2 w-2 rounded-full ${style.pin.split(" ")[0]}"></span>${style.label}
+        </span>
+      </div>
+      <p class="m-0! font-semibold text-foreground">${escapeHtml(report.studyArea)}</p>
+      <p class="m-0! text-xs leading-snug text-muted-foreground">${escapeHtml(report.specificLocation)}</p>
+      <p class="m-0! text-xs text-muted-foreground">${aiText}</p>
+      <a href="/admin/reports/${encodeURIComponent(report.id)}"
+         class="mt-2 flex min-h-9 items-center justify-center rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground! no-underline hover:bg-primary/90">
+        Open report
+      </a>
+    </div>`;
 }
 
 export function MonitoringMap({
@@ -69,166 +137,122 @@ export function MonitoringMap({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
-  // Initialize Leaflet Map
+  // The latest callback, so pin clicks never call a stale one.
+  const onSelectRef = useRef(onSelectReport);
+  useEffect(() => {
+    onSelectRef.current = onSelectReport;
+  }, [onSelectReport]);
+
+  // Create the map once.
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
+    const overview = STUDY_AREA_CENTERS["All Study Areas"];
     const map = L.map(mapContainerRef.current, {
-      center: [8.255, 124.26],
-      zoom: 12,
+      center: [overview.lat, overview.lng],
+      zoom: overview.zoom,
       minZoom: 10,
-      maxZoom: 18,
+      maxZoom: 19,
       zoomControl: true,
+      // The page scrolls normally over the map; zoom with the buttons,
+      // a pinch or a double-click.
+      scrollWheelZoom: false,
     });
 
-    // Dark Matter basemap tiles (CartoDB with OSM data)
-    L.tileLayer(
-      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      {
-        subdomains: "abcd",
-        maxZoom: 19,
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>',
-      }
-    ).addTo(map);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    L.control.scale({ imperial: false, maxWidth: 120 }).addTo(map);
 
     mapInstanceRef.current = map;
+    const markers = markersRef.current;
+    const resize = setTimeout(() => map.invalidateSize(), 0);
 
     return () => {
+      clearTimeout(resize);
       map.remove();
       mapInstanceRef.current = null;
+      markers.clear();
     };
   }, []);
 
-  // Update Markers when reports or selection change
+  // Draw one pin for every report that has coordinates.
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    // Clear existing markers
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current.clear();
 
-    const reportsWithCoords = reports.filter(
-      (r) => r.coordinates && typeof r.coordinates.lat === "number"
-    );
-
-    reportsWithCoords.forEach((report) => {
+    reports.forEach((report) => {
       if (!report.coordinates) return;
 
-      const isSelected = report.id === selectedReportId;
-      const icon = createMarkerIcon(report.reviewStatus, isSelected);
-
       const marker = L.marker([report.coordinates.lat, report.coordinates.lng], {
-        icon,
+        icon: createMarkerIcon(report.reviewStatus, report.id === selectedReportId),
         title: `${report.referenceNumber} (${report.studyArea})`,
-        alt: `Sighting ${report.referenceNumber} in ${report.studyArea}`,
+        alt: `Sighting ${report.referenceNumber} in ${report.studyArea}, ${STATUS_STYLE[report.reviewStatus].label}`,
+        zIndexOffset: report.id === selectedReportId ? 1000 : 0,
       }).addTo(map);
 
-      // Popup Content
-      const popupHtml = `
-        <div style="font-family: inherit; min-width: 190px; color: #f4f4f5; background: #17221c; padding: 4px; border-radius: 6px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-            <span style="font-family: monospace; font-size: 11px; font-weight: 700; color: #8fcb9b;">
-              ${report.referenceNumber}
-            </span>
-            <span style="font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 9999px; background: rgba(255,255,255,0.1); color: ${
-              report.reviewStatus === "Verified"
-                ? "#8fcb9b"
-                : report.reviewStatus === "Rejected"
-                  ? "#ef4444"
-                  : "#f59e0b"
-            };">
-              ${report.reviewStatus}
-            </span>
-          </div>
-          <div style="font-size: 11px; font-weight: 600; margin-bottom: 2px;">
-            ${report.studyArea}
-          </div>
-          <div style="font-size: 10px; color: #a1a1aa; margin-bottom: 6px; line-height: 1.3;">
-            ${report.specificLocation}
-          </div>
-          <div style="font-size: 10px; color: #d4d4d8; margin-bottom: 8px;">
-            AI: <strong>${report.aiClassification.label}</strong> (${Math.round(
-              report.aiClassification.confidence * 100
-            )}%)
-          </div>
-          <a
-            href="/admin/reports/${report.id}"
-            style="display: block; text-align: center; font-size: 11px; font-weight: 600; padding: 5px 8px; border-radius: 4px; background: #8fcb9b; color: #09090b; text-decoration: none;"
-          >
-            Open Report Details &rarr;
-          </a>
-        </div>
-      `;
-
-      marker.bindPopup(popupHtml, {
-        className: "citia-dark-popup",
-      });
-
-      marker.on("click", () => {
-        onSelectReport(report.id);
-      });
-
+      marker.bindPopup(popupHtml(report));
+      marker.on("click", () => onSelectRef.current(report.id));
       markersRef.current.set(report.id, marker);
     });
-  }, [reports, selectedReportId, onSelectReport]);
+  }, [reports, selectedReportId]);
 
-  // Center on study area change or selected report change
+  // Move the view: to the selected report's pin, or to the chosen area.
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    if (selectedReportId) {
-      const selected = reports.find((r) => r.id === selectedReportId);
-      if (selected?.coordinates) {
-        map.flyTo([selected.coordinates.lat, selected.coordinates.lng], 15, {
-          duration: 0.8,
-        });
-        const marker = markersRef.current.get(selectedReportId);
-        if (marker && !marker.isPopupOpen()) {
-          marker.openPopup();
-        }
-        return;
-      }
+    const selected = selectedReportId
+      ? reports.find((r) => r.id === selectedReportId)
+      : undefined;
+
+    if (selected?.coordinates) {
+      map.flyTo(
+        [selected.coordinates.lat, selected.coordinates.lng],
+        Math.max(map.getZoom(), 15),
+        { duration: 0.8 }
+      );
+      const marker = markersRef.current.get(selected.id);
+      if (marker && !marker.isPopupOpen()) marker.openPopup();
+      return;
     }
 
-    // Default to study area bounds if no specific report is selected
-    const centerConfig = STUDY_AREA_CENTERS[selectedArea] || STUDY_AREA_CENTERS["All Study Areas"];
-    map.flyTo([centerConfig.lat, centerConfig.lng], centerConfig.zoom, {
-      duration: 0.8,
-    });
+    map.closePopup();
+    const area = STUDY_AREA_CENTERS[selectedArea] ?? STUDY_AREA_CENTERS["All Study Areas"];
+    map.flyTo([area.lat, area.lng], area.zoom, { duration: 0.8 });
   }, [selectedArea, selectedReportId, reports]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-lg border border-border bg-neutral-950">
-      <div ref={mapContainerRef} className="h-full w-full z-0" />
+    <div className={`relative h-full min-h-[inherit] w-full ${MAP_CHROME}`}>
+      <div
+        ref={mapContainerRef}
+        role="application"
+        aria-label="Map of sighting reports. Select a pin to see the report."
+        className="z-0 h-full min-h-[inherit] w-full overflow-hidden rounded-lg border border-border bg-surface-tint"
+      />
 
-      {/* Floating Map Legend */}
-      <div className="absolute bottom-3 left-3 z-[400] rounded-md border border-border/80 bg-neutral-950/90 p-2.5 backdrop-blur-md text-xs shadow-lg">
-        <p className="text-xs text-muted-foreground mb-1.5 font-semibold">
-          Observation Status
-        </p>
-        <div className="flex flex-col gap-1.5 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-[#1f4d33] text-[8px] text-white font-bold flex items-center justify-center">
-              ✓
-            </span>
-            <span className="text-zinc-200">Verified Sighting</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-amber-500 text-[8px] text-black font-bold flex items-center justify-center">
-              !
-            </span>
-            <span className="text-zinc-200">Pending Review</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="h-3 w-3 rounded-full bg-red-500 text-[8px] text-white font-bold flex items-center justify-center">
-              ✕
-            </span>
-            <span className="text-zinc-200">Rejected Observation</span>
-          </div>
-        </div>
+      {/* Legend */}
+      <div className="absolute bottom-8 left-3 z-10 rounded-md border border-border bg-card/95 p-3 text-sm shadow-md backdrop-blur-sm">
+        <p className="mb-2 font-semibold text-foreground">Review status</p>
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+          {(Object.keys(STATUS_STYLE) as ReportStatus[]).map((status) => (
+            <li key={status} className="flex items-center gap-2 text-foreground">
+              <span
+                aria-hidden="true"
+                className={`flex h-4 w-4 items-center justify-center rounded-full text-[0.625rem] font-bold ${STATUS_STYLE[status].pin}`}
+              >
+                {STATUS_STYLE[status].symbol}
+              </span>
+              {STATUS_STYLE[status].label}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
