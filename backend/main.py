@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from fastapi import Depends, FastAPI, File, Form, Request, Response, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Path as PathParam, Query, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -37,14 +37,37 @@ from database import (
     DatabaseSetupError,
     DatabaseStatus,
     DatabaseUnavailable,
+    NewReview,
+    ReportFilters,
     ReportNotSaved,
+    ReviewNotSaved,
     StaffMember,
     open_database,
 )
 from errors import ApiError, register_error_handlers
 from images import decode_upload_image
 from reports import ReportResponse, parse_submission, submit_report
-from storage import PhotoStorage, StorageSetupError, StorageStatus, StorageUnavailable, open_storage
+from staff_reports import (
+    REFERENCE_PATTERN,
+    DashboardResponse,
+    ReportDetailResponse,
+    ReportListResponse,
+    ReviewRequest,
+    ReviewStatus,
+    StudyArea,
+    dashboard_response,
+    detail_response,
+    list_response,
+    photo_media_type,
+)
+from storage import (
+    PhotoNotFound,
+    PhotoStorage,
+    StorageSetupError,
+    StorageStatus,
+    StorageUnavailable,
+    open_storage,
+)
 from upload_limits import UploadSizeLimitMiddleware
 
 API_VERSION = "0.1.0"
@@ -147,6 +170,27 @@ def require_staff(request: Request) -> StaffContext:
         raise ApiError(403, "not_staff", "This account does not have access to the CENRO staff portal.")
 
     return StaffContext(staff=staff, email=verified.email)
+
+
+STAFF_REPORTS_UNAVAILABLE_MESSAGE = "Reports cannot be loaded right now. Please try again later."
+REPORT_NOT_FOUND_MESSAGE = "No report has that reference number."
+PHOTO_UNAVAILABLE_MESSAGE = "The photo cannot be loaded right now. Please try again later."
+
+# A staff photo is personal data from a private bucket: the browser must
+# not keep a copy, and must not guess a different file type.
+PHOTO_HEADERS = {
+    "Cache-Control": "private, no-store",
+    "X-Content-Type-Options": "nosniff",
+    "Content-Disposition": "inline",
+}
+
+
+def reports_unavailable() -> ApiError:
+    return ApiError(503, "reports_unavailable", STAFF_REPORTS_UNAVAILABLE_MESSAGE)
+
+
+def report_not_found() -> ApiError:
+    return ApiError(404, "report_not_found", REPORT_NOT_FOUND_MESSAGE)
 
 
 def upload_limit_message(settings: Settings) -> str:
@@ -443,6 +487,149 @@ def create_app(
             role=context.staff.role,
             email=context.email,
         )
+
+    # ── Staff: reading reports (Stage 15A). Every route below requires a
+    #    signed-in, active staff member, and none of them writes. ──────────
+
+    @app.get("/staff/reports", response_model=ReportListResponse)
+    def staff_list_reports(
+        request: Request,
+        status: ReviewStatus | None = None,
+        study_area: StudyArea | None = None,
+        q: str | None = Query(default=None, max_length=100),
+        has_location: bool = False,
+        limit: int = Query(default=25, ge=1, le=200),
+        offset: int = Query(default=0, ge=0, le=1_000_000),
+        context: StaffContext = Depends(require_staff),
+    ) -> ReportListResponse:
+        """One page of reports, newest first. Holds no reporter details."""
+        search = q.strip() if q else None
+        filters = ReportFilters(
+            status=status,
+            study_area=study_area,
+            search=search or None,
+            has_location=has_location,
+            limit=limit,
+            offset=offset,
+        )
+        try:
+            page = request.app.state.database.list_reports(filters)
+        except DatabaseUnavailable:
+            raise reports_unavailable() from None
+        return list_response(page, limit, offset)
+
+    @app.get("/staff/reports/{reference}", response_model=ReportDetailResponse)
+    def staff_report_detail(
+        request: Request,
+        reference: str = PathParam(pattern=REFERENCE_PATTERN),
+        context: StaffContext = Depends(require_staff),
+    ) -> ReportDetailResponse:
+        """One report in full, including the reporter's name and contact."""
+        try:
+            report = request.app.state.database.find_report_detail(reference)
+        except DatabaseUnavailable:
+            raise reports_unavailable() from None
+        if report is None:
+            raise report_not_found()
+        # This reply holds personal details, so who opened it is recorded.
+        # The line names the staff account and the report, never the details.
+        logger.info("Staff %s opened report %s.", context.staff.id, reference)
+        return detail_response(report)
+
+    @app.get("/staff/reports/{reference}/photo")
+    def staff_report_photo(
+        request: Request,
+        reference: str = PathParam(pattern=REFERENCE_PATTERN),
+        context: StaffContext = Depends(require_staff),
+    ) -> Response:
+        """The report's photo, fetched from the private bucket for staff."""
+        storage: PhotoStorage | None = getattr(request.app.state, "storage", None)
+        if storage is None:
+            raise ApiError(503, "photo_unavailable", PHOTO_UNAVAILABLE_MESSAGE)
+        try:
+            photo = request.app.state.database.find_report_photo(reference)
+        except DatabaseUnavailable:
+            raise reports_unavailable() from None
+        if photo is None:
+            raise ApiError(404, "photo_not_found", "This report has no photo.")
+        try:
+            data = storage.download(photo.storage_path)
+        except PhotoNotFound:
+            raise ApiError(404, "photo_not_found", "This report has no photo.") from None
+        except StorageUnavailable:
+            raise ApiError(503, "photo_unavailable", PHOTO_UNAVAILABLE_MESSAGE) from None
+        logger.info("Staff %s viewed the photo of report %s.", context.staff.id, reference)
+        return Response(
+            content=data,
+            media_type=photo_media_type(photo.mime_type),
+            headers=PHOTO_HEADERS,
+        )
+
+    # ── Staff: recording a review (Stage 15B). ──────────────────────────
+
+    @app.post(
+        "/staff/reports/{reference}/reviews",
+        response_model=ReportDetailResponse,
+        status_code=201,
+    )
+    def staff_add_review(
+        request: Request,
+        decision: ReviewRequest,
+        reference: str = PathParam(pattern=REFERENCE_PATTERN),
+        context: StaffContext = Depends(require_staff),
+    ) -> ReportDetailResponse:
+        """
+        Adds a review decision to the report's history and returns the
+        report as it now stands. A later decision is added on top; the
+        earlier one is kept.
+        """
+        database = request.app.state.database
+        try:
+            saved = database.add_review(
+                NewReview(
+                    reference_number=reference,
+                    decision=decision.decision,
+                    rejection_reason=decision.rejection_reason,
+                    staff_notes=decision.staff_notes,
+                    reviewed_by=context.staff.id,
+                )
+            )
+        except DatabaseUnavailable:
+            raise ApiError(
+                503, "review_unavailable", "The decision could not be saved right now. Please try again."
+            ) from None
+        except ReviewNotSaved:
+            raise ApiError(500, "review_not_saved", "The decision could not be saved. Please try again.") from None
+        if not saved:
+            raise report_not_found()
+
+        logger.info(
+            "Staff %s recorded %s on report %s.", context.staff.id, decision.decision, reference
+        )
+        try:
+            report = database.find_report_detail(reference)
+        except DatabaseUnavailable:
+            # The decision IS saved; only the refreshed copy could not be read.
+            raise ApiError(
+                503,
+                "review_saved_reload_failed",
+                "The decision was saved, but the report could not be reloaded. Refresh the page.",
+            ) from None
+        if report is None:
+            raise report_not_found()
+        return detail_response(report)
+
+    @app.get("/staff/dashboard", response_model=DashboardResponse)
+    def staff_dashboard(
+        request: Request,
+        context: StaffContext = Depends(require_staff),
+    ) -> DashboardResponse:
+        """Counts by status and study area, and the latest activity."""
+        try:
+            data = request.app.state.database.dashboard()
+        except DatabaseUnavailable:
+            raise reports_unavailable() from None
+        return dashboard_response(data)
 
     return app
 

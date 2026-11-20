@@ -43,12 +43,18 @@ class StorageUnavailable(Exception):
     """Storage could not complete a request."""
 
 
+class PhotoNotFound(Exception):
+    """Storage answered, but holds no file at that path."""
+
+
 class PhotoStorage(Protocol):
     """Anything that can hold report photos — the real bucket or a test fake."""
 
     def upload(self, key: str, data: bytes, content_type: str) -> None: ...
 
     def delete(self, key: str) -> None: ...
+
+    def download(self, key: str) -> bytes: ...
 
     def ping(self) -> bool: ...
 
@@ -84,6 +90,20 @@ class S3PhotoStorage:
             self._client.delete_object(Bucket=self._bucket, Key=key)
         except STORAGE_ERRORS as exc:
             logger.warning("Photo delete failed (%s).", failure_reason(exc))
+            raise StorageUnavailable from None
+
+    def download(self, key: str) -> bytes:
+        """The stored photo's bytes. Used to show a photo to signed-in staff."""
+        try:
+            return self._client.get_object(Bucket=self._bucket, Key=key)["Body"].read()
+        except ClientError as exc:
+            if exc.response.get("Error", {}).get("Code") in ("NoSuchKey", "404"):
+                logger.warning("Photo download failed: no file at that path.")
+                raise PhotoNotFound from None
+            logger.warning("Photo download failed (%s).", failure_reason(exc))
+            raise StorageUnavailable from None
+        except STORAGE_ERRORS as exc:
+            logger.warning("Photo download failed (%s).", failure_reason(exc))
             raise StorageUnavailable from None
 
     def ping(self) -> bool:

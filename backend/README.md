@@ -153,6 +153,59 @@ uploaded file.
 **Reference numbers:** PostgreSQL never returns a sequence number, so a
 failed or rolled-back insert leaves a gap. Gaps are expected.
 
+## Staff: reading reports
+
+For signed-in CENRO staff only. Each request needs
+`Authorization: Bearer <Supabase access token>` for an account with an
+**active** row in `citia.staff_profiles`. Without it the answer is 401
+(not signed in) or 403 (not staff). None of these endpoints writes.
+
+| Endpoint | Returns |
+| --- | --- |
+| `GET /staff/reports` | One page of reports, newest first, with the total. |
+| `GET /staff/reports/{reference}` | One report in full, with its review history. |
+| `GET /staff/reports/{reference}/photo` | The report's photo. |
+| `GET /staff/dashboard` | Counts by status and study area, and the latest activity. |
+
+`GET /staff/reports` options:
+
+| Option | Values |
+| --- | --- |
+| `status` | `pending_review`, `verified`, `rejected` |
+| `study_area` | `palao`, `dalipuga`, `npc` |
+| `q` | Search text (up to 100 characters), matched against the reference number, barangay and landmark. |
+| `has_location` | `true` returns only reports with coordinates. |
+| `limit`, `offset` | Page size (1–200, default 25) and starting row. |
+
+Personal details:
+
+- The list and the dashboard never contain a reporter's name, contact or
+  notes.
+- `GET /staff/reports/{reference}` does. Each time it is used, the server
+  log records the staff account and the reference number (never the
+  details).
+- The photo is fetched from the private bucket by the API and sent with
+  `Cache-Control: private, no-store`, so the browser keeps no copy.
+
+A report that does not exist is 404. If the database or storage cannot
+be reached the answer is 503, never an empty list.
+
+### Recording a review — `POST /staff/reports/{reference}/reviews`
+
+```json
+{ "decision": "rejected", "rejection_reason": "Not a Mahogany leaf.", "staff_notes": "Checked on site." }
+```
+
+- `decision` is `verified` or `rejected`. A rejection needs a
+  `rejection_reason` (up to 1000 characters); a verification must not
+  have one. `staff_notes` is optional (up to 2000 characters).
+- The reviewer is the signed-in staff member. It cannot be named in the
+  request; a request that tries is refused.
+- A decision is **added** to the report's history and never changed or
+  removed. The database then updates the report's status. A later
+  decision is added on top, so the history shows both.
+- The reply (201) is the report as it now stands, with its history.
+
 ## Dependencies
 
 | File | Contains |
